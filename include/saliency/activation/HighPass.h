@@ -1,0 +1,8 @@
+//
+// Created by geislerd on 09.03.17.
+//
+
+#ifndef SALIENCYSANDBOX2_0_HIGHPASS_H
+#define SALIENCYSANDBOX2_0_HIGHPASS_H
+
+#endif //SALIENCYSANDBOX2_0_HIGHPASS_H
