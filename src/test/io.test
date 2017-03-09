@@ -1,0 +1,323 @@
+//
+// Created by geislerd on 09.02.17.
+//
+
+#include <boost/test/unit_test.hpp>
+
+#include <io/ImageReader.h>
+#include <io/ImageShow.h>
+#include <io/ImageWriter.h>
+#include <io/VideoReader.h>
+#include <io/VideoWriter.h>
+#include <io/CSVReader.h>
+
+#define data_base "/media/geislerd/Documents/repo/SaliencySandbox2.0/data/test/"
+
+BOOST_AUTO_TEST_SUITE(io)
+
+    BOOST_AUTO_TEST_CASE( CSVReader ) {
+        { // create test dataset
+            if (boost::filesystem::exists(boost::filesystem::path(data_base "/tmp/05")))
+                boost::filesystem::remove_all(boost::filesystem::path(data_base "/tmp/05"));
+            boost::filesystem::create_directories(boost::filesystem::path(data_base "/tmp/05"));
+
+            std::ofstream os(data_base "/tmp/05/test.csv");
+            os << true << ';' << 'a' << ';' << 2 << ';' << 3l << ';' << (unsigned char) 'b' << ';' << 5u << ';' << 6ul << ';' << 7.0f << ';' << 8.0 << ';' << (std::string) "Hello Test" << std::endl;
+            os << false << ';' << 'c' << ';' << 8 << ';' << 7l << ';' << (unsigned char) 'd' << ';' << 6u << ';' << 5ul << ';' << 4.0f << ';' << 3.0 << ';' << (std::string) "Bye Test" << std::endl;
+            os << std::flush;
+            os.close();
+        }
+
+        saliency_sandbox::io::CSVReader<';',bool, char, int, long, unsigned char, unsigned int, unsigned long, float, double, std::string> csv_reader(data_base "/tmp/05/test.csv");
+
+        { // Test first line
+            BOOST_CHECK_NO_THROW(csv_reader.template output<0>()->process(0));
+            BOOST_CHECK(csv_reader.template output<0>()->value() != nullptr);
+            BOOST_CHECK_EQUAL(*csv_reader.template output<0>()->value(), true);
+            BOOST_CHECK_EQUAL(csv_reader.template output<0>()->time(), 0);
+            BOOST_CHECK(!csv_reader.template output<0>()->eof());
+
+            BOOST_CHECK_NO_THROW(csv_reader.template output<1>()->process(0));
+            BOOST_CHECK(csv_reader.template output<1>()->value() != nullptr);
+            BOOST_CHECK_EQUAL(*csv_reader.template output<1>()->value(), 'a');
+            BOOST_CHECK_EQUAL(csv_reader.template output<1>()->time(), 0);
+            BOOST_CHECK(!csv_reader.template output<1>()->eof());
+
+            BOOST_CHECK_NO_THROW(csv_reader.template output<2>()->process(0));
+            BOOST_CHECK(csv_reader.template output<2>()->value() != nullptr);
+            BOOST_CHECK_EQUAL(*csv_reader.template output<2>()->value(), 2);
+            BOOST_CHECK_EQUAL(csv_reader.template output<2>()->time(), 0);
+            BOOST_CHECK(!csv_reader.template output<2>()->eof());
+
+            BOOST_CHECK_NO_THROW(csv_reader.template output<3>()->process(0));
+            BOOST_CHECK(csv_reader.template output<3>()->value() != nullptr);
+            BOOST_CHECK_EQUAL(*csv_reader.template output<3>()->value(), 3l);
+            BOOST_CHECK_EQUAL(csv_reader.template output<3>()->time(), 0);
+            BOOST_CHECK(!csv_reader.template output<3>()->eof());
+
+            BOOST_CHECK_NO_THROW(csv_reader.template output<4>()->process(0));
+            BOOST_CHECK(csv_reader.template output<4>()->value() != nullptr);
+            BOOST_CHECK_EQUAL(*csv_reader.template output<4>()->value(), 'b');
+            BOOST_CHECK_EQUAL(csv_reader.template output<4>()->time(), 0);
+            BOOST_CHECK(!csv_reader.template output<4>()->eof());
+
+            BOOST_CHECK_NO_THROW(csv_reader.template output<5>()->process(0));
+            BOOST_CHECK(csv_reader.template output<5>()->value() != nullptr);
+            BOOST_CHECK_EQUAL(*csv_reader.template output<5>()->value(), 5u);
+            BOOST_CHECK_EQUAL(csv_reader.template output<5>()->time(), 0);
+            BOOST_CHECK(!csv_reader.template output<5>()->eof());
+
+            BOOST_CHECK_NO_THROW(csv_reader.template output<6>()->process(0));
+            BOOST_CHECK(csv_reader.template output<6>()->value() != nullptr);
+            BOOST_CHECK_EQUAL(*csv_reader.template output<6>()->value(), 6ul);
+            BOOST_CHECK_EQUAL(csv_reader.template output<6>()->time(), 0);
+            BOOST_CHECK(!csv_reader.template output<6>()->eof());
+
+            BOOST_CHECK_NO_THROW(csv_reader.template output<7>()->process(0));
+            BOOST_CHECK(csv_reader.template output<7>()->value() != nullptr);
+            BOOST_CHECK_EQUAL(*csv_reader.template output<7>()->value(), 7.0f);
+            BOOST_CHECK_EQUAL(csv_reader.template output<7>()->time(), 0);
+            BOOST_CHECK(!csv_reader.template output<7>()->eof());
+
+            BOOST_CHECK_NO_THROW(csv_reader.template output<8>()->process(0));
+            BOOST_CHECK(csv_reader.template output<8>()->value() != nullptr);
+            BOOST_CHECK_EQUAL(*csv_reader.template output<8>()->value(), 8.0);
+            BOOST_CHECK_EQUAL(csv_reader.template output<8>()->time(), 0);
+            BOOST_CHECK(!csv_reader.template output<8>()->eof());
+
+            BOOST_CHECK_NO_THROW(csv_reader.template output<9>()->process(0));
+            BOOST_CHECK(csv_reader.template output<9>()->value() != nullptr);
+            BOOST_CHECK_EQUAL(*csv_reader.template output<9>()->value(), "Hello Test");
+            BOOST_CHECK_EQUAL(csv_reader.template output<9>()->time(), 0);
+            BOOST_CHECK(!csv_reader.template output<9>()->eof());
+        }
+        { // Test second line
+            BOOST_CHECK_NO_THROW(csv_reader.template output<0>()->process(1));
+            BOOST_CHECK(csv_reader.template output<0>()->value() != nullptr);
+            BOOST_CHECK_EQUAL(*csv_reader.template output<0>()->value(), false);
+            BOOST_CHECK_EQUAL(csv_reader.template output<0>()->time(), 1);
+            BOOST_CHECK(!csv_reader.template output<0>()->eof());
+
+            BOOST_CHECK_NO_THROW(csv_reader.template output<1>()->process(1));
+            BOOST_CHECK(csv_reader.template output<1>()->value() != nullptr);
+            BOOST_CHECK_EQUAL(*csv_reader.template output<1>()->value(), 'c');
+            BOOST_CHECK_EQUAL(csv_reader.template output<1>()->time(), 1);
+            BOOST_CHECK(!csv_reader.template output<1>()->eof());
+
+            BOOST_CHECK_NO_THROW(csv_reader.template output<2>()->process(1));
+            BOOST_CHECK(csv_reader.template output<2>()->value() != nullptr);
+            BOOST_CHECK_EQUAL(*csv_reader.template output<2>()->value(), 8);
+            BOOST_CHECK_EQUAL(csv_reader.template output<2>()->time(), 1);
+            BOOST_CHECK(!csv_reader.template output<2>()->eof());
+
+            BOOST_CHECK_NO_THROW(csv_reader.template output<3>()->process(1));
+            BOOST_CHECK(csv_reader.template output<3>()->value() != nullptr);
+            BOOST_CHECK_EQUAL(*csv_reader.template output<3>()->value(), 7l);
+            BOOST_CHECK_EQUAL(csv_reader.template output<3>()->time(), 1);
+            BOOST_CHECK(!csv_reader.template output<3>()->eof());
+
+            BOOST_CHECK_NO_THROW(csv_reader.template output<4>()->process(1));
+            BOOST_CHECK(csv_reader.template output<4>()->value() != nullptr);
+            BOOST_CHECK_EQUAL(*csv_reader.template output<4>()->value(), 'd');
+            BOOST_CHECK_EQUAL(csv_reader.template output<4>()->time(), 1);
+            BOOST_CHECK(!csv_reader.template output<4>()->eof());
+
+            BOOST_CHECK_NO_THROW(csv_reader.template output<5>()->process(1));
+            BOOST_CHECK(csv_reader.template output<5>()->value() != nullptr);
+            BOOST_CHECK_EQUAL(*csv_reader.template output<5>()->value(), 6u);
+            BOOST_CHECK_EQUAL(csv_reader.template output<5>()->time(), 1);
+            BOOST_CHECK(!csv_reader.template output<5>()->eof());
+
+            BOOST_CHECK_NO_THROW(csv_reader.template output<6>()->process(1));
+            BOOST_CHECK(csv_reader.template output<6>()->value() != nullptr);
+            BOOST_CHECK_EQUAL(*csv_reader.template output<6>()->value(), 5ul);
+            BOOST_CHECK_EQUAL(csv_reader.template output<6>()->time(), 1);
+            BOOST_CHECK(!csv_reader.template output<6>()->eof());
+
+            BOOST_CHECK_NO_THROW(csv_reader.template output<7>()->process(1));
+            BOOST_CHECK(csv_reader.template output<7>()->value() != nullptr);
+            BOOST_CHECK_EQUAL(*csv_reader.template output<7>()->value(), 4.0f);
+            BOOST_CHECK_EQUAL(csv_reader.template output<7>()->time(), 1);
+            BOOST_CHECK(!csv_reader.template output<7>()->eof());
+
+            BOOST_CHECK_NO_THROW(csv_reader.template output<8>()->process(1));
+            BOOST_CHECK(csv_reader.template output<8>()->value() != nullptr);
+            BOOST_CHECK_EQUAL(*csv_reader.template output<8>()->value(), 3.0);
+            BOOST_CHECK_EQUAL(csv_reader.template output<8>()->time(), 1);
+            BOOST_CHECK(!csv_reader.template output<8>()->eof());
+
+            BOOST_CHECK_NO_THROW(csv_reader.template output<9>()->process(1));
+            BOOST_CHECK(csv_reader.template output<9>()->value() != nullptr);
+            BOOST_CHECK_EQUAL(*csv_reader.template output<9>()->value(), "Bye Test");
+            BOOST_CHECK_EQUAL(csv_reader.template output<9>()->time(), 1);
+            BOOST_CHECK(!csv_reader.template output<9>()->eof());
+        }
+        { // Test eof
+            BOOST_CHECK_NO_THROW(csv_reader.process(2));
+            BOOST_CHECK(csv_reader.eof());
+            BOOST_CHECK(csv_reader.template output<0>()->eof());
+            BOOST_CHECK(csv_reader.template output<1>()->eof());
+            BOOST_CHECK(csv_reader.template output<2>()->eof());
+            BOOST_CHECK(csv_reader.template output<3>()->eof());
+            BOOST_CHECK(csv_reader.template output<4>()->eof());
+            BOOST_CHECK(csv_reader.template output<5>()->eof());
+            BOOST_CHECK(csv_reader.template output<6>()->eof());
+            BOOST_CHECK(csv_reader.template output<7>()->eof());
+            BOOST_CHECK(csv_reader.template output<8>()->eof());
+            BOOST_CHECK(csv_reader.template output<9>()->eof());
+        }
+    }
+
+    BOOST_AUTO_TEST_CASE( ImageReader )
+    {
+        saliency_sandbox::io::RGBImageReader image_reader(data_base "set00");
+
+        BOOST_CHECK_EQUAL(image_reader.template output<0>()->time(),-1);
+        BOOST_CHECK_EQUAL(image_reader.time(),-1);
+
+
+        BOOST_CHECK_NO_THROW(image_reader.template output<0>()->process(-1));
+        BOOST_CHECK(image_reader.template output<0>()->value() != nullptr);
+        BOOST_CHECK_EQUAL(image_reader.template output<0>()->value()->at<cv::Vec3b>(0),cv::Vec3b(0,0,0)); // black
+        BOOST_CHECK_EQUAL(image_reader.template output<0>()->time(),0);
+        BOOST_CHECK_EQUAL(image_reader.time(),0);
+
+        BOOST_CHECK_NO_THROW(image_reader.template output<0>()->process(-1));
+        BOOST_CHECK(image_reader.template output<0>()->value() != nullptr);
+        BOOST_CHECK_EQUAL(image_reader.template output<0>()->value()->at<cv::Vec3b>(0),cv::Vec3b(255,255,255)); // white
+        BOOST_CHECK_EQUAL(image_reader.template output<0>()->time(),1);
+        BOOST_CHECK_EQUAL(image_reader.time(),1);
+
+        BOOST_CHECK_NO_THROW(image_reader.template output<0>()->process(-1));
+        BOOST_CHECK(image_reader.template output<0>()->value() != nullptr);
+        BOOST_CHECK_EQUAL(image_reader.template output<0>()->value()->at<cv::Vec3b>(0),cv::Vec3b(0,0,255)); // red
+        BOOST_CHECK_EQUAL(image_reader.template output<0>()->time(),2);
+        BOOST_CHECK_EQUAL(image_reader.time(),2);
+
+        BOOST_CHECK_NO_THROW(image_reader.template output<0>()->process(-1));
+        BOOST_CHECK(image_reader.template output<0>()->value() != nullptr);
+        BOOST_CHECK_EQUAL(image_reader.template output<0>()->value()->at<cv::Vec3b>(0),cv::Vec3b(0,255,0)); // green
+        BOOST_CHECK_EQUAL(image_reader.template output<0>()->time(),3);
+        BOOST_CHECK_EQUAL(image_reader.time(),3);
+
+        BOOST_CHECK_NO_THROW(image_reader.template output<0>()->process(-1));
+        BOOST_CHECK(image_reader.template output<0>()->value() != nullptr);
+        BOOST_CHECK_EQUAL(image_reader.template output<0>()->value()->at<cv::Vec3b>(0),cv::Vec3b(255,0,0)); // blue
+        BOOST_CHECK_EQUAL(image_reader.template output<0>()->time(),4);
+        BOOST_CHECK_EQUAL(image_reader.time(),4);
+    }
+
+    BOOST_AUTO_TEST_CASE( ImageShow ) {
+        saliency_sandbox::io::RGBImageReader image_reader(data_base "set00");
+        saliency_sandbox::io::ImageShow image_show("Debug");
+
+        connect_port(image_reader,0,image_show,0);
+        for(int i = 0; i < 100; i++)
+            image_show.process(i);
+    }
+
+    BOOST_AUTO_TEST_CASE( ImageWriter ) {
+        if(boost::filesystem::exists(boost::filesystem::path(data_base "/tmp/00")))
+            boost::filesystem::remove_all(boost::filesystem::path(data_base "/tmp/00"));
+
+        saliency_sandbox::io::RGBImageReader image_reader(data_base "set00");
+        saliency_sandbox::io::ImageWriter image_writer(data_base "/tmp/00");
+
+
+        connect_port(image_reader,0,image_writer,0);
+
+        image_writer.process(-1);
+        BOOST_CHECK_EQUAL(cv::imread(data_base "/tmp/00/image_00000000.tiff").at<cv::Vec3b>(0),cv::Vec3b(0,0,0)); // black
+        BOOST_CHECK_EQUAL(image_writer.time(),0);
+        image_writer.process(-1);
+        BOOST_CHECK_EQUAL(cv::imread(data_base "/tmp/00/image_00000001.tiff").at<cv::Vec3b>(0),cv::Vec3b(255,255,255)); // white
+        BOOST_CHECK_EQUAL(image_writer.time(),1);
+        image_writer.process(-1);
+        BOOST_CHECK_EQUAL(cv::imread(data_base "/tmp/00/image_00000002.tiff").at<cv::Vec3b>(0),cv::Vec3b(0,0,255)); // red
+        BOOST_CHECK_EQUAL(image_writer.time(),2);
+        image_writer.process(-1);
+        BOOST_CHECK_EQUAL(cv::imread(data_base "/tmp/00/image_00000003.tiff").at<cv::Vec3b>(0),cv::Vec3b(0,255,0)); // green
+        BOOST_CHECK_EQUAL(image_writer.time(),3);
+        image_writer.process(-1);
+        BOOST_CHECK_EQUAL(cv::imread(data_base "/tmp/00/image_00000004.tiff").at<cv::Vec3b>(0),cv::Vec3b(255,0,0)); // blue
+        BOOST_CHECK_EQUAL(image_writer.time(),4);
+    }
+
+    BOOST_AUTO_TEST_CASE( VideoReader )
+    {
+        saliency_sandbox::io::VideoReader video_reader(data_base "set01/test.avi");
+
+        BOOST_CHECK_EQUAL(video_reader.template output<0>()->time(),-1);
+        BOOST_CHECK_EQUAL(video_reader.time(),-1);
+
+
+        BOOST_CHECK_NO_THROW(video_reader.template output<0>()->process(-1));
+        BOOST_CHECK(video_reader.template output<0>()->value() != nullptr);
+        BOOST_CHECK_EQUAL(video_reader.template output<0>()->value()->at<cv::Vec3b>(0),cv::Vec3b(0,0,0)); // black
+        BOOST_CHECK_EQUAL(video_reader.template output<0>()->time(),0);
+        BOOST_CHECK_EQUAL(video_reader.time(),0);
+
+        BOOST_CHECK_NO_THROW(video_reader.template output<0>()->process(-1));
+        BOOST_CHECK(video_reader.template output<0>()->value() != nullptr);
+        BOOST_CHECK_EQUAL(video_reader.template output<0>()->value()->at<cv::Vec3b>(0),cv::Vec3b(255,255,255)); // white
+        BOOST_CHECK_EQUAL(video_reader.template output<0>()->time(),1);
+        BOOST_CHECK_EQUAL(video_reader.time(),1);
+
+        BOOST_CHECK_NO_THROW(video_reader.template output<0>()->process(-1));
+        BOOST_CHECK(video_reader.template output<0>()->value() != nullptr);
+        BOOST_CHECK_EQUAL(video_reader.template output<0>()->value()->at<cv::Vec3b>(0),cv::Vec3b(0,0,255)); // red
+        BOOST_CHECK_EQUAL(video_reader.template output<0>()->time(),2);
+        BOOST_CHECK_EQUAL(video_reader.time(),2);
+
+        BOOST_CHECK_NO_THROW(video_reader.template output<0>()->process(-1));
+        BOOST_CHECK(video_reader.template output<0>()->value() != nullptr);
+        BOOST_CHECK_EQUAL(video_reader.template output<0>()->value()->at<cv::Vec3b>(0),cv::Vec3b(0,255,0)); // green
+        BOOST_CHECK_EQUAL(video_reader.template output<0>()->time(),3);
+        BOOST_CHECK_EQUAL(video_reader.time(),3);
+
+        BOOST_CHECK_NO_THROW(video_reader.template output<0>()->process(-1));
+        BOOST_CHECK(video_reader.template output<0>()->value() != nullptr);
+        BOOST_CHECK_EQUAL(video_reader.template output<0>()->value()->at<cv::Vec3b>(0), cv::Vec3b(255, 0, 0)); // blue
+        BOOST_CHECK_EQUAL(video_reader.template output<0>()->time(), 4);
+        BOOST_CHECK_EQUAL(video_reader.time(), 4);
+    }
+
+    BOOST_AUTO_TEST_CASE( VideoWriter ) {
+        if(boost::filesystem::exists(boost::filesystem::path(data_base "/tmp/01")))
+            boost::filesystem::remove_all(boost::filesystem::path(data_base "/tmp/01"));
+
+        saliency_sandbox::io::RGBImageReader image_reader(data_base "set00");
+        saliency_sandbox::io::VideoWriter video_writer(data_base "/tmp/01/test.avi");
+        cv::VideoCapture vc;
+        cv::Mat3b mat;
+
+
+        connect_port(image_reader,0,video_writer,0);
+
+        video_writer.process(-1);
+        BOOST_CHECK_EQUAL(video_writer.time(),0);
+        video_writer.process(-1);
+        BOOST_CHECK_EQUAL(video_writer.time(),1);
+        video_writer.process(-1);
+        BOOST_CHECK_EQUAL(video_writer.time(),2);
+        video_writer.process(-1);
+        BOOST_CHECK_EQUAL(video_writer.time(),3);
+        video_writer.process(-1);
+        BOOST_CHECK_EQUAL(video_writer.time(),4);
+
+        //video_writer.~VideoWriter();
+
+        vc.open(data_base "/tmp/01/test.avi");
+        vc >> mat;
+        BOOST_CHECK_SMALL(cv::norm(mat.at<cv::Vec3b>(0) - cv::Vec3b(0, 0, 0)),2.0); // black
+        vc >> mat;
+        BOOST_CHECK_SMALL(cv::norm(mat.at<cv::Vec3b>(0) - cv::Vec3b(255, 255, 255)),2.0); // white
+        vc >> mat;
+        BOOST_CHECK_SMALL(cv::norm(mat.at<cv::Vec3b>(0) - cv::Vec3b(0, 0, 255)),2.0); // red
+        vc >> mat;
+        BOOST_CHECK_SMALL(cv::norm(mat.at<cv::Vec3b>(0) - cv::Vec3b(0, 255, 0)),2.0); // green
+        vc >> mat;
+        BOOST_CHECK_SMALL(cv::norm(mat.at<cv::Vec3b>(0) - cv::Vec3b(255, 0, 0)),2.0); // blue
+    }
+
+BOOST_AUTO_TEST_SUITE_END()

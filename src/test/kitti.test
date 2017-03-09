@@ -1,0 +1,272 @@
+//
+// Created by geislerd on 09.02.17.
+//
+
+#include <boost/test/unit_test.hpp>
+
+#include <kitti/KittiReader.h>
+#include <kitti/TrackletReader.h>
+#include <kitti/CalibrationReader.h>
+#include <utils/Matrix.h>
+
+#define data_base "/media/geislerd/Documents/repo/SaliencySandbox2.0/data/test/"
+
+BOOST_AUTO_TEST_SUITE(kitti)
+
+    BOOST_AUTO_TEST_CASE( KittiReader )
+    {
+        cv::Vec4f velodyne_points[6] = {
+                cv::Vec4f(-1,0,0,0),
+                cv::Vec4f(+1,0,0,1),
+                cv::Vec4f(0,-1,0,2),
+                cv::Vec4f(0,+1,0,3),
+                cv::Vec4f(0,0,-1,4),
+                cv::Vec4f(0,0,+1,5)};
+        float oxts_float[25] = {1.1f,1.2f,1.3f,1.4f,1.5f,1.6f,1.7f,1.8f,1.9f,1.01f,1.02f,1.03f,1.04f,1.05f,1.06f,1.07f,1.08f,1.09f,1.011f,1.022f,1.033f,1.044f,1.055f,1.066f,1.077f};
+        int oxts_int[5] = {0,1,2,3,4};
+
+
+        if(boost::filesystem::exists(boost::filesystem::path(data_base "/tmp/02")))
+            boost::filesystem::remove_all(boost::filesystem::path(data_base "/tmp/02"));
+
+        {   // CREATE VELODYNE TEST SET
+            boost::filesystem::create_directories(boost::filesystem::path(data_base "/tmp/02/velodyne_points/data/"));
+
+            FILE *stream = fopen(data_base "/tmp/02/velodyne_points/data/0000000000.bin", "wb");
+            fwrite(velodyne_points, sizeof(cv::Vec4f), 6, stream);
+            fclose(stream);
+        }
+
+        {   // CREATE OXTS TEST SET
+            boost::filesystem::create_directories(boost::filesystem::path(data_base "/tmp/02/oxts/data/"));
+
+            std::ofstream stream(data_base "/tmp/02/oxts/data/0000000000.txt");
+            for(int i = 0; i < 25; i++)
+                stream << oxts_float[i] << " ";
+            for(int i = 0; i < 4; i++)
+                stream << oxts_int[i] << " ";
+            stream << oxts_int[4] << std::endl << std::flush;
+            stream.close();
+        }
+
+        {   // CREATE IMAGE TEST SET
+            boost::filesystem::create_directories(boost::filesystem::path(data_base "/tmp/02/image_00/data"));
+            boost::filesystem::create_directories(boost::filesystem::path(data_base "/tmp/02/image_01/data"));
+            boost::filesystem::create_directories(boost::filesystem::path(data_base "/tmp/02/image_02/data"));
+            boost::filesystem::create_directories(boost::filesystem::path(data_base "/tmp/02/image_03/data"));
+
+            boost::filesystem::copy(data_base "/set02/image_00/data/0000000000.png", data_base "/tmp/02/image_00/data/0000000000.png");
+            boost::filesystem::copy(data_base "/set02/image_01/data/0000000000.png", data_base "/tmp/02/image_01/data/0000000000.png");
+            boost::filesystem::copy(data_base "/set02/image_02/data/0000000000.png", data_base "/tmp/02/image_02/data/0000000000.png");
+            boost::filesystem::copy(data_base "/set02/image_03/data/0000000000.png", data_base "/tmp/02/image_03/data/0000000000.png");
+        }
+
+        saliency_sandbox::kitti::KittiReader kitti_reader(data_base "/tmp/02");
+
+        {
+            BOOST_CHECK_NO_THROW(kitti_reader.template output<0>()->process(0));
+            BOOST_CHECK_EQUAL(kitti_reader.template output<0>()->time(), 0);
+            BOOST_CHECK(kitti_reader.template output<0>()->value() != nullptr);
+            BOOST_CHECK_EQUAL(kitti_reader.template output<0>()->value()->mat().at<cv::Vec4f>(0), velodyne_points[0]);
+            BOOST_CHECK_EQUAL(kitti_reader.template output<0>()->value()->mat().at<cv::Vec4f>(1), velodyne_points[1]);
+            BOOST_CHECK_EQUAL(kitti_reader.template output<0>()->value()->mat().at<cv::Vec4f>(2), velodyne_points[2]);
+            BOOST_CHECK_EQUAL(kitti_reader.template output<0>()->value()->mat().at<cv::Vec4f>(3), velodyne_points[3]);
+            BOOST_CHECK_EQUAL(kitti_reader.template output<0>()->value()->mat().at<cv::Vec4f>(4), velodyne_points[4]);
+            BOOST_CHECK_EQUAL(kitti_reader.template output<0>()->value()->mat().at<cv::Vec4f>(5), velodyne_points[5]);
+        }
+        {
+            BOOST_CHECK_NO_THROW(kitti_reader.template output<1>()->process(0));
+            BOOST_CHECK(kitti_reader.template output<1>()->value() != nullptr);
+            cv::Mat m = cv::imread(data_base "/tmp/02/image_00/data/0000000000.png",cv::IMREAD_UNCHANGED);
+            cv::absdiff(kitti_reader.template output<1>()->value()->mat(),m,m);
+            BOOST_CHECK_EQUAL(cv::sum(m),cv::Scalar::zeros());
+        }
+        {
+            BOOST_CHECK_NO_THROW(kitti_reader.template output<2>()->process(0));
+            BOOST_CHECK(kitti_reader.template output<2>()->value() != nullptr);
+            cv::Mat m = cv::imread(data_base "/tmp/02/image_01/data/0000000000.png",cv::IMREAD_UNCHANGED);
+            cv::absdiff(kitti_reader.template output<2>()->value()->mat(),m,m);
+            BOOST_CHECK_EQUAL(cv::sum(m),cv::Scalar::zeros());
+        }
+        {
+            BOOST_CHECK_NO_THROW(kitti_reader.template output<3>()->process(0));
+            BOOST_CHECK(kitti_reader.template output<3>()->value() != nullptr);
+            cv::Mat m = cv::imread(data_base "/tmp/02/image_02/data/0000000000.png",cv::IMREAD_UNCHANGED);
+            cv::absdiff(kitti_reader.template output<3>()->value()->mat(),m,m);
+            BOOST_CHECK_EQUAL(cv::sum(m),cv::Scalar::zeros());
+        }
+        {
+            BOOST_CHECK_NO_THROW(kitti_reader.template output<4>()->process(0));
+            BOOST_CHECK(kitti_reader.template output<4>()->value() != nullptr);
+            cv::Mat m = cv::imread(data_base "/tmp/02/image_03/data/0000000000.png",cv::IMREAD_UNCHANGED);
+            cv::absdiff(kitti_reader.template output<4>()->value()->mat(),m,m);
+            BOOST_CHECK_EQUAL(cv::sum(m),cv::Scalar::zeros());
+        }
+        {
+            BOOST_CHECK_NO_THROW(kitti_reader.template output<5>()->process(0));
+            BOOST_CHECK_EQUAL(kitti_reader.template output<5>()->time(), 0);
+            BOOST_CHECK(kitti_reader.template output<5>()->value() != nullptr);
+            for(int i = 0; i < 25; i++)
+                BOOST_CHECK_EQUAL(*(float*)kitti_reader.template output<5>()->value()->channel(i)->data(), oxts_float[i]);
+            for(int i = 0; i < 5; i++)
+                BOOST_CHECK_EQUAL(*(int*)kitti_reader.template output<5>()->value()->channel(25+i)->data(), oxts_int[i]);
+        }
+    }
+
+    BOOST_AUTO_TEST_CASE( VelodyneReader )
+    {
+        cv::Vec4f velodyne_points[6] = {
+                cv::Vec4f(-1,0,0,0),
+                cv::Vec4f(+1,0,0,1),
+                cv::Vec4f(0,-1,0,2),
+                cv::Vec4f(0,+1,0,3),
+                cv::Vec4f(0,0,-1,4),
+                cv::Vec4f(0,0,+1,5)};
+
+        if(boost::filesystem::exists(boost::filesystem::path(data_base "/tmp/03")))
+            boost::filesystem::remove_all(boost::filesystem::path(data_base "/tmp/03"));
+        boost::filesystem::create_directories(boost::filesystem::path(data_base "/tmp/03/velodyne_points/data/"));
+
+        FILE* stream = fopen (data_base "/tmp/03/velodyne_points/data/0000000000.bin","wb");
+        fwrite(velodyne_points,sizeof(cv::Vec4f),6,stream);
+        fclose(stream);
+
+        saliency_sandbox::kitti::VelodyneReader velodyne_reader(data_base "/tmp/03");
+
+        BOOST_CHECK_NO_THROW(velodyne_reader.template output<0>()->process(0));
+        BOOST_CHECK_EQUAL(velodyne_reader.template output<0>()->time(),0);
+        BOOST_CHECK(velodyne_reader.template output<0>()->value() != nullptr);
+        BOOST_CHECK_EQUAL(velodyne_reader.template output<0>()->value()->mat().at<cv::Vec4f>(0),velodyne_points[0]);
+        BOOST_CHECK_EQUAL(velodyne_reader.template output<0>()->value()->mat().at<cv::Vec4f>(1),velodyne_points[1]);
+        BOOST_CHECK_EQUAL(velodyne_reader.template output<0>()->value()->mat().at<cv::Vec4f>(2),velodyne_points[2]);
+        BOOST_CHECK_EQUAL(velodyne_reader.template output<0>()->value()->mat().at<cv::Vec4f>(3),velodyne_points[3]);
+        BOOST_CHECK_EQUAL(velodyne_reader.template output<0>()->value()->mat().at<cv::Vec4f>(4),velodyne_points[4]);
+        BOOST_CHECK_EQUAL(velodyne_reader.template output<0>()->value()->mat().at<cv::Vec4f>(5),velodyne_points[5]);
+    }
+
+    BOOST_AUTO_TEST_CASE( VelodynePolarImage )
+    {
+        cv::Vec4f velodyne_points[6] = {
+                cv::Vec4f(-1,0,0,0),
+                cv::Vec4f(+1,0,0,1),
+                cv::Vec4f(0,-1,0,2),
+                cv::Vec4f(0,+1,0,3),
+                cv::Vec4f(0,0,-1,4),
+                cv::Vec4f(0,0,+1,5)};
+
+        if(boost::filesystem::exists(boost::filesystem::path(data_base "/tmp/04")))
+            boost::filesystem::remove_all(boost::filesystem::path(data_base "/tmp/04"));
+        boost::filesystem::create_directories(boost::filesystem::path(data_base "/tmp/04/velodyne_points/data/"));
+
+        FILE* stream = fopen (data_base "/tmp/04/velodyne_points/data/0000000000.bin","wb");
+        fwrite(velodyne_points,sizeof(cv::Vec4f),6,stream);
+        fclose(stream);
+
+        saliency_sandbox::kitti::VelodyneReader velodyne_reader(data_base "/tmp/04");
+        saliency_sandbox::kitti::VelodyneReader::PolarImage velodyne2polar;
+        saliency_sandbox::kitti::VelodynePolarImage::ConvertRGB velodyne2polar_rgb;
+
+        connect_port(velodyne_reader,0,velodyne2polar,0);
+
+        BOOST_CHECK_NO_THROW(velodyne2polar.template output<0>()->process(0));
+        BOOST_CHECK_EQUAL(velodyne2polar.template output<0>()->time(),0);
+        BOOST_CHECK_EQUAL(velodyne2polar.template output<1>()->time(),0);
+        BOOST_CHECK(velodyne2polar.template output<0>()->value() != nullptr);
+        BOOST_CHECK(velodyne2polar.template output<1>()->value() != nullptr);
+    }
+
+    BOOST_AUTO_TEST_CASE( ImageReader )
+    {
+        if(boost::filesystem::exists(boost::filesystem::path(data_base "/tmp/05")))
+            boost::filesystem::remove_all(boost::filesystem::path(data_base "/tmp/05"));
+
+        boost::filesystem::create_directories(boost::filesystem::path(data_base "/tmp/05/image_00/data"));
+        boost::filesystem::create_directories(boost::filesystem::path(data_base "/tmp/05/image_01/data"));
+        boost::filesystem::create_directories(boost::filesystem::path(data_base "/tmp/05/image_02/data"));
+        boost::filesystem::create_directories(boost::filesystem::path(data_base "/tmp/05/image_03/data"));
+
+        boost::filesystem::copy(data_base "/set02/image_00/data/0000000000.png", data_base "/tmp/05/image_00/data/0000000000.png");
+        boost::filesystem::copy(data_base "/set02/image_01/data/0000000000.png", data_base "/tmp/05/image_01/data/0000000000.png");
+        boost::filesystem::copy(data_base "/set02/image_02/data/0000000000.png", data_base "/tmp/05/image_02/data/0000000000.png");
+        boost::filesystem::copy(data_base "/set02/image_03/data/0000000000.png", data_base "/tmp/05/image_03/data/0000000000.png");
+
+        saliency_sandbox::kitti::LeftGrayImageReader left_gray_image_reader(boost::filesystem::path(data_base "/tmp/05"));
+        saliency_sandbox::kitti::RightGrayImageReader right_gray_image_reader(boost::filesystem::path(data_base "/tmp/05"));
+        saliency_sandbox::kitti::LeftRGBImageReader left_rgb_image_reader(boost::filesystem::path(data_base "/tmp/05"));
+        saliency_sandbox::kitti::RightRGBImageReader right_rgb_image_reader(boost::filesystem::path(data_base "/tmp/05"));
+
+        {
+            BOOST_CHECK_NO_THROW(left_gray_image_reader.template output<0>()->process(0));
+            BOOST_CHECK(left_gray_image_reader.template output<0>()->value() != nullptr);
+            cv::Mat m = cv::imread(data_base "/tmp/05/image_00/data/0000000000.png",cv::IMREAD_UNCHANGED);
+            cv::absdiff(left_gray_image_reader.template output<0>()->value()->mat(),m,m);
+            BOOST_CHECK_EQUAL(cv::sum(m),cv::Scalar::zeros());
+        }
+        {
+            BOOST_CHECK_NO_THROW(right_gray_image_reader.template output<0>()->process(0));
+            BOOST_CHECK(right_gray_image_reader.template output<0>()->value() != nullptr);
+            cv::Mat m = cv::imread(data_base "/tmp/05/image_01/data/0000000000.png",cv::IMREAD_UNCHANGED);
+            cv::absdiff(right_gray_image_reader.template output<0>()->value()->mat(),m,m);
+            BOOST_CHECK_EQUAL(cv::sum(m),cv::Scalar::zeros());
+        }
+        {
+            BOOST_CHECK_NO_THROW(left_rgb_image_reader.template output<0>()->process(0));
+            BOOST_CHECK(left_rgb_image_reader.template output<0>()->value() != nullptr);
+            cv::Mat m = cv::imread(data_base "/tmp/05/image_02/data/0000000000.png",cv::IMREAD_UNCHANGED);
+            cv::absdiff(left_rgb_image_reader.template output<0>()->value()->mat(),m,m);
+            BOOST_CHECK_EQUAL(cv::sum(m),cv::Scalar::zeros());
+        }
+        {
+            BOOST_CHECK_NO_THROW(right_rgb_image_reader.template output<0>()->process(0));
+            BOOST_CHECK(right_rgb_image_reader.template output<0>()->value() != nullptr);
+            cv::Mat m = cv::imread(data_base "/tmp/05/image_03/data/0000000000.png",cv::IMREAD_UNCHANGED);
+            cv::absdiff(right_rgb_image_reader.template output<0>()->value()->mat(),m,m);
+            BOOST_CHECK_EQUAL(cv::sum(m),cv::Scalar::zeros());
+        }
+    }
+
+    BOOST_AUTO_TEST_CASE( OXTSReader )
+    {
+        float oxts_float[25] = {1.1f,1.2f,1.3f,1.4f,1.5f,1.6f,1.7f,1.8f,1.9f,1.01f,1.02f,1.03f,1.04f,1.05f,1.06f,1.07f,1.08f,1.09f,1.011f,1.022f,1.033f,1.044f,1.055f,1.066f,1.077f};
+        int oxts_int[5] = {0,1,2,3,4};
+
+        if(boost::filesystem::exists(boost::filesystem::path(data_base "/tmp/06")))
+            boost::filesystem::remove_all(boost::filesystem::path(data_base "/tmp/06"));
+        boost::filesystem::create_directories(boost::filesystem::path(data_base "/tmp/06/oxts/data/"));
+
+        std::ofstream stream(data_base "/tmp/06/oxts/data/0000000000.txt");
+        for(int i = 0; i < 25; i++)
+            stream << oxts_float[i] << " ";
+        for(int i = 0; i < 4; i++)
+            stream << oxts_int[i] << " ";
+        stream << oxts_int[4] << std::endl << std::flush;
+        stream.close();
+
+        saliency_sandbox::kitti::OXTSReader oxts_reader(boost::filesystem::path(data_base "/tmp/06"));
+
+        BOOST_CHECK_NO_THROW(oxts_reader.template output<0>()->process(0));
+        BOOST_CHECK_EQUAL(oxts_reader.template output<0>()->time(), 0);
+        BOOST_CHECK(oxts_reader.template output<0>()->value() != nullptr);
+        for(int i = 0; i < 25; i++)
+            BOOST_CHECK_EQUAL(*(float*)oxts_reader.template output<0>()->value()->channel(i)->data(), oxts_float[i]);
+        for(int i = 0; i < 5; i++)
+            BOOST_CHECK_EQUAL(*(int*)oxts_reader.template output<0>()->value()->channel(25+i)->data(), oxts_int[i]);
+    }
+
+    BOOST_AUTO_TEST_CASE( TrackletReader )
+    {
+        saliency_sandbox::kitti::TrackletReader tracklet_reader(boost::filesystem::path(data_base "/set03/"));
+
+        BOOST_CHECK_NO_THROW(tracklet_reader.template output<0>()->process(0));
+        //TODO: further cases
+    }
+
+    BOOST_AUTO_TEST_CASE( CalibrationReader )
+    {
+        saliency_sandbox::kitti::CalibrationReader calib_reader(boost::filesystem::path(data_base "/set03/dummy"));
+
+        BOOST_CHECK_NO_THROW(calib_reader.template output<0>()->process(0));
+    }
+
+
+BOOST_AUTO_TEST_SUITE_END()

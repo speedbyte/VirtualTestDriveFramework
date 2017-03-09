@@ -1,0 +1,148 @@
+name: "Spectral Saliency";
+
+node {
+    name: "Kitti Image Reader";
+    type: KittiLeftGrayImageReader;
+    argument {
+        name: "path";
+        type: pb_string;
+        value: "/media/geislerd/Documents/repo/Kitti/data/2011_09_29/2011_09_29_drive_0071_sync/";
+    }
+}
+
+node {
+    name: "Convert to Heatmap";
+    type: UtilsImageConverter;
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftGrayImageReader::Image::WIDTH";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftGrayImageReader::Image::HEIGHT";
+    }
+    argument {
+        name: "input";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_IntensityImage";
+    }
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_HeatmapImage";
+    }
+    input {
+        node: "Kitti Image Reader";
+        port: 0;
+    }
+}
+
+node {
+    name: "Spectral Whitening";
+    type: SaliencySpectralWhitening;
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftGrayImageReader::Image::WIDTH";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftGrayImageReader::Image::HEIGHT";
+    }
+    input {
+        node: "Convert to Heatmap";
+        port: 0;
+    }
+}
+
+node {
+    name: "Convert Spectral Whitening to RGB";
+    type: UtilsImageConverter;
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftGrayImageReader::Image::WIDTH";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftGrayImageReader::Image::HEIGHT";
+    }
+    argument {
+        name: "input";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_HeatmapImage";
+    }
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_RGBImage";
+    }
+    input {
+        node: "Spectral Whitening";
+        port: 0;
+    }
+}
+
+node {
+    name: "FPS Counter";
+    type: UtilsFPSCounter;
+    input {
+        node: "Spectral Whitening";
+        port: 0;
+    }
+}
+
+node {
+    name: "FPS Plot";
+    type: Plot;
+    input {
+        node: "FPS Counter";
+        port: 0;
+    }
+}
+
+node {
+    name: "Show Spectral Whitening";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "Spectral Whitening";
+    }
+    input {
+        node: "Convert Spectral Whitening to RGB";
+        port: 0;
+    }
+}
+
+node {
+    name: "Show Kitti Image";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "Raw Image";
+    }
+    input {
+        node: "Kitti Image Reader";
+        port: 0;
+    }
+}
+
+node {
+    name: "Show FPS Plot";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "FPS";
+    }
+    input {
+        node: "FPS Plot";
+        port: 0;
+    }
+}

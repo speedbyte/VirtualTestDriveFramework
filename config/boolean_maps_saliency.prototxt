@@ -1,0 +1,353 @@
+name: "Boolean Maps Saliency";
+
+node {
+    name: "Kitti Image Reader";
+    type: KittiLeftRGBImageReader;
+    argument {
+        name: "path";
+        type: pb_string;
+        value: "/media/geislerd/Documents/repo/Kitti/data/2011_09_29/2011_09_29_drive_0071_sync/";
+    }
+}
+
+node {
+    name: "Convert to LAB";
+    type: UtilsImageConverter;
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::WIDTH";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT";
+    }
+    argument {
+        name: "input";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_RGBImage";
+    }
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_LABImage";
+    }
+    input {
+        node: "Kitti Image Reader";
+        port: 0;
+    }
+}
+
+node {
+    name: "Seperate Channels";
+    type: UtilsMatrixSplit;
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::WIDTH";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT";
+    }
+    argument {
+        name: "type";
+        type: pb_complex;
+        value: "cv::Vec3f";
+    }
+    input {
+        node: "Convert to LAB";
+        port: 0;
+    }
+}
+
+node {
+    name: "Convert to Intensity L";
+    type: UtilsImageConverter;
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::WIDTH";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT";
+    }
+    argument {
+        name: "input";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_HeatmapImage";
+    }
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_IntensityImage";
+    }
+    input {
+        node: "Seperate Channels";
+        port: 0;
+    }
+}
+
+node {
+    name: "Convert to Intensity A";
+    type: UtilsImageConverter;
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::WIDTH";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT";
+    }
+    argument {
+        name: "input";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_HeatmapImage";
+    }
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_IntensityImage";
+    }
+    input {
+        node: "Seperate Channels";
+        port: 1;
+    }
+}
+
+node {
+    name: "Convert to Intensity B";
+    type: UtilsImageConverter;
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::WIDTH";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT";
+    }
+    argument {
+        name: "input";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_HeatmapImage";
+    }
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_IntensityImage";
+    }
+    input {
+        node: "Seperate Channels";
+        port: 2;
+    }
+}
+
+node {
+    name: "Boolean Map channel L";
+    type: SaliencyBooleanMaps;
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::WIDTH";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT";
+    }
+    input {
+        node: "Convert to Intensity L";
+        port: 0;
+    }
+}
+
+node {
+    name: "Boolean Map channel A";
+    type: SaliencyBooleanMaps;
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::WIDTH";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT";
+    }
+    input {
+        node: "Convert to Intensity A";
+        port: 0;
+    }
+}
+
+node {
+    name: "Boolean Map channel B";
+    type: SaliencyBooleanMaps;
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::WIDTH";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT";
+    }
+    input {
+        node: "Convert to Intensity B";
+        port: 0;
+    }
+}
+
+node {
+    name: "Merge Activations";
+    type: UtilsMatrixMerge;
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::WIDTH";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT";
+    }
+    argument {
+        name: "type";
+        type: pb_complex;
+        value: "cv::Vec3f";
+    }
+    input {
+        node: "Boolean Map channel L";
+        port: 0;
+    }
+    input {
+        node: "Boolean Map channel A";
+        port: 0;
+    }
+    input {
+        node: "Boolean Map channel B";
+        port: 0;
+    }
+}
+
+node {
+    name: "Sum Activations";
+    type: UtilsMatrixSum;
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::WIDTH";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT";
+    }
+    argument {
+        name: "type";
+        type: pb_complex;
+        value: "cv::Vec3f";
+    }
+    input {
+        node: "Merge Activations";
+        port: 0;
+    }
+}
+
+node {
+    name: "Boolean Maps Heatmap";
+    type: UtilsImageConverter;
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::WIDTH";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT";
+    }
+    argument {
+        name: "input";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_HeatmapImage";
+    }
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_RGBImage";
+    }
+    input {
+        node: "Sum Activations";
+        port: 0;
+    }
+}
+
+node {
+    name: "FPS Counter";
+    type: UtilsFPSCounter;
+    input {
+        node: "Sum Activations";
+        port: 0;
+    }
+}
+
+node {
+    name: "FPS Plot";
+    type: Plot;
+    input {
+        node: "FPS Counter";
+        port: 0;
+    }
+}
+
+node {
+    name: "Show Boolean Maps";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "Boolean Maps";
+    }
+    input {
+        node: "Boolean Maps Heatmap";
+        port: 0;
+    }
+}
+
+node {
+    name: "Show Kitti Image";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "Raw Image";
+    }
+    input {
+        node: "Kitti Image Reader";
+        port: 0;
+    }
+}
+
+node {
+    name: "Show FPS Plot";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "FPS";
+    }
+    input {
+        node: "FPS Plot";
+        port: 0;
+    }
+}

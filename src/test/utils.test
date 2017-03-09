@@ -1,0 +1,179 @@
+//
+// Created by geislerd on 09.02.17.
+//
+
+#include <boost/test/unit_test.hpp>
+
+#include <io/ImageReader.h>
+#include <utils/Matrix.h>
+
+#define data_base "/media/geislerd/Documents/repo/SaliencySandbox2.0/data/test/"
+
+BOOST_AUTO_TEST_SUITE(utils)
+
+    BOOST_AUTO_TEST_CASE( Splitt )
+    {
+        saliency_sandbox::io::RGBImageReader image_reader(data_base "set00");
+        saliency_sandbox::utils::RGBImage::Splitt splitt;
+
+        connect_port(image_reader,0,splitt,0);
+
+        BOOST_CHECK_NO_THROW(splitt.template output<0>()->process(0));
+        BOOST_CHECK_EQUAL(splitt.template output<0>()->time(),0);
+        BOOST_CHECK(splitt.template output<0>()->value() != nullptr);
+        BOOST_CHECK(splitt.template output<1>()->value() != nullptr);
+        BOOST_CHECK(splitt.template output<2>()->value() != nullptr);
+        BOOST_CHECK_EQUAL(splitt.template output<0>()->value()->at<uchar>(0),0); // blue
+        BOOST_CHECK_EQUAL(splitt.template output<1>()->value()->at<uchar>(0),0); // green
+        BOOST_CHECK_EQUAL(splitt.template output<2>()->value()->at<uchar>(0),0); // red
+
+        BOOST_CHECK_NO_THROW(splitt.template output<0>()->process(1));
+        BOOST_CHECK_EQUAL(splitt.template output<0>()->time(),1);
+        BOOST_CHECK(splitt.template output<0>()->value() != nullptr);
+        BOOST_CHECK(splitt.template output<1>()->value() != nullptr);
+        BOOST_CHECK(splitt.template output<2>()->value() != nullptr);
+        BOOST_CHECK_EQUAL(splitt.template output<0>()->value()->at<uchar>(0),255); // blue
+        BOOST_CHECK_EQUAL(splitt.template output<1>()->value()->at<uchar>(0),255); // green
+        BOOST_CHECK_EQUAL(splitt.template output<2>()->value()->at<uchar>(0),255); // red
+
+        BOOST_CHECK_NO_THROW(splitt.template output<0>()->process(2));
+        BOOST_CHECK_EQUAL(splitt.template output<0>()->time(),2);
+        BOOST_CHECK(splitt.template output<0>()->value() != nullptr);
+        BOOST_CHECK(splitt.template output<1>()->value() != nullptr);
+        BOOST_CHECK(splitt.template output<2>()->value() != nullptr);
+        BOOST_CHECK_EQUAL(splitt.template output<0>()->value()->at<uchar>(0),0); // blue
+        BOOST_CHECK_EQUAL(splitt.template output<1>()->value()->at<uchar>(0),0); // green
+        BOOST_CHECK_EQUAL(splitt.template output<2>()->value()->at<uchar>(0),255); // red
+
+        BOOST_CHECK_NO_THROW(splitt.template output<0>()->process(3));
+        BOOST_CHECK_EQUAL(splitt.template output<0>()->time(),3);
+        BOOST_CHECK(splitt.template output<0>()->value() != nullptr);
+        BOOST_CHECK(splitt.template output<1>()->value() != nullptr);
+        BOOST_CHECK(splitt.template output<2>()->value() != nullptr);
+        BOOST_CHECK_EQUAL(splitt.template output<0>()->value()->at<uchar>(0),0); // blue
+        BOOST_CHECK_EQUAL(splitt.template output<1>()->value()->at<uchar>(0),255); // green
+        BOOST_CHECK_EQUAL(splitt.template output<2>()->value()->at<uchar>(0),0); // red
+
+        BOOST_CHECK_NO_THROW(splitt.template output<0>()->process(4));
+        BOOST_CHECK_EQUAL(splitt.template output<0>()->time(),4);
+        BOOST_CHECK(splitt.template output<0>()->value() != nullptr);
+        BOOST_CHECK(splitt.template output<1>()->value() != nullptr);
+        BOOST_CHECK(splitt.template output<2>()->value() != nullptr);
+        BOOST_CHECK_EQUAL(splitt.template output<0>()->value()->at<uchar>(0),255); // blue
+        BOOST_CHECK_EQUAL(splitt.template output<1>()->value()->at<uchar>(0),0); // green
+        BOOST_CHECK_EQUAL(splitt.template output<2>()->value()->at<uchar>(0),0); // red
+    }
+
+    BOOST_AUTO_TEST_CASE( Merge )
+    {
+        saliency_sandbox::io::RGBImageReader image_reader(data_base "set00");
+        saliency_sandbox::utils::RGBImage::Splitt splitt;
+        saliency_sandbox::utils::RGBImage::Merge merge;
+
+        connect_port(image_reader,0,splitt,0);
+        connect_port(splitt,0,merge,0);
+        connect_port(splitt,1,merge,1);
+        connect_port(splitt,2,merge,2);
+
+        BOOST_CHECK_NO_THROW(merge.template output<0>()->process(0));
+        BOOST_CHECK_EQUAL(merge.template output<0>()->time(),0);
+        BOOST_CHECK(merge.template output<0>()->value() != nullptr);
+        BOOST_CHECK_EQUAL(merge.template output<0>()->value()->at<cv::Vec3b>(0),cv::Vec3b(0,0,0)); // black
+
+        BOOST_CHECK_NO_THROW(merge.template output<0>()->process(1));
+        BOOST_CHECK_EQUAL(merge.template output<0>()->time(),1);
+        BOOST_CHECK(merge.template output<0>()->value() != nullptr);
+        BOOST_CHECK_EQUAL(merge.template output<0>()->value()->at<cv::Vec3b>(0),cv::Vec3b(255,255,255)); // white
+
+        BOOST_CHECK_NO_THROW(merge.template output<0>()->process(2));
+        BOOST_CHECK_EQUAL(merge.template output<0>()->time(),2);
+        BOOST_CHECK(merge.template output<0>()->value() != nullptr);
+        BOOST_CHECK_EQUAL(merge.template output<0>()->value()->at<cv::Vec3b>(0),cv::Vec3b(0,0,255)); // red
+
+        BOOST_CHECK_NO_THROW(merge.template output<0>()->process(3));
+        BOOST_CHECK_EQUAL(merge.template output<0>()->time(),3);
+        BOOST_CHECK(merge.template output<0>()->value() != nullptr);
+        BOOST_CHECK_EQUAL(merge.template output<0>()->value()->at<cv::Vec3b>(0),cv::Vec3b(0,255,0)); // green
+
+        BOOST_CHECK_NO_THROW(merge.template output<0>()->process(4));
+        BOOST_CHECK_EQUAL(merge.template output<0>()->time(),4);
+        BOOST_CHECK(merge.template output<0>()->value() != nullptr);
+        BOOST_CHECK_EQUAL(merge.template output<0>()->value()->at<cv::Vec3b>(0),cv::Vec3b(255,0,0)); // blue
+    }
+
+    BOOST_AUTO_TEST_CASE( ImageConvertRGB2Intensity )
+    {
+        saliency_sandbox::io::RGBImageReader image_reader(data_base "set00");
+        saliency_sandbox::io::RGBImageReader::Image::ConvertIntensity rgb2intensity;
+
+        connect_port(image_reader,0,rgb2intensity,0);
+
+        BOOST_CHECK_NO_THROW(rgb2intensity.template output<0>()->process(0));
+        BOOST_CHECK_EQUAL(rgb2intensity.template output<0>()->time(),0);
+        BOOST_CHECK(rgb2intensity.template output<0>()->value() != nullptr);
+        BOOST_CHECK_EQUAL(rgb2intensity.template output<0>()->value()->at<uchar>(0),0); // black
+
+        BOOST_CHECK_NO_THROW(rgb2intensity.template output<0>()->process(1));
+        BOOST_CHECK_EQUAL(rgb2intensity.template output<0>()->time(),1);
+        BOOST_CHECK(rgb2intensity.template output<0>()->value() != nullptr);
+        BOOST_CHECK_EQUAL(rgb2intensity.template output<0>()->value()->at<uchar>(0),255); // white
+    }
+
+    BOOST_AUTO_TEST_CASE( ImageConvertRGB2Binary )
+    {
+        saliency_sandbox::io::RGBImageReader image_reader(data_base "set00");
+        saliency_sandbox::io::RGBImageReader::Image::ConvertBinary rgb2binary;
+
+        connect_port(image_reader,0,rgb2binary,0);
+
+        BOOST_CHECK_NO_THROW(rgb2binary.template output<0>()->process(0));
+        BOOST_CHECK_EQUAL(rgb2binary.template output<0>()->time(),0);
+        BOOST_CHECK(rgb2binary.template output<0>()->value() != nullptr);
+        BOOST_CHECK_EQUAL(rgb2binary.template output<0>()->value()->at<uchar>(0),0); // black
+
+        BOOST_CHECK_NO_THROW(rgb2binary.template output<0>()->process(1));
+        BOOST_CHECK_EQUAL(rgb2binary.template output<0>()->time(),1);
+        BOOST_CHECK(rgb2binary.template output<0>()->value() != nullptr);
+        BOOST_CHECK_EQUAL(rgb2binary.template output<0>()->value()->at<uchar>(0),255); // white
+    }
+
+    BOOST_AUTO_TEST_CASE( ImageConvertRGB2Heatmap )
+    {
+        saliency_sandbox::io::RGBImageReader image_reader(data_base "set00");
+        saliency_sandbox::io::RGBImageReader::Image::ConvertHeatmap rgb2heatmap;
+
+        connect_port(image_reader,0,rgb2heatmap,0);
+
+        BOOST_CHECK_NO_THROW(rgb2heatmap.template output<0>()->process(0));
+        BOOST_CHECK_EQUAL(rgb2heatmap.template output<0>()->time(),0);
+        BOOST_CHECK(rgb2heatmap.template output<0>()->value() != nullptr);
+        BOOST_CHECK_EQUAL(rgb2heatmap.template output<0>()->value()->at<float>(0),0.0f); // black
+
+        BOOST_CHECK_NO_THROW(rgb2heatmap.template output<0>()->process(1));
+        BOOST_CHECK_EQUAL(rgb2heatmap.template output<0>()->time(),1);
+        BOOST_CHECK(rgb2heatmap.template output<0>()->value() != nullptr);
+        BOOST_CHECK_EQUAL(rgb2heatmap.template output<0>()->value()->at<float>(0),1.0); // white
+    }
+
+    BOOST_AUTO_TEST_CASE( ImageConvertHeatmap2RGB )
+    {
+        saliency_sandbox::io::RGBImageReader image_reader(data_base "set00");
+        saliency_sandbox::io::RGBImageReader::Image::ConvertHeatmap rgb2heatmap;
+        saliency_sandbox::io::RGBImageReader::Image::ConvertHeatmap::OutputImage::ConvertRGB heatmap2rgb;
+
+        connect_port(image_reader,0,rgb2heatmap,0);
+        connect_port(rgb2heatmap,0,heatmap2rgb,0);
+
+        BOOST_CHECK_NO_THROW(heatmap2rgb.template output<0>()->process(0));
+        BOOST_CHECK_EQUAL(heatmap2rgb.template output<0>()->time(),0);
+        BOOST_CHECK(heatmap2rgb.template output<0>()->value() != nullptr);
+        BOOST_CHECK_EQUAL(heatmap2rgb.template output<0>()->value()->at<cv::Vec3b>(0),cv::Vec3b(128,0,0)); // black
+
+        BOOST_CHECK_NO_THROW(heatmap2rgb.template output<0>()->process(1));
+        BOOST_CHECK_EQUAL(heatmap2rgb.template output<0>()->time(),1);
+        BOOST_CHECK(heatmap2rgb.template output<0>()->value() != nullptr);
+        BOOST_CHECK_EQUAL(heatmap2rgb.template output<0>()->value()->at<cv::Vec3b>(0),cv::Vec3b(128,0,0)); // white
+    }
+
+
+BOOST_AUTO_TEST_SUITE_END()

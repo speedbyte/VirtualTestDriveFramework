@@ -1,0 +1,106 @@
+package saliency_sandbox.core.generated;
+
+message Pipeline {
+    optional string name = 1;
+
+    message Node {
+        optional string name = 1;
+
+        enum Type {
+            // Kitti-Dataset
+            KittiReader                 = 101;
+            KittiCalibrationReader      = 102;
+            KittiLeftGrayImageReader    = 103;
+            KittiRightGrayImageReader   = 104;
+            KittiLeftRGBImageReader     = 105;
+            KittiRightRGBImageReader    = 106;
+            KittiOXTSReader             = 107;
+            KittiTrackletReader         = 108;
+            KittiVelodyneReader         = 109;
+
+            // IO
+            IOCSVReader                 = 201;
+            IODirectoryScanner          = 202;
+            IOImageReader               = 203;
+            IOImageShow                 = 204;
+            IOImageWriter               = 205;
+            IOVideoReader               = 206;
+            IOVideoWriter               = 207;
+
+            // Utils
+            UtilsImageConverter         = 301;
+            UtilsFPSCounter             = 302;
+            UtilsMatrixSplit            = 303;
+            UtilsMatrixMerge            = 304;
+            UtilsMatrixSum            = 305;
+
+            // Saliency
+            SaliencySpectralWhitening   = 401;
+            SaliencyBooleanMaps         = 402;
+
+            // Plot
+            Plot                        = 501;
+        }
+
+        required Type type = 2;
+
+        message Input {
+            required string node = 1;
+            required uint32 port = 2;
+        }
+
+        repeated Input input = 3;
+
+        message Argument {
+            required string name = 1;
+
+            enum Type {
+                // boolean
+                pb_bool = 1;
+
+                // signed integers
+                pb_int8  = 2;
+                pb_int16 = 3;
+                pb_int32 = 4;
+                pb_int64 = 5;
+
+                // unsigend integers
+                pb_uint8  = 6;
+                pb_uint16 = 7;
+                pb_uint32 = 8;
+                pb_uint64 = 9;
+
+                // floating points
+                pb_float32 = 10;
+                pb_float64 = 11;
+
+                // string
+                pb_string = 12;
+
+                // complex (such as objects, unions)
+                pb_complex = 13;
+            }
+
+            required Type   type   = 2;
+            optional string value  = 4;
+        }
+
+        repeated Argument argument = 4;
+
+        message Property {
+            required string name = 1;
+
+            enum Type {
+                pb_bool   = 1;
+                pb_int    = 2;
+                pb_float  = 3;
+                pb_string = 4;
+            }
+
+            required Type   type   = 2;
+            required string value  = 4;
+        }
+    }
+
+    repeated Node node = 2;
+}

@@ -1,0 +1,7 @@
+MESSAGE("-- create spectral whitening tool target")
+
+aux_source_directory(. CORE_SOURCE)
+MESSAGE("   source files: ${CORE_SOURCE}")
+
+add_executable(spectralwhitening ${CORE_SOURCE})
+target_link_libraries(spectralwhitening kitti saliency plot ${OpenCV_LIBS} ${Boost_LIBRARIES} )

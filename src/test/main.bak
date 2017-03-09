@@ -1,0 +1,82 @@
+//
+// Created by geislerd on 07.02.17.
+//
+
+
+#include <iostream>
+#include <io/ImageShow.h>
+#include <io/ImageReader.h>
+#include <io/VideoReader.h>
+#include <io/ImageWriter.h>
+#include <io/VideoWriter.h>
+#include <kitti/KittiReader.h>
+#include <kitti/VelodynePolarImage.h>
+
+int mains(int argc, char* argv[]) {
+    //std::string path("/home/geislerd/Projects/Volkswagen-Drivers-Perception/private/old/data/img");
+    //std::string path("/home/geislerd/Projects/Volkswagen-Drivers-Perception/private/old/data/vid/field-0000-0000.avi");
+    std::string path("/home/geislerd/Projects/Kitti/data/2011_09_26/2011_09_26_drive_0001_sync/image_02/data");
+    saliency_sandbox::io::ImageReader vr(path);
+    /*saliency_sandbox::utils::ImageConvertRGB2Intensity cvt_intensity;
+    saliency_sandbox::utils::ImageConvertIntensity2Heatmap cvt_heatmap;
+    saliency_sandbox::utils::ImageConvertHeatmap2RGB cvt_rgb;
+    saliency_sandbox::utils::RGBImage::Splitt splitt;
+    saliency_sandbox::utils::RGBImage::Merge merge;
+    saliency_sandbox::io::ImageShow show_merged("merged");
+    saliency_sandbox::io::ImageShow show_channel_0("channel 0");
+    saliency_sandbox::io::ImageWriter write_rgb("/tmp/rgb");
+    saliency_sandbox::io::VideoWriter write_rgb_vid("/tmp/rgbvid.avi");*/
+   // saliency_sandbox::kitti::KittiReader kitti_reader("/home/geislerd/Projects/Kitti/data/2011_09_26/2011_09_26_drive_0001_sync");
+    saliency_sandbox::kitti::Velodyne2PolarImage cvt_velodyne;
+    saliency_sandbox::utils::_ImageConvertHeatmap2RGB<360,360> cvt_distance_rgb;
+    saliency_sandbox::utils::_ImageConvertHeatmap2RGB<360,360> cvt_reflection_rgb;
+   // saliency_sandbox::io::ImageShow show_distance("Velodyne Distance");
+   // saliency_sandbox::io::ImageShow show_reflection("Velodyne Reflection");
+    saliency_sandbox::io::ImageWriter write_rgb("/tmp/rgb");
+    saliency_sandbox::io::ImageShow show_merged("merged");
+    /*
+    connect_port(&vr,0,&cvt_velodyne,0);
+    connect_port(&cvt_velodyne,0,&cvt_distance_rgb,0);
+    connect_port(&cvt_velodyne,1,&cvt_reflection_rgb,0);
+    //connect_port(&cvt_distance_rgb,0,&show_distance,0);
+    //connect_port(&cvt_reflection_rgb,0,&show_reflection,0);
+    connect_port(&cvt_distance_rgb,0,&write_rgb,0);
+     */
+
+    connect_port(&vr,0,&write_rgb,0);
+
+    /*cvt_intensity.input()->connect(vr.output());
+    cvt_heatmap.input()->connect(cvt_intensity.output());
+    cvt_rgb.input()->connect(cvt_heatmap.output());
+    splitt.input()->connect(cvt_rgb.output());
+    merge.template input<0>()->connect(splitt.template output<2>());
+    merge.template input<1>()->connect(splitt.template output<1>());
+    merge.template input<2>()->connect(splitt.template output<0>());
+    show_merged.input()->connect(merge.output());
+    show_channel_0.input()->connect(splitt.template output<0>());
+    write_rgb.input()->connect(cvt_rgb.output());
+    write_rgb_vid.input()->connect(cvt_rgb.output());*/
+
+    time_t i = 0;
+    while(true) {
+/*        show_merged.process(i);
+        show_channel_0.process(i);
+        write_rgb_vid.process(i);
+        write_rgb.process(i++);*/
+
+        write_rgb.process(i);
+        //show_reflection.process(i);
+
+        i++;
+
+        //if(i%0 == 0)
+        //    std::cout << "fps: " << *show_channel_0.output()->value() << std::endl;
+/*        cv::imshow("Channel 1",*splitt.template output<0>()->value());
+        cv::imshow("Channel 2",*splitt.template output<1>()->value());
+        cv::imshow("Channel 3",*splitt.template output<2>()->value());
+        cv::imshow("Merged 1",*merge.template output<0>()->value());*/
+        cv::waitKey(1);
+
+    }
+
+}

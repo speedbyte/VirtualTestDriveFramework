@@ -1,0 +1,6 @@
+add_subdirectory(plotvelodyne/)
+add_subdirectory(plotoxts/)
+add_subdirectory(plottracklets/)
+add_subdirectory(spectralwhitening/)
+add_subdirectory(booleanmaps/)
+add_subdirectory(protobuild/)

@@ -1,0 +1,13 @@
+//
+// Created by geislerd on 07.03.17.
+//
+
+#ifndef CONFIG_H
+#define CONFIG_H
+
+#define PROTOBUILD_COMPILER "${CMAKE_CXX_COMPILER}"
+#define PROTOBUILD_COMPILER_FLAGS "-std=c++11 -w -shared -fPIC ${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS} ${CMAKE_SHARED_LINKER_FLAGS}" //-g
+#define PROTOBUILD_COMPILER_LIBS "${PROTOBUILD_JITC_THIRD_DEP}"
+#define PROTOBUILD_COMPILER_INCLUDE "/media/geislerd/Documents/repo/SaliencySandbox2.0/include"//"${CMAKE_INSTALL_PREFIX}/include"
+
+#endif //CONFIG_H
