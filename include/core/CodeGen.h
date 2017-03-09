@@ -586,6 +586,13 @@ namespace saliency_sandbox {
                             gen << SetTemplateArgument("height",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32);
                             gen << SetInput("feature",0);
                             break;
+                        case generated::Pipeline_Node_Type_SaliencyHighpass:
+                            gen << SetHeader("saliency/activation/HighPass");
+                            gen << SetClass("saliency_sandbox::saliency::activation::_HighPass");
+                            gen << SetTemplateArgument("width",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32);
+                            gen << SetTemplateArgument("height",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32);
+                            gen << SetInput("feature",0);
+                            break;
                         case generated::Pipeline_Node_Type_UtilsFPSCounter:
                             gen << SetHeader("utils/FPSCounter");
                             gen << SetClass("saliency_sandbox::utils::FPSCounter");

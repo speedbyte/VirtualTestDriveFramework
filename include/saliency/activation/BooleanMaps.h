@@ -114,16 +114,16 @@ namespace saliency_sandbox {
                             fs = this->filterSize()*(j+1)*2+1;
                             c = (i-this->numThresholds()/2)*r;
 
+                            /*
                             calls.push_back(std::async(std::launch::async,_bm_thresh_thread<_width,_height>,this,in,CV_THRESH_BINARY,fs,c,true,true));
                             calls.push_back(std::async(std::launch::async,_bm_thresh_thread<_width,_height>,this,in,CV_THRESH_BINARY_INV,fs,c,true,true));
+                             */
 
-                            /*
                             cv::adaptiveThreshold(in,t,UCHAR_MAX,CV_ADAPTIVE_THRESH_MEAN_C,CV_THRESH_BINARY,fs,c);
                             this->add(t,true,true);
 
                             cv::adaptiveThreshold(in,t,UCHAR_MAX,CV_ADAPTIVE_THRESH_MEAN_C,CV_THRESH_BINARY_INV,fs,c);
                             this->add(t,true,true);
-                             */
                         }
 
                     for(int i = 0; i < calls.size(); i++)

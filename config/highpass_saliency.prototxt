@@ -64,8 +64,8 @@ node {
 }
 
 node {
-    name: "Convert to Intensity L";
-    type: UtilsImageConverter;
+    name: "Highpass Channel L";
+    type: SaliencyHighpass;
     argument {
         name: "width";
         type: pb_uint32;
@@ -75,16 +75,6 @@ node {
         name: "height";
         type: pb_uint32;
         value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT";
-    }
-    argument {
-        name: "input";
-        type: pb_complex;
-        value: "saliency_sandbox::utils::_HeatmapImage";
-    }
-    argument {
-        name: "output";
-        type: pb_complex;
-        value: "saliency_sandbox::utils::_IntensityImage";
     }
     input {
         node: "Seperate Channels";
@@ -93,8 +83,8 @@ node {
 }
 
 node {
-    name: "Convert to Intensity A";
-    type: UtilsImageConverter;
+    name: "Highpass Channel A";
+    type: SaliencyHighpass;
     argument {
         name: "width";
         type: pb_uint32;
@@ -104,16 +94,6 @@ node {
         name: "height";
         type: pb_uint32;
         value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT";
-    }
-    argument {
-        name: "input";
-        type: pb_complex;
-        value: "saliency_sandbox::utils::_HeatmapImage";
-    }
-    argument {
-        name: "output";
-        type: pb_complex;
-        value: "saliency_sandbox::utils::_IntensityImage";
     }
     input {
         node: "Seperate Channels";
@@ -122,8 +102,8 @@ node {
 }
 
 node {
-    name: "Convert to Intensity B";
-    type: UtilsImageConverter;
+    name: "Highpass Channel B";
+    type: SaliencyHighpass;
     argument {
         name: "width";
         type: pb_uint32;
@@ -133,77 +113,10 @@ node {
         name: "height";
         type: pb_uint32;
         value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT";
-    }
-    argument {
-        name: "input";
-        type: pb_complex;
-        value: "saliency_sandbox::utils::_HeatmapImage";
-    }
-    argument {
-        name: "output";
-        type: pb_complex;
-        value: "saliency_sandbox::utils::_IntensityImage";
     }
     input {
         node: "Seperate Channels";
         port: 2;
-    }
-}
-
-node {
-    name: "Boolean Map channel L";
-    type: SaliencyBooleanMaps;
-    argument {
-        name: "width";
-        type: pb_uint32;
-        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::WIDTH";
-    }
-    argument {
-        name: "height";
-        type: pb_uint32;
-        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT";
-    }
-    input {
-        node: "Convert to Intensity L";
-        port: 0;
-    }
-}
-
-node {
-    name: "Boolean Map channel A";
-    type: SaliencyBooleanMaps;
-    argument {
-        name: "width";
-        type: pb_uint32;
-        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::WIDTH";
-    }
-    argument {
-        name: "height";
-        type: pb_uint32;
-        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT";
-    }
-    input {
-        node: "Convert to Intensity A";
-        port: 0;
-    }
-}
-
-node {
-    name: "Boolean Map channel B";
-    type: SaliencyBooleanMaps;
-    argument {
-        name: "width";
-        type: pb_uint32;
-        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::WIDTH";
-    }
-    argument {
-        name: "height";
-        type: pb_uint32;
-        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT";
-    }
-    input {
-        node: "Convert to Intensity B";
-        port: 0;
     }
 }
 
@@ -226,15 +139,15 @@ node {
         value: "cv::Vec3f";
     }
     input {
-        node: "Boolean Map channel L";
+        node: "Highpass Channel L";
         port: 0;
     }
     input {
-        node: "Boolean Map channel A";
+        node: "Highpass Channel A";
         port: 0;
     }
     input {
-        node: "Boolean Map channel B";
+        node: "Highpass Channel B";
         port: 0;
     }
 }
@@ -311,7 +224,7 @@ node {
 }
 
 node {
-    name: "Show Boolean Maps";
+    name: "Show Highpass Activation";
     type: IOImageShow;
     argument {
         name: "window";
