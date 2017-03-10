@@ -320,10 +320,21 @@ namespace saliency_sandbox {
             private:
                 std::string m_name;
                 generated::Pipeline_Node_Argument_Type m_type;
+                bool m_optional;
+                std::string m_default;
             public:
                 SetConstructorArgument(std::string name, generated::Pipeline_Node_Argument_Type type) {
                     this->m_name = name;
                     this->m_type = type;
+                    this->m_optional = false;
+                    this->m_default = "";
+                }
+
+                SetConstructorArgument(std::string name, generated::Pipeline_Node_Argument_Type type, std::string _default) {
+                    this->m_name = name;
+                    this->m_type = type;
+                    this->m_optional = true;
+                    this->m_default = _default;
                 }
 
                 std::string name() const {
@@ -332,6 +343,14 @@ namespace saliency_sandbox {
 
                 generated::Pipeline_Node_Argument_Type type() const {
                     return this->m_type;
+                }
+
+                bool optional() const {
+                    return this->m_optional;
+                }
+
+                std::string _default() const {
+                    return this->m_default;
                 }
             };
 
@@ -411,12 +430,28 @@ namespace saliency_sandbox {
             }
 
             CodeGen& operator<<(const SetConstructorArgument& constructorArgument) {
-                const generated::Pipeline_Node_Argument* argument;
+                generated::Pipeline_Node_Argument* argument;
 
                 for(int i = 0; i < this->node().argument_size(); i++) {
-                    argument = &(this->node().argument(i));
+                    argument = (generated::Pipeline_Node_Argument*)&(this->node().argument(i));
                     if(argument->name() != constructorArgument.name())
                         continue;
+
+                    sserr << ssequal(argument->type(),constructorArgument.type())
+                          << "invlaid type for argument \"" << constructorArgument.name()
+                          << "\" expected type \"" << generated::Pipeline_Node_Argument::Type_Name(constructorArgument.type())
+                          << "\" but got: \"" << generated::Pipeline_Node_Argument::Type_Name(argument->type());
+
+                    this->pushConstructorArgument(argument);
+                    return *this;
+                }
+
+                if(constructorArgument.optional()) {
+                    argument = this->node().add_argument();
+                    argument->set_name(constructorArgument.name());
+                    argument->set_type(constructorArgument.type());
+                    argument->set_value(constructorArgument._default());
+
                     this->pushConstructorArgument(argument);
                     return *this;
                 }
@@ -664,10 +699,16 @@ namespace saliency_sandbox {
                             gen << SetHeader("plot/Plot");
                             gen << SetClass("saliency_sandbox::plot::Plot");
                             gen << SetInput("line 0",0);
+                            gen << SetConstructorArgument("line0",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_string,"line0");
                             sserr << sscond(pipeline.node(i).input_size() >= 10) << "the maximum number of input of node \"" << pipeline.node(i).name()
                                   << "\" is 10. found " << pipeline.node(i).input_size() << ssthrow;
-                            for(int j = 1; j < pipeline.node(i).input_size() && j < 10; j++)
-                                gen << SetInput("line " + i,i);
+                            for(int j = 1; j < pipeline.node(i).input_size() && j < 10; j++) {
+                                std::stringstream ss;
+
+                                ss << "line" << j;
+                                gen << SetInput(ss.str(), i);
+                                gen << SetConstructorArgument(ss.str(),generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_string,ss.str());
+                            }
                             break;
                         default:
                             sserr << "unknown node type: " << generated::Pipeline_Node::Type_Name(pipeline.node(i).type()) << ssthrow;

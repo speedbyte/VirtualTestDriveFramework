@@ -513,6 +513,11 @@ node {
 node {
     name: "FPS Plot";
     type: Plot;
+    argument {
+        name: "line0";
+        type: pb_string;
+        value: "fps";
+    }
     input {
         node: "FPS Counter";
         port: 0;
@@ -540,6 +545,21 @@ node {
 node {
     name: "Evaluation Plot";
     type: Plot;
+    argument {
+        name: "line0";
+        type: pb_string;
+        value: "Boolean Maps";
+    }
+    argument {
+        name: "line1";
+        type: pb_string;
+        value: "Spectral Whitening";
+    }
+    argument {
+        name: "line2";
+        type: pb_string;
+        value: "Highpass";
+    }
     input {
         node: "Pearson Evaluation of Boolean Maps";
         port: 0;

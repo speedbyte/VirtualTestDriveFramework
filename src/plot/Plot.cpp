@@ -149,11 +149,12 @@ namespace saliency_sandbox {
             this->m_gp << "set border lc rgb 'white'"<< std::endl;
             this->m_gp << "set key tc rgb 'white'"<< std::endl;
 
-            stop << std::setprecision(4) << std::fixed;
             this->m_gp << "set y2tics (";
             sep = false;
             for(int i = 0; i  < this->numInput(); i++)
                 if(this->m_lines[i].active()) {
+                    stop = std::stringstream();
+                    stop << std::setprecision(4) << std::fixed;
                     // dont print "," on first line
                     if(sep)
                         this->m_gp << ",";
@@ -162,7 +163,6 @@ namespace saliency_sandbox {
                     top = this->m_lines[i].top();
                     stop << top;
                     this->m_gp << "'" << stop.str() << "' " << top;
-                    stop.clear();
                 }
             this->m_gp << ")" << std::endl;
 
