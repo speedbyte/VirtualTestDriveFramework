@@ -38,6 +38,7 @@ message Pipeline {
             SaliencySpectralWhitening   = 401;
             SaliencyBooleanMaps         = 402;
             SaliencyHighpass            = 403;
+            SaliencyPearson             = 404;
 
             // Plot
             Plot                        = 501;

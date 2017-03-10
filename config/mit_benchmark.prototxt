@@ -1,0 +1,569 @@
+name: "MIT Saliency Benchmark";
+
+#
+# Dataset reader
+#
+
+node {
+    name: "Image Reader";
+    type: IOImageReader;
+    argument {
+        name: "path";
+        type: pb_string;
+        value: "/media/geislerd/Documents/repo/MIT/trainSetClean/Stimuli/";
+    }
+}
+
+node {
+    name: "Fixation Reader";
+    type: IOImageReader;
+    argument {
+        name: "path";
+        type: pb_string;
+        value: "/media/geislerd/Documents/repo/MIT/trainSetClean/FIXATIONMAPS/";
+    }
+}
+
+#
+# Fixation Heatmap
+#
+
+node {
+    name: "Fixation Heatmap";
+    type: UtilsImageConverter;
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_HeatmapImage";
+    }
+    input {
+        node: "Fixation Reader";
+        port: 0;
+    }
+}
+
+#
+# Boolean Maps Saliency Calculation
+#
+
+node {
+    name: "Convert to LAB";
+    type: UtilsImageConverter;
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_LABImage";
+    }
+    input {
+        node: "Image Reader";
+        port: 0;
+    }
+}
+
+node {
+    name: "Seperate Channels";
+    type: UtilsMatrixSplit;
+    argument {
+        name: "type";
+        type: pb_complex;
+        value: "cv::Vec3f";
+    }
+    input {
+        node: "Convert to LAB";
+        port: 0;
+    }
+}
+
+node {
+    name: "Convert to Intensity L";
+    type: UtilsImageConverter;
+    argument {
+        name: "input";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_HeatmapImage";
+    }
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_IntensityImage";
+    }
+    input {
+        node: "Seperate Channels";
+        port: 0;
+    }
+}
+
+node {
+    name: "Convert to Intensity A";
+    type: UtilsImageConverter;
+    argument {
+        name: "input";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_HeatmapImage";
+    }
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_IntensityImage";
+    }
+    input {
+        node: "Seperate Channels";
+        port: 1;
+    }
+}
+
+node {
+    name: "Convert to Intensity B";
+    type: UtilsImageConverter;
+    argument {
+        name: "input";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_HeatmapImage";
+    }
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_IntensityImage";
+    }
+    input {
+        node: "Seperate Channels";
+        port: 2;
+    }
+}
+
+node {
+    name: "Boolean Map channel L";
+    type: SaliencyBooleanMaps;
+    input {
+        node: "Convert to Intensity L";
+        port: 0;
+    }
+}
+
+node {
+    name: "Boolean Map channel A";
+    type: SaliencyBooleanMaps;
+    input {
+        node: "Convert to Intensity A";
+        port: 0;
+    }
+}
+
+node {
+    name: "Boolean Map channel B";
+    type: SaliencyBooleanMaps;
+    input {
+        node: "Convert to Intensity B";
+        port: 0;
+    }
+}
+
+node {
+    name: "Merge Boolean Maps Activations";
+    type: UtilsMatrixMerge;
+    argument {
+        name: "type";
+        type: pb_complex;
+        value: "cv::Vec3f";
+    }
+    input {
+        node: "Boolean Map channel L";
+        port: 0;
+    }
+    input {
+        node: "Boolean Map channel A";
+        port: 0;
+    }
+    input {
+        node: "Boolean Map channel B";
+        port: 0;
+    }
+}
+
+node {
+    name: "Boolean Maps";
+    type: UtilsMatrixSum;
+    argument {
+        name: "type";
+        type: pb_complex;
+        value: "cv::Vec3f";
+    }
+    input {
+        node: "Merge Boolean Maps Activations";
+        port: 0;
+    }
+}
+
+#
+# Spectral Saliency
+#
+
+node {
+    name: "Convert to Heatmap";
+    type: UtilsImageConverter;
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_HeatmapImage";
+    }
+    input {
+        node: "Image Reader";
+        port: 0;
+    }
+}
+
+node {
+    name: "Spectral Whitening";
+    type: SaliencySpectralWhitening;
+    input {
+        node: "Convert to Heatmap";
+        port: 0;
+    }
+}
+
+#
+# Highpass Saliency
+#
+
+node {
+     name: "Highpass Channel L";
+     type: SaliencyHighpass;
+     input {
+         node: "Seperate Channels";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "Highpass Channel A";
+     type: SaliencyHighpass;
+     input {
+         node: "Seperate Channels";
+         port: 1;
+     }
+ }
+
+ node {
+     name: "Highpass Channel B";
+     type: SaliencyHighpass;
+     input {
+         node: "Seperate Channels";
+         port: 2;
+     }
+ }
+
+ node {
+     name: "Merge Highpass Activations";
+     type: UtilsMatrixMerge;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec3f";
+     }
+     input {
+         node: "Highpass Channel L";
+         port: 0;
+     }
+     input {
+         node: "Highpass Channel A";
+         port: 0;
+     }
+     input {
+         node: "Highpass Channel B";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "Highpass Saliency";
+     type: UtilsMatrixSum;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec3f";
+     }
+     input {
+         node: "Merge Highpass Activations";
+         port: 0;
+     }
+ }
+
+#
+# Pearson Evaluation
+#
+
+node {
+    name: "Pearson Evaluation of Boolean Maps";
+    type: SaliencyPearson;
+    input {
+        node: "Boolean Maps";
+        port: 0;
+    }
+    input {
+        node: "Fixation Heatmap";
+        port: 0;
+    }
+}
+
+node {
+    name: "Pearson Evaluation of Spectral Whitening";
+    type: SaliencyPearson;
+    input {
+        node: "Spectral Whitening";
+        port: 0;
+    }
+    input {
+        node: "Fixation Heatmap";
+        port: 0;
+    }
+}
+
+node {
+    name: "Pearson Evaluation of Highpass";
+    type: SaliencyPearson;
+    input {
+        node: "Highpass Saliency";
+        port: 0;
+    }
+    input {
+        node: "Fixation Heatmap";
+        port: 0;
+    }
+}
+
+#
+# Show Boolean Maps Activation
+#
+
+node {
+    name: "Boolean Maps Heatmap";
+    type: UtilsImageConverter;
+    argument {
+        name: "input";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_HeatmapImage";
+    }
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_RGBImage";
+    }
+    input {
+        node: "Boolean Maps";
+        port: 0;
+    }
+}
+
+node {
+    name: "Show Boolean Maps";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "Boolean Maps";
+    }
+    input {
+        node: "Boolean Maps Heatmap";
+        port: 0;
+    }
+}
+
+#
+# Show Spectral Whitening Activation
+#
+
+node {
+    name: "Spectral Whitening Heatmap";
+    type: UtilsImageConverter;
+    argument {
+        name: "input";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_HeatmapImage";
+    }
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_RGBImage";
+    }
+    input {
+        node: "Spectral Whitening";
+        port: 0;
+    }
+}
+
+node {
+    name: "Spectral Whitening Maps";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "Spectral Whitening";
+    }
+    input {
+        node: "Spectral Whitening Heatmap";
+        port: 0;
+    }
+}
+
+#
+# Show Highpass Activation
+#
+
+node {
+    name: "Highpass Heatmap";
+    type: UtilsImageConverter;
+    argument {
+        name: "input";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_HeatmapImage";
+    }
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_RGBImage";
+    }
+    input {
+        node: "Highpass Saliency";
+        port: 0;
+    }
+}
+
+node {
+    name: "Highpass Maps";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "Highpass Saliency";
+    }
+    input {
+        node: "Highpass Heatmap";
+        port: 0;
+    }
+}
+
+#
+# Show Raw Input
+#
+
+node {
+    name: "Show Image";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "Raw Image";
+    }
+    input {
+        node: "Image Reader";
+        port: 0;
+    }
+}
+
+#
+# Show Fixation Heatmap
+#
+
+node {
+    name: "Convert Fixation Heatmap to RGB";
+    type: UtilsImageConverter;
+    argument {
+        name: "input";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_HeatmapImage";
+    }
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_RGBImage";
+    }
+    input {
+        node: "Fixation Heatmap";
+        port: 0;
+    }
+}
+
+node {
+    name: "Show Fixation";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "Fixation Heatmap";
+    }
+    input {
+        node: "Convert Fixation Heatmap to RGB";
+        port: 0;
+    }
+}
+
+#
+# FPS Plot
+#
+
+node {
+    name: "FPS Counter";
+    type: UtilsFPSCounter;
+    input {
+        node: "Boolean Maps";
+        port: 0;
+    }
+}
+
+node {
+    name: "FPS Plot";
+    type: Plot;
+    input {
+        node: "FPS Counter";
+        port: 0;
+    }
+}
+
+node {
+    name: "Show FPS Plot";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "FPS";
+    }
+    input {
+        node: "FPS Plot";
+        port: 0;
+    }
+}
+
+#
+# Evaluation Plot
+#
+
+node {
+    name: "Evaluation Plot";
+    type: Plot;
+    input {
+        node: "Pearson Evaluation of Boolean Maps";
+        port: 0;
+    }
+    input {
+        node: "Pearson Evaluation of Spectral Whitening";
+        port: 0;
+    }
+    input {
+        node: "Pearson Evaluation of Highpass";
+        port: 0;
+    }
+}
+
+node {
+    name: "Show Evaluation Plot";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "Pearson Coefficent";
+    }
+    input {
+        node: "Evaluation Plot";
+        port: 0;
+    }
+}

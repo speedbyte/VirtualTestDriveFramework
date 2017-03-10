@@ -67,5 +67,9 @@
 #define RES_HEIGHT_I( width , height ) height
 #define RES_WIDTH( RES ) RES_WIDTH_I( RES )
 #define RES_HEIGHT( RES ) RES_HEIGHT_I( RES )
+#define RES_WIDTH_I_S( width , height ) #width
+#define RES_HEIGHT_I_S( width , height ) #height
+#define RES_WIDTH_S( RES ) RES_WIDTH_I_S( RES )
+#define RES_HEIGHT_S( RES ) RES_HEIGHT_I_S( RES )
 
 #endif /* RESOLUTION_H_ */

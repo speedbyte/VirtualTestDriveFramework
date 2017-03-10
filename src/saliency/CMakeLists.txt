@@ -2,6 +2,7 @@ MESSAGE("-- create saliency library target")
 
 aux_source_directory(. SALIENCY_SOURCE)
 aux_source_directory(./activation ACTIVATION_SOURCE)
+aux_source_directory(./evaluation ACTIVATION_SOURCE)
 MESSAGE("   source files: ${SALIENCY_SOURCE} ${ACTIVATION_SOURCE}")
 
 add_library(saliency SHARED ${SALIENCY_SOURCE} ${ACTIVATION_SOURCE})

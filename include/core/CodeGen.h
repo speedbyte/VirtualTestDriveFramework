@@ -9,6 +9,7 @@
 #include <src/core/node.pb.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <google/protobuf/text_format.h>
+#include <config.h>
 
 #ifndef CODE_GEN_H
 #define CODE_GEN_H
@@ -40,9 +41,9 @@ namespace saliency_sandbox {
                 return this->m_node_idx;
             }
 
-            const generated::Pipeline_Node& node() {
+            generated::Pipeline_Node& node() {
                 sserr << sscond(this->nodeIdx() < 0 || this->nodeIdx() >= this->pipeline().node_size()) << "node not found with index: " << this->nodeIdx() << ssthrow;
-                return this->pipeline().node(this->nodeIdx());
+                return (generated::Pipeline_Node&)this->pipeline().node(this->nodeIdx());
             }
 
             std::string header() {
@@ -280,10 +281,21 @@ namespace saliency_sandbox {
             private:
                 std::string m_name;
                 generated::Pipeline_Node_Argument_Type m_type;
+                bool m_optional;
+                std::string m_default;
             public:
                 SetTemplateArgument(std::string name, generated::Pipeline_Node_Argument_Type type) {
                     this->m_name = name;
                     this->m_type = type;
+                    this->m_optional = false;
+                    this->m_default = "";
+                }
+
+                SetTemplateArgument(std::string name, generated::Pipeline_Node_Argument_Type type, std::string _default) {
+                    this->m_name = name;
+                    this->m_type = type;
+                    this->m_optional = true;
+                    this->m_default = _default;
                 }
 
                 std::string name() const {
@@ -293,6 +305,15 @@ namespace saliency_sandbox {
                 generated::Pipeline_Node_Argument_Type type() const {
                     return this->m_type;
                 }
+
+                bool optional() const {
+                    return this->m_optional;
+                }
+
+                std::string _default() const {
+                    return this->m_default;
+                }
+
             };
 
             class SetConstructorArgument {
@@ -358,10 +379,10 @@ namespace saliency_sandbox {
             }
 
             CodeGen& operator<<(const SetTemplateArgument& templateArgument) {
-                const generated::Pipeline_Node_Argument* argument;
+                generated::Pipeline_Node_Argument* argument;
 
                 for(int i = 0; i < this->node().argument_size(); i++) {
-                    argument = &(this->node().argument(i));
+                    argument = (generated::Pipeline_Node_Argument*)&(this->node().argument(i));
                     if(argument->name() != templateArgument.name())
                         continue;
 
@@ -369,6 +390,16 @@ namespace saliency_sandbox {
                           << "invlaid type for argument \"" << templateArgument.name()
                           << "\" expected type \"" << generated::Pipeline_Node_Argument::Type_Name(templateArgument.type())
                           << "\" but got: \"" << generated::Pipeline_Node_Argument::Type_Name(argument->type());
+
+                    this->pushTemplateArgument(argument);
+                    return *this;
+                }
+
+                if(templateArgument.optional()) {
+                    argument = this->node().add_argument();
+                    argument->set_name(templateArgument.name());
+                    argument->set_type(templateArgument.type());
+                    argument->set_value(templateArgument._default());
 
                     this->pushTemplateArgument(argument);
                     return *this;
@@ -531,9 +562,9 @@ namespace saliency_sandbox {
                         case generated::Pipeline_Node_Type_IOImageReader:
                             gen << SetHeader("io/ImageReader");
                             gen << SetClass("saliency_sandbox::io::_ImageReader");
-                            gen << SetTemplateArgument("width",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32);
-                            gen << SetTemplateArgument("height",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32);
-                            gen << SetTemplateArgument("image_format",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_complex);
+                            gen << SetTemplateArgument("width",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_WIDTH_S(RESOLUTION) );
+                            gen << SetTemplateArgument("height",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_HEIGHT_S(RESOLUTION));
+                            gen << SetTemplateArgument("image_format",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_complex,"saliency_sandbox::utils::_RGBImage");
                             gen << SetConstructorArgument("path",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_string);
                             gen << SetNoInput();
                             break;
@@ -552,8 +583,8 @@ namespace saliency_sandbox {
                         case generated::Pipeline_Node_Type_IOVideoReader:
                             gen << SetHeader("io/VideoReader");
                             gen << SetClass("saliency_sandbox::io::VideoReader");
-                            gen << SetTemplateArgument("width",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32);
-                            gen << SetTemplateArgument("height",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32);
+                            gen << SetTemplateArgument("width",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_WIDTH_S(RESOLUTION) );
+                            gen << SetTemplateArgument("height",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_HEIGHT_S(RESOLUTION));
                             gen << SetConstructorArgument("path",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_string);
                             gen << SetNoInput();
                             break;
@@ -566,32 +597,40 @@ namespace saliency_sandbox {
                         case generated::Pipeline_Node_Type_UtilsImageConverter:
                             gen << SetHeader("utils/Image");
                             gen << SetClass("saliency_sandbox::utils::_ImageConvert");
-                            gen << SetTemplateArgument("width",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32);
-                            gen << SetTemplateArgument("height",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32);
-                            gen << SetTemplateArgument("input",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_complex);
+                            gen << SetTemplateArgument("width",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_WIDTH_S(RESOLUTION) );
+                            gen << SetTemplateArgument("height",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_HEIGHT_S(RESOLUTION));
+                            gen << SetTemplateArgument("input",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_complex,"saliency_sandbox::utils::_RGBImage");
                             gen << SetTemplateArgument("output",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_complex);
                             gen << SetInput("image",0);
                             break;
                         case generated::Pipeline_Node_Type_SaliencySpectralWhitening:
                             gen << SetHeader("saliency/activation/Spectral");
                             gen << SetClass("saliency_sandbox::saliency::activation::_Spectral");
-                            gen << SetTemplateArgument("width",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32);
-                            gen << SetTemplateArgument("height",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32);
+                            gen << SetTemplateArgument("width",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_WIDTH_S(RESOLUTION) );
+                            gen << SetTemplateArgument("height",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_HEIGHT_S(RESOLUTION));
                             gen << SetInput("feature",0);
                             break;
                         case generated::Pipeline_Node_Type_SaliencyBooleanMaps:
                             gen << SetHeader("saliency/activation/BooleanMaps");
                             gen << SetClass("saliency_sandbox::saliency::activation::_BooleanMaps");
-                            gen << SetTemplateArgument("width",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32);
-                            gen << SetTemplateArgument("height",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32);
+                            gen << SetTemplateArgument("width",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_WIDTH_S(RESOLUTION) );
+                            gen << SetTemplateArgument("height",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_HEIGHT_S(RESOLUTION));
                             gen << SetInput("feature",0);
                             break;
                         case generated::Pipeline_Node_Type_SaliencyHighpass:
                             gen << SetHeader("saliency/activation/HighPass");
                             gen << SetClass("saliency_sandbox::saliency::activation::_HighPass");
-                            gen << SetTemplateArgument("width",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32);
-                            gen << SetTemplateArgument("height",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32);
+                            gen << SetTemplateArgument("width",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_WIDTH_S(RESOLUTION) );
+                            gen << SetTemplateArgument("height",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_HEIGHT_S(RESOLUTION));
                             gen << SetInput("feature",0);
+                            break;
+                        case generated::Pipeline_Node_Type_SaliencyPearson:
+                            gen << SetHeader("saliency/evaluation/Pearson");
+                            gen << SetClass("saliency_sandbox::saliency::evaluation::_Pearson");
+                            gen << SetTemplateArgument("width",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_WIDTH_S(RESOLUTION) );
+                            gen << SetTemplateArgument("height",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_HEIGHT_S(RESOLUTION));
+                            gen << SetInput("saliency",0);
+                            gen << SetInput("fixation",0);
                             break;
                         case generated::Pipeline_Node_Type_UtilsFPSCounter:
                             gen << SetHeader("utils/FPSCounter");
@@ -601,23 +640,23 @@ namespace saliency_sandbox {
                         case generated::Pipeline_Node_Type_UtilsMatrixSplit:
                             gen << SetHeader("utils/Matrix");
                             gen << SetClass("saliency_sandbox::utils::_MatrixSplitt");
-                            gen << SetTemplateArgument("width",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32);
-                            gen << SetTemplateArgument("height",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32);
+                            gen << SetTemplateArgument("width",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_WIDTH_S(RESOLUTION) );
+                            gen << SetTemplateArgument("height",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_HEIGHT_S(RESOLUTION));
                             gen << SetTemplateArgument("type",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_complex);
                             gen << SetInput("matrix",0);
                             break;
                         case generated::Pipeline_Node_Type_UtilsMatrixMerge:
                             gen << SetHeader("utils/Matrix");
                             gen << SetClass("saliency_sandbox::utils::_MatrixMerge");
-                            gen << SetTemplateArgument("width",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32);
-                            gen << SetTemplateArgument("height",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32);
+                            gen << SetTemplateArgument("width",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_WIDTH_S(RESOLUTION) );
+                            gen << SetTemplateArgument("height",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_HEIGHT_S(RESOLUTION));
                             gen << SetTemplateArgument("type",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_complex);
                             break;
                         case generated::Pipeline_Node_Type_UtilsMatrixSum:
                             gen << SetHeader("utils/Matrix");
                             gen << SetClass("saliency_sandbox::utils::_MatrixSum");
-                            gen << SetTemplateArgument("width",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32);
-                            gen << SetTemplateArgument("height",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32);
+                            gen << SetTemplateArgument("width",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_WIDTH_S(RESOLUTION) );
+                            gen << SetTemplateArgument("height",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_HEIGHT_S(RESOLUTION));
                             gen << SetTemplateArgument("type",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_complex);
                             gen << SetInput("matrix",0);
                             break;

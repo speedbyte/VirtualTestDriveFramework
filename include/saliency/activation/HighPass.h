@@ -10,9 +10,14 @@
 namespace saliency_sandbox {
     namespace saliency {
         namespace activation {
+
+            class _HighPassImpl {
+            protected:
+                void highpass(cv::Mat1f in, cv::Mat1f out, cv::Size sz, float sigma);
+            };
+
             template<uint32_t _width, uint32_t _height>
-            class _HighPass : public _Saliency<_width,_height,saliency_sandbox::utils::_HeatmapImage<_width,_height>> {
-            private:
+            class _HighPass : public _HighPassImpl, public _Saliency<_width,_height,saliency_sandbox::utils::_HeatmapImage<_width,_height>> {
             public:
 
                 float sigma() {
@@ -28,14 +33,7 @@ namespace saliency_sandbox {
                 }
 
                 void calc() override {
-                    cv::Mat1f smooth;
-                    cv::Mat1f in;
-
-                    in = this->template input<0>()->value()->mat();
-
-                    cv::GaussianBlur(in,smooth,this->filterSize(),this->sigma(),this->sigma(),cv::BORDER_REPLICATE);
-                    cv::absdiff(in,smooth,this->map());
-
+                    this->highpass(this->template input<0>()->value()->mat(),this->map(),this->filterSize(),this->sigma());
                     this->normalize();
                 }
 
