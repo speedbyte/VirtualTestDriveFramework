@@ -31,6 +31,7 @@ namespace saliency_sandbox {
 
             std::stringstream m_include_ss;
             std::stringstream m_declare_ss;
+            std::stringstream m_init_ss;
             std::stringstream m_connect_ss;
 
             const generated::Pipeline& pipeline() {
@@ -181,6 +182,29 @@ namespace saliency_sandbox {
                     this->m_declare_ss << ")";
                 }
                 this->m_declare_ss << ";" << std::endl;
+
+                this->m_init_ss << "\t/*" << std::endl;
+                this->m_init_ss << "\t * set properties of node \"" << this->node().name() << "\"" << std::endl;
+                this->m_init_ss << "\t */" << std::endl;
+                for(int i = 0; i < this->node().property_size(); i++) {
+                    switch(this->node().property(i).type()) {
+                        case generated::Pipeline_Node_Property_Type_pb_bool:
+                            this->m_init_ss << "\tnode_" << this->m_node_idx << ".properties()->template set<bool>(\"" << this->node().property(i).name() << "\",bool(" << this->node().property(i).value() << "));";
+                            break;
+                        case generated::Pipeline_Node_Property_Type_pb_int:
+                            this->m_init_ss << "\tnode_" << this->m_node_idx << ".properties()->template set<int>(\"" << this->node().property(i).name() << "\",int(" << this->node().property(i).value() << "));";
+                            break;
+                        case generated::Pipeline_Node_Property_Type_pb_float:
+                            this->m_init_ss << "\tnode_" << this->m_node_idx << ".properties()->template set<float>(\"" << this->node().property(i).name() <<"\",float(" << this->node().property(i).value() << "));";
+                            break;
+                        case generated::Pipeline_Node_Property_Type_pb_string:
+                            this->m_init_ss << "\tnode_" << this->m_node_idx << ".properties()->template set<std::string>(\"" << this->node().property(i).name() << "\",std::string(\"" << this->node().property(i).value() << "\"));";
+                            break;
+                        default:
+                            sserr << "unknown property type: " << generated::Pipeline_Node_Property::Type_Name(this->node().property(i).type()) << ssthrow;
+                    }
+                }
+                this->m_init_ss << std::endl;
 
                 for(int i = 0; i < this->node().input_size(); i++) {
                     for(int j = 0; j < this->pipeline().node_size(); j++) {
@@ -354,6 +378,25 @@ namespace saliency_sandbox {
                 }
             };
 
+            class SetProperty {
+            private:
+                std::string m_name;
+                generated::Pipeline_Node_Property_Type m_type;
+            public:
+                SetProperty(std::string name, generated::Pipeline_Node_Property_Type type) {
+                    this->m_name = name;
+                    this->m_type = type;
+                }
+
+                std::string name() const {
+                    return this->m_name;
+                }
+
+                generated::Pipeline_Node_Property_Type type() const {
+                    return this->m_type;
+                }
+            };
+
             CodeGen& operator<<(const SetPipeline& pipeline) {
                 this->m_node_idx = -1;
                 this->m_header = "";
@@ -479,14 +522,31 @@ namespace saliency_sandbox {
                 sserr << sscond(this->node().input_size()>0) << "node \"" << this->node().name() << "\" has no input port" << ssthrow;
             }
 
+            CodeGen& operator<<(const SetProperty& sproperty) {
+                generated::Pipeline_Node_Property* property;
+
+                for(int i = 0; i < this->node().property_size(); i++) {
+                    property = (generated::Pipeline_Node_Property*)&(this->node().property(i));
+                    if(property->name() != sproperty.name())
+                        continue;
+
+                    sserr << ssequal(property->type(),sproperty.type())
+                          << "invlaid type for property \"" << sproperty.name()
+                          << "\" expected type \"" << generated::Pipeline_Node_Property::Type_Name(sproperty.type())
+                          << "\" but got: \"" << generated::Pipeline_Node_Property::Type_Name(property->type());
+                }
+            }
+
             std::string cpp() {
                 std::string include_s;
                 std::string declare_s;
+                std::string init_s;
                 std::string connect_s;
                 std::stringstream ss;
 
                 include_s = this->m_include_ss.str();
                 declare_s = this->m_declare_ss.str();
+                init_s = this->m_init_ss.str();
                 connect_s = this->m_connect_ss.str();
 
                 ss << "/*  " << std::endl;
@@ -496,6 +556,7 @@ namespace saliency_sandbox {
                 ss << include_s << std::endl;
                 ss << declare_s << std::endl;
                 ss << "extern \"C\" void create_pipeline(saliency_sandbox::core::Pipeline& pipeline) {" << std::endl;
+                ss << init_s << std::endl;
                 ss << connect_s << std::endl;
                 for(int i = 0; i < this->pipeline().node_size(); i++)
                     ss << "\tpipeline.pushNode(\"" << this->pipeline().node(i).name().c_str() << "\",&node_" << i << ");" << std::endl;
@@ -667,6 +728,24 @@ namespace saliency_sandbox {
                             gen << SetInput("saliency",0);
                             gen << SetInput("fixation",0);
                             break;
+                        case generated::Pipeline_Node_Type_SaliencyIttiKoch:
+                            gen << SetHeader("saliency/activation/IttiKoch");
+                            gen << SetClass("saliency_sandbox::saliency::activation::_IttiKoch");
+                            gen << SetTemplateArgument("width",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_WIDTH_S(RESOLUTION) );
+                            gen << SetTemplateArgument("height",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_HEIGHT_S(RESOLUTION));
+                            gen << SetInput("feature",0);
+                            break;
+                        case generated::Pipeline_Node_Type_SaliencyOrientation:
+                            gen << SetHeader("saliency/feature/Orientation");
+                            gen << SetClass("saliency_sandbox::saliency::feature::_Orientation");
+                            gen << SetTemplateArgument("width",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_WIDTH_S(RESOLUTION) );
+                            gen << SetTemplateArgument("height",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_HEIGHT_S(RESOLUTION));
+                            gen << SetProperty("sigma",generated::Pipeline_Node_Property_Type ::Pipeline_Node_Property_Type_pb_float);
+                            gen << SetProperty("theta",generated::Pipeline_Node_Property_Type ::Pipeline_Node_Property_Type_pb_float);
+                            gen << SetProperty("lambda",generated::Pipeline_Node_Property_Type ::Pipeline_Node_Property_Type_pb_float);
+                            gen << SetProperty("gamma",generated::Pipeline_Node_Property_Type ::Pipeline_Node_Property_Type_pb_float);
+                            gen << SetInput("feature",0);
+                            break;
                         case generated::Pipeline_Node_Type_UtilsFPSCounter:
                             gen << SetHeader("utils/FPSCounter");
                             gen << SetClass("saliency_sandbox::utils::FPSCounter");
@@ -693,6 +772,13 @@ namespace saliency_sandbox {
                             gen << SetTemplateArgument("width",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_WIDTH_S(RESOLUTION) );
                             gen << SetTemplateArgument("height",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_HEIGHT_S(RESOLUTION));
                             gen << SetTemplateArgument("type",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_complex);
+                            gen << SetInput("matrix",0);
+                            break;
+                        case generated::Pipeline_Node_Type_UtilsNormalize:
+                            gen << SetHeader("utils/Normalize");
+                            gen << SetClass("saliency_sandbox::utils::_Normalize");
+                            gen << SetTemplateArgument("width",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_WIDTH_S(RESOLUTION) );
+                            gen << SetTemplateArgument("height",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_HEIGHT_S(RESOLUTION));
                             gen << SetInput("matrix",0);
                             break;
                         case generated::Pipeline_Node_Type_Plot:

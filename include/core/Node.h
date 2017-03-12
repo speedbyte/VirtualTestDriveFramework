@@ -70,6 +70,12 @@ namespace saliency_sandbox {
                     bool m_eof;
                     std::string m_name;
 
+                protected:
+
+                    time_t proctime() {
+                        return this->m_current;
+                    }
+
                 public:
 
                     Output() : INode(), m_input(this), m_output(this), m_current(-1), m_eof(false) {
@@ -99,12 +105,12 @@ namespace saliency_sandbox {
                         return this->m_output.port(index);
                     }
 
-                    Output(const Output& output);
+                    //Output(const Output& output);
 
-                    mutable std::mutex mutex;
+                    //std::mutex proc_mutex;
 
                     virtual void process(time_t time) override {
-                        this->mutex.lock();
+                        //this->proc_mutex.lock();
                         this->m_input.process(time);
                         if (time < 0) {
                             this->m_current++;
@@ -114,10 +120,16 @@ namespace saliency_sandbox {
                                 this->m_current++;
                                 this->calc();
                             }
-                        this->mutex.unlock();
+                        //this->proc_mutex.unlock();
                     }
 
                     time_t time() override {
+                        //time_t c;
+                        //this->proc_mutex.lock();
+                        //c = this->m_current;
+                        //this->proc_mutex.unlock();
+                        //return c;
+
                         return this->m_current;
                     }
 

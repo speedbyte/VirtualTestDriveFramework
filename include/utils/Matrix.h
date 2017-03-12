@@ -46,12 +46,12 @@ namespace saliency_sandbox {
         private:
             _type m_value[_height*_width];
         public:
-            _Matrix() : cv::Mat_<_type>(_height,_width,m_value) {
+            _Matrix() : cv::Mat_<_type>(_height,_width,this->m_value) {
 
             }
 
             cv::Mat mat() override {
-                return cv::Mat_<_type>(_height,_width,m_value);
+                return cv::Mat_<_type>(_height,_width,this->m_value);
             }
 
             void mat(cv::Mat& mat) {
@@ -245,6 +245,28 @@ namespace saliency_sandbox {
         };
 
         template <uint32_t _width, uint32_t _height>
+        class _MatrixSum<_width,_height, cv::Vec4f> : public core::Node::template Input<_Matrix<_width,_height,cv::Vec4f>>::template Output<_Matrix<_width,_height,float>> {
+        private:
+            _Matrix<_width,_height,float> m_sum;
+        public:
+            _MatrixSum() {
+                this->reset();
+
+                this->template input<0>()->name("input");
+                this->template output<0>()->name("sum");
+            }
+
+            void calc() override {
+                cv::transform(*this->input()->value(),this->m_sum,cv::Matx14f(1,1,1,1));
+                this->output()->value(&this->m_sum);
+            }
+
+            void reset() override {
+                this->output()->value(&this->m_sum);
+            }
+        };
+
+        template <uint32_t _width, uint32_t _height>
         class _MatrixSum<_width,_height, cv::Vec3b> : public core::Node::template Input<_Matrix<_width,_height,cv::Vec3b>>::template Output<_Matrix<_width,_height,uchar>> {
         private:
             _Matrix<_width,_height,uchar> m_sum;
@@ -327,6 +349,36 @@ namespace saliency_sandbox {
                 cv::Mat1f m_channel_mat[3] = {this->template input<0>()->value()->mat(),this->template input<1>()->value()->mat(),this->template input<2>()->value()->mat()};
 
                 cv::merge(m_channel_mat,3,this->m_merged);
+                this->template output<0>()->value(&(this->m_merged));
+            }
+
+            void reset() override {
+            }
+        };
+
+        template <uint32_t _width, uint32_t _height>
+        class _MatrixMerge<_width,_height,cv::Vec4f> : public core::Node::template Input<_Matrix<_width,_height,float>,_Matrix<_width,_height,float>,_Matrix<_width,_height,float>,_Matrix<_width,_height,float>>::template Output<_Matrix<_width,_height,cv::Vec4f>> {
+        private:
+            _Matrix<_width,_height,cv::Vec4f> m_merged;
+        public:
+            _MatrixMerge() {
+                this->reset();
+
+                this->template input<0>()->name("channel 0");
+                this->template input<1>()->name("channel 1");
+                this->template input<2>()->name("channel 2");
+                this->template input<3>()->name("channel 4");
+                this->template output<0>()->name("merged");
+            }
+
+            void calc() override {
+                cv::Mat1f m_channel_mat[4] = {
+                        this->template input<0>()->value()->mat(),
+                        this->template input<1>()->value()->mat(),
+                        this->template input<2>()->value()->mat(),
+                        this->template input<3>()->value()->mat()};
+
+                cv::merge(m_channel_mat,4,this->m_merged);
                 this->template output<0>()->value(&(this->m_merged));
             }
 

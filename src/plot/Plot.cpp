@@ -34,6 +34,8 @@ namespace saliency_sandbox {
 
             time = this->m_port->time();
             value = *(float*)this->m_port->data();
+            if(isnanf(value))
+                value = 0;
             this->m_min = fminf(this->m_min,value);
             this->m_max = fmaxf(this->m_max,value);
 
@@ -222,17 +224,17 @@ namespace saliency_sandbox {
         }
 
         float Plot::minX() {
-            if(this->time() < this->numPoints())
+            if(this->proctime() < this->numPoints())
                 return 0;
             else
-                return this->time() - this->numPoints() + 1;
+                return this->proctime() - this->numPoints() + 1;
         }
 
         float Plot::maxX() {
-            if(this->time() < this->numPoints())
+            if(this->proctime() < this->numPoints())
                 return this->numPoints();
             else
-                return this->time();
+                return this->proctime();
         }
 
         float Plot::minY() {

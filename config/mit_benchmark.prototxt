@@ -222,6 +222,264 @@ node {
 }
 
 #
+# Itti & Koch
+#
+
+node {
+    name: "Orientation 0°";
+    type: SaliencyOrientation;
+    property {
+        name: "theta";
+        type: pb_float;
+        value: "0.0f";
+    }
+    input {
+        node: "Convert to Heatmap";
+        port: 0;
+    }
+}
+
+node {
+    name: "Orientation 45°";
+    type: SaliencyOrientation;
+    property {
+        name: "theta";
+        type: pb_float;
+        value: "45.0f * (M_PI/180.0f)";
+    }
+    input {
+        node: "Convert to Heatmap";
+        port: 0;
+    }
+}
+
+node {
+    name: "Orientation 90°";
+    type: SaliencyOrientation;
+    property {
+        name: "theta";
+        type: pb_float;
+        value: "90.0f * (M_PI/180.0f)";
+    }
+    input {
+        node: "Convert to Heatmap";
+        port: 0;
+    }
+}
+
+node {
+    name: "Orientation 135°";
+    type: SaliencyOrientation;
+    property {
+        name: "theta";
+        type: pb_float;
+        value: "135.0f * (M_PI/180.0f)";
+    }
+    input {
+        node: "Convert to Heatmap";
+        port: 0;
+    }
+}
+
+node {
+    name: "Itti & Koch Orientation 0°";
+    type: SaliencyIttiKoch;
+    input {
+        node: "Orientation 0°";
+        port: 0;
+    }
+}
+
+node {
+    name: "Itti & Koch Orientation 45°";
+    type: SaliencyIttiKoch;
+    input {
+        node: "Orientation 45°";
+        port: 0;
+    }
+}
+
+node {
+    name: "Itti & Koch Orientation 90°";
+    type: SaliencyIttiKoch;
+    input {
+        node: "Orientation 90°";
+        port: 0;
+    }
+}
+
+node {
+    name: "Itti & Koch Orientation 135°";
+    type: SaliencyIttiKoch;
+    input {
+        node: "Orientation 135°";
+        port: 0;
+    }
+}
+
+node {
+    name: "Itti & Koch Channel L";
+    type: SaliencyIttiKoch;
+    input {
+        node: "Seperate Channels";
+        port: 0;
+    }
+}
+
+node {
+    name: "Itti & Koch Channel A";
+    type: SaliencyIttiKoch;
+    input {
+        node: "Seperate Channels";
+        port: 1;
+    }
+}
+
+node {
+    name: "Itti & Koch Channel B";
+    type: SaliencyIttiKoch;
+    input {
+        node: "Seperate Channels";
+        port: 2;
+    }
+}
+
+ node {
+     name: "Merge Itti & Koch Orientation Activations";
+     type: UtilsMatrixMerge;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec4f";
+     }
+     input {
+         node: "Itti & Koch Orientation 0°";
+         port: 0;
+     }
+     input {
+         node: "Itti & Koch Orientation 45°";
+         port: 0;
+     }
+     input {
+         node: "Itti & Koch Orientation 90°";
+         port: 0;
+     }
+     input {
+         node: "Itti & Koch Orientation 135°";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "Itti & Koch Orientation Activation";
+     type: UtilsMatrixSum;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec4f";
+     }
+     input {
+         node: "Merge Itti & Koch Orientation Activations";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "Merge Itti & Koch Color Activations";
+     type: UtilsMatrixMerge;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec2f";
+     }
+     input {
+         node: "Itti & Koch Channel A";
+         port: 0;
+     }
+     input {
+         node: "Itti & Koch Channel B";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "Itti & Koch Color Activation";
+     type: UtilsMatrixSum;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec2f";
+     }
+     input {
+         node: "Merge Itti & Koch Color Activations";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "Itti & Koch Normed Intensity Activation";
+     type: UtilsNormalize;
+     input {
+         node: "Itti & Koch Channel L";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "Itti & Koch Normed Orientation Activation";
+     type: UtilsNormalize;
+     input {
+         node: "Itti & Koch Orientation Activation";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "Itti & Koch Normed Color Activation";
+     type: UtilsNormalize;
+     input {
+         node: "Itti & Koch Color Activation";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "Merge Itti & Koch Activations";
+     type: UtilsMatrixMerge;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec3f";
+     }
+     input {
+         node: "Itti & Koch Normed Color Activation";
+         port: 0;
+     }
+     input {
+         node: "Itti & Koch Normed Orientation Activation";
+         port: 0;
+     }
+     input {
+         node: "Itti & Koch Normed Intensity Activation";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "Itti & Koch";
+     type: UtilsMatrixSum;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec3f";
+     }
+     input {
+         node: "Merge Itti & Koch Activations";
+         port: 0;
+     }
+ }
+
+#
 # Highpass Saliency
 #
 
@@ -319,6 +577,19 @@ node {
 }
 
 node {
+    name: "Pearson Evaluation of Itti & Koch";
+    type: SaliencyPearson;
+    input {
+        node: "Itti & Koch";
+        port: 0;
+    }
+    input {
+        node: "Fixation Heatmap";
+        port: 0;
+    }
+}
+
+node {
     name: "Pearson Evaluation of Highpass";
     type: SaliencyPearson;
     input {
@@ -401,6 +672,43 @@ node {
     }
     input {
         node: "Spectral Whitening Heatmap";
+        port: 0;
+    }
+}
+
+#
+# Show Itti & Koch Activation
+#
+
+node {
+    name: "Itti & Koch Heatmap";
+    type: UtilsImageConverter;
+    argument {
+        name: "input";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_HeatmapImage";
+    }
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_RGBImage";
+    }
+    input {
+        node: "Itti & Koch";
+        port: 0;
+    }
+}
+
+node {
+    name: "Itti & Koch Maps";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "Itti & Koch";
+    }
+    input {
+        node: "Itti & Koch Heatmap";
         port: 0;
     }
 }
@@ -558,6 +866,11 @@ node {
     argument {
         name: "line2";
         type: pb_string;
+        value: "Itti & Koch";
+    }
+    argument {
+        name: "line3";
+        type: pb_string;
         value: "Highpass";
     }
     input {
@@ -566,6 +879,10 @@ node {
     }
     input {
         node: "Pearson Evaluation of Spectral Whitening";
+        port: 0;
+    }
+    input {
+        node: "Pearson Evaluation of Itti & Koch";
         port: 0;
     }
     input {
