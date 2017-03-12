@@ -46,7 +46,13 @@ namespace saliency_sandbox {
             bool m_check_port_size;
 
         public:
-            Port(INode* node) : IPort(), m_name(Utils::uniqueName()), m_data(nullptr), m_connect(nullptr), m_node(node), m_check_port_size(true) {
+            Port(INode* node) :
+                    IPort(),
+                    m_name(Utils::uniqueName()),
+                    m_data(nullptr),
+                    m_connect(nullptr),
+                    m_node(node),
+                    m_check_port_size(true) {
 
             }
 
@@ -67,7 +73,7 @@ namespace saliency_sandbox {
             }
 
             size_t size() override {
-                return sizeof(_type);
+                return TypeInfo<_type>::SIZE;
             }
 
             void *data() override {

@@ -50,6 +50,14 @@ void help() {
     opt_desc.print(std::cout);
 }
 
+std::string findlib(const char* argv0, std::string lib) {
+    fs::path p;
+
+    p = argv0;
+    p = p.parent_path();
+    p /= lib;
+}
+
 int main(int argc, char** argv) {
     po::variables_map vm;
     fs::path config_path, source_path, lib_path, root_path;
@@ -125,7 +133,7 @@ int main(int argc, char** argv) {
             // collect libraries
             libs_ss = std::stringstream(PROTOBUILD_COMPILER_LIBS);
             while(std::getline(libs_ss,lib_s,';'))
-                compile_ss << " " << lib_s.c_str() << " ";
+                compile_ss << " " << findlib(argv[0],lib_s).c_str() << " ";
 
             // compile library
             sserr << sscond(system(compile_ss.str().c_str())) << "error while compiling pipeline" << ssthrow;

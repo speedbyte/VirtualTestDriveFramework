@@ -6,6 +6,7 @@
 #include <graphviz/gvc.h>
 #include <highgui.h>
 #include <boost/lexical_cast.hpp>
+#include <utils/GraphViz.h>
 
 namespace saliency_sandbox {
 
@@ -120,70 +121,62 @@ namespace saliency_sandbox {
         }
 
         void Pipeline::show() {
-            GVC_t* gvc;
-            Agraph_t* g;
             boost::unordered::unordered_map<std::string,INode*>::iterator node_iter, node_end;
-            boost::unordered::unordered_map<INode*,Agnode_t*> nodes;
             boost::unordered::unordered_map<IPort*,Agnode_t*> ports;
-            char* img;
-            unsigned int img_size;
-            cv::Mat1b raw_mat;
-            cv::Mat3b img_mat;
             Agnode_t* node;
             Agnode_t* input;
-            Agedge_t* node_input_edge;
             Agnode_t* output;
-            Agedge_t* node_output_edge;
             INode* inode;
             IPort* iport;
             std::string iport_name;
             IPort* oport;
             std::string oport_name;
-            Agedge_t* port_port_edge;
 
-            gvc = gvContext();
+            saliency_sandbox::utils::GraphViz graph(this->name());
 
-            g = agopen((char*)this->name(), Agdirected, 0);
-            agsafeset(g,"nodesep","0.15","");
-            agsafeset(g,"ranksep","0.15","");
+            graph.set("nodesep","0.15");
+            graph.set("ranksep","0.15");
 
 
             for(node_iter = this->m_subsystem.begin();node_iter != node_end; node_iter++) {
                 inode = node_iter->second;
-                node = agnode(g,(char*)inode->name(),1);
-                nodes[node_iter->second] = node;
 
-                agsafeset(node,"shape","rectangle","");
+                node = graph.node(inode->name());
+
+                graph.set(node,"shape","rectangle");
 
                 for(int i = 0; i < node_iter->second->numInput(); i++) {
                     iport = inode->input(i);
-                    iport_name = std::string(inode->name()) + ":" + std::string(iport->name());
-                    input = agnode(g,(char*)iport_name.c_str(),1);
-                    node_input_edge = agedge(g,input,node,"",1);
-                    agsafeset(input,"shape","circle","");
-                    agsafeset(input,"width","0.5","");
-                    agsafeset(input,"style","filled","");
-                    agsafeset(input,"fillcolor","#8EC13A","");
-                    agsafeset(input,"fixedsize","true","");
-                    agsafeset(input,"label",(char*)(std::string(iport->name())+"\n("+boost::lexical_cast<std::string>(i)+")").c_str(),"");
-                    agsafeset(input,"fontsize","9.0pt","");
+
+                    input = graph.node(std::string(inode->name()) + ":" + std::string(iport->name()));
+
+                    graph.edge(input,node);
+
+                    graph.set(input,"shape","circle");
+                    graph.set(input,"width","0.5");
+                    graph.set(input,"style","filled");
+                    graph.set(input,"fillcolor","#8EC13A");
+                    graph.set(input,"fixedsize","true");
+                    graph.set(input,"label",std::string(iport->name())+"\n("+boost::lexical_cast<std::string>(i)+")");
+                    graph.set(input,"fontsize","9.0pt");
 
                     ports[iport] = input;
                 }
 
                 for(int i = 0; i < node_iter->second->numOutput(); i++) {
                     oport = inode->output(i);
-                    oport_name = std::string(inode->name()) + ":" + std::string(oport->name());
-                    output = agnode(g,(char*)oport_name.c_str(),1);
-                    node_output_edge = agedge(g,node,output,"",1);
-                    agsafeset(output,"shape","circle","");
-                    agsafeset(output,"shape","circle","");
-                    agsafeset(output,"width","0.5","");
-                    agsafeset(output,"style","filled","");
-                    agsafeset(output,"fillcolor","#C13A8E","");
-                    agsafeset(output,"fixedsize","true","");
-                    agsafeset(output,"label",(char*)(std::string(oport->name())+"\n("+boost::lexical_cast<std::string>(i)+")").c_str(),"");
-                    agsafeset(output,"fontsize","9.0pt","");
+
+                    output = graph.node(std::string(inode->name()) + ":" + std::string(oport->name()));
+
+                    graph.edge(node,output);
+
+                    graph.set(output,"shape","circle");
+                    graph.set(output,"width","0.5");
+                    graph.set(output,"style","filled");
+                    graph.set(output,"fillcolor","#C13A8E");
+                    graph.set(output,"fixedsize","true");
+                    graph.set(output,"label",std::string(oport->name())+"\n("+boost::lexical_cast<std::string>(i)+")");
+                    graph.set(output,"fontsize","9.0pt");
 
                     ports[oport] = output;
                 }
@@ -196,22 +189,13 @@ namespace saliency_sandbox {
                     iport = inode->input(i);
                     oport = (IPort*)iport->dependency();
 
-                    if(ports.find(oport) != ports.end()) {
-                        input = ports[iport];
-                        output = ports[oport];
-                        port_port_edge = agedge(g,output,input,"",1);
-                    }
+                    if(ports.find(oport) != ports.end())
+                        graph.edge(ports[oport],ports[iport]);
                 }
             }
 
-            gvLayout(gvc,g,"dot");
-            gvRenderData(gvc,g,"png",&img,&img_size);
-
-            raw_mat = cv::Mat1b(1,(int)img_size,(uchar*)img);
-            img_mat = cv::imdecode(raw_mat,1);
-
             cv::namedWindow("pipeline");
-            cv::imshow("pipeline",img_mat);
+            cv::imshow("pipeline",graph.mat());
         }
 
         const char *Pipeline::name() {

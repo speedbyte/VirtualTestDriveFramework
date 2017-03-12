@@ -17,6 +17,18 @@ namespace saliency_sandbox {
             static void setMainStackSize();
             static void setThreadStackSize(pthread_attr_t& attr);
         };
+
+        template <typename _type>
+        class TypeInfo {
+        public:
+            static const uint32_t SIZE = sizeof(_type);
+        };
+
+        template <>
+        class TypeInfo<void> {
+        public:
+            static const uint32_t SIZE = 0;
+        };
     }
 }
 

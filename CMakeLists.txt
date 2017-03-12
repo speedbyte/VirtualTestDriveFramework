@@ -16,6 +16,7 @@ include_directories(${PROTOBUF_INCLUDE_DIRS})
 include_directories(${CMAKE_BINARY_DIR})
 include_directories(include)
 
+
 install(DIRECTORY include/ DESTINATION include/ FILES_MATCHING PATTERN "*.h")
 
 add_subdirectory(src/core/)
