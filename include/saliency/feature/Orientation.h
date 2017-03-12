@@ -11,8 +11,15 @@ namespace saliency_sandbox {
     namespace saliency {
         namespace feature {
 
+            class _OrientationImpl {
+
+            public:
+                void orientation(cv::Mat1f in, cv::Mat1f out, float sigma, float theta, float lambda, float gamma);
+
+            };
+
             template<uint32_t _width, uint32_t _height>
-            class _Orientation : public _Saliency<_width,_height,saliency_sandbox::utils::_HeatmapImage<_width,_height>> {
+            class _Orientation : public _OrientationImpl, public _Saliency<_width,_height,saliency_sandbox::utils::_HeatmapImage<_width,_height>> {
             public:
 
                 float sigma() {
@@ -40,14 +47,12 @@ namespace saliency_sandbox {
                 }
 
                 void calc() override {
-                    cv::Mat1f in, out, filter;
-
-                    filter = cv::getGaborKernel(cv::Size(33,33),this->sigma(),this->theta(),this->lambda(),this->gamma());
+                    cv::Mat1f in, out;
 
                     in = this->template input<0>()->value()->mat();
                     out = this->map();
 
-                    cv::filter2D(in,out,-1,filter,cv::Point(-1,-1),0,cv::BORDER_REPLICATE);
+                    this->orientation(in,out,this->sigma(),this->theta(),this->lambda(),this->gamma());
                 }
 
                 void reset() override {
