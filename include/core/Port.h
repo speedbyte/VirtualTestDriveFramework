@@ -143,19 +143,6 @@ namespace saliency_sandbox {
             bool eof() override {
                 return this->dependency()->eof();
             }
-
-        private:
-            static std::string generateName() {
-                auto randchar = []() -> char
-                {
-                    const char charset[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-                    const size_t max_index = (sizeof(charset) - 1);
-                    return charset[ rand() % max_index ];
-                };
-                std::string str(8,0);
-                std::generate_n( str.begin(), 8, randchar );
-                return str;
-            }
         };
 
         class IPortListElement {
@@ -208,15 +195,15 @@ namespace saliency_sandbox {
             }
 
             void process(time_t time) {
-                bool join;
+                //bool join;
 
-                join = false;
-                ProcessPortThread::run(&(this->m_port),time,&join);
-                //this->m_port.process(time);
+                //join = false;
+                //ProcessPortThread::run(&(this->m_port),time,&join);
+                this->m_port.process(time);
                 this->m_next.process(time);
 
-                while(!join)
-                    usleep(1);
+                //while(!join)
+                //    usleep(1);
             }
 
             bool eof() {

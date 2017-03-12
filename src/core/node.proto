@@ -32,13 +32,16 @@ message Pipeline {
             UtilsFPSCounter             = 302;
             UtilsMatrixSplit            = 303;
             UtilsMatrixMerge            = 304;
-            UtilsMatrixSum            = 305;
+            UtilsMatrixSum              = 305;
+            UtilsNormalize              = 306;
 
             // Saliency
             SaliencySpectralWhitening   = 401;
             SaliencyBooleanMaps         = 402;
             SaliencyHighpass            = 403;
             SaliencyPearson             = 404;
+            SaliencyIttiKoch            = 405;
+            SaliencyOrientation         = 406;
 
             // Plot
             Plot                        = 501;
@@ -102,6 +105,8 @@ message Pipeline {
             required Type   type   = 2;
             required string value  = 4;
         }
+
+        repeated Property property = 5;
     }
 
     repeated Node node = 2;
