@@ -50,14 +50,6 @@ void help() {
     opt_desc.print(std::cout);
 }
 
-std::string findlib(const char* argv0, std::string lib) {
-    fs::path p;
-
-    p = argv0;
-    p = p.parent_path();
-    p /= lib;
-}
-
 int main(int argc, char** argv) {
     po::variables_map vm;
     fs::path config_path, source_path, lib_path, root_path;
@@ -145,6 +137,7 @@ int main(int argc, char** argv) {
             compile_ss << source_path.c_str() << " -o " << lib_path.c_str() << " ";
             compile_ss << PROTOBUILD_COMPILER_FLAGS << " ";
             compile_ss << "-I" << (root_path / "include") << " ";
+            //compile_ss << "-I" << PROTOBUILD_COMPILER_INCLUDE << " ";
             compile_ss << "-L" << (root_path / "lib") << " ";
 
 

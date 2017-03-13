@@ -42,6 +42,7 @@ message Pipeline {
             SaliencyPearson             = 404;
             SaliencyIttiKoch            = 405;
             SaliencyOrientation         = 406;
+            SaliencyGBVS                = 407;
 
             // Plot
             Plot                        = 501;

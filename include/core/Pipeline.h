@@ -22,6 +22,7 @@ namespace saliency_sandbox {
             PropertyMap m_properties;
             time_t m_current;
             std::string m_name;
+            float m_fps;
 
         public:
             Pipeline();
@@ -53,6 +54,8 @@ namespace saliency_sandbox {
             const char *name() override;
 
             void name(const char *name) override;
+
+            float fps() override;
 
             void show();
         };

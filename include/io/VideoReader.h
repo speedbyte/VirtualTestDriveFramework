@@ -13,40 +13,38 @@
 
 namespace saliency_sandbox {
     namespace io {
-        template <uint32_t _width, uint32_t _height>
-        class _VideoReader : public core::Node::Input<>::Output<utils::_RGBImage<_width,_height>> {
+
+        class _VideoReaderImpl {
         private:
-            utils::_RGBImage<_width,_height> m_rgb;
             cv::VideoCapture m_vc;
             boost::filesystem::path m_path;
 
         public:
-            _VideoReader(boost::filesystem::path path) : core::Node::Input<>::Output<utils::_RGBImage<_width,_height>>(), m_vc(), m_path(path) {
-                //TODO: check path
-                this->reset();
+            _VideoReaderImpl(boost::filesystem::path path);
 
+            void reopen();
+
+            bool read(cv::Mat3b& mat);
+        };
+
+        template <uint32_t _width, uint32_t _height>
+        class _VideoReader : public _VideoReaderImpl, public core::Node::Input<>::Output<saliency_sandbox::utils::_RGBImage<_width,_height>> {
+        private:
+            utils::_RGBImage<_width,_height> m_rgb;
+
+        public:
+            _VideoReader(boost::filesystem::path path) : _VideoReaderImpl(path) {
+                this->reset();
                 this->template output<0>()->name("frame");
             }
 
             virtual void reset() override {
-                if(this->m_vc.isOpened())
-                    this->m_vc.release();
-                this->m_vc = cv::VideoCapture();
-                this->m_vc.open(this->m_path.c_str());
+                this->reopen();
+                this->output()->value(&(this->m_rgb));
             }
 
             virtual void calc() override {
-                cv::Mat3b raw;
-
-                this->m_vc >> raw;
-
-                if(raw.size[0]>0 && raw.size[1]>0) {
-                    cv::resize(raw, this->m_rgb, this->m_rgb.size());
-                }
-                else
-                    ; //TODO: error handling - video reader returns empty mat
-
-                this->output()->value(&(this->m_rgb));
+                this->eof(!this->read(this->m_rgb));
             }
         };
 

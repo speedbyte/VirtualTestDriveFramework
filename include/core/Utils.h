@@ -16,6 +16,7 @@ namespace saliency_sandbox {
             static std::string uniqueName();
             static void setMainStackSize();
             static void setThreadStackSize(pthread_attr_t& attr);
+            static void fps(void (*calc)(), float& fps);
         };
 
         template <typename _type>

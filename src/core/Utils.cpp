@@ -6,6 +6,7 @@
 #include <core/Utils.h>
 #include <algorithm>
 #include <sys/resource.h>
+#include <chrono>
 
 namespace saliency_sandbox {
 
@@ -43,6 +44,18 @@ namespace saliency_sandbox {
             const size_t ss = STACK_SIZE;
 
             pthread_attr_setstacksize(&attr,ss);
+        }
+
+        void Utils::fps(void (*calc)(), float& fps) {
+            std::chrono::high_resolution_clock::time_point t1, t2;
+            long microseconds;
+
+            t1 = std::chrono::high_resolution_clock::now();
+            calc();
+            t2 = std::chrono::high_resolution_clock::now();
+
+            microseconds = std::chrono::duration_cast<std::chrono::microseconds>(t2-t1).count();
+            fps = (1000.0f*1000.0f)/float(microseconds);
         }
     }
 }

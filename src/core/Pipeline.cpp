@@ -77,13 +77,24 @@ namespace saliency_sandbox {
         }
 
         void Pipeline::process(time_t time) {
+            std::chrono::high_resolution_clock::time_point t1, t2;
+            long microseconds;
+
             sserr << sscond(this->m_endNodes.empty()) << "pipeline has no end nodes. process the output ports instead" << ssthrow;
+
+            t1 = std::chrono::high_resolution_clock::now();
+
             for(int i = 0; i < this->m_endNodes.size(); i++)
                 this->m_endNodes[i]->process(time);
             if (time < 0)
                 this->m_current++;
             else
                 for (; this->m_current < time; this->m_current++);
+
+            t2 = std::chrono::high_resolution_clock::now();
+
+            microseconds = std::chrono::duration_cast<std::chrono::microseconds>(t2-t1).count();
+            this->m_fps = (1000.0f*1000.0f)/float(microseconds);
         }
 
         time_t Pipeline::time() {
@@ -204,6 +215,10 @@ namespace saliency_sandbox {
 
         void Pipeline::name(const char *name) {
             this->m_name = std::string(name);
+        }
+
+        float Pipeline::fps() {
+            return this->m_fps;
         }
 
     }

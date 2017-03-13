@@ -9,6 +9,7 @@
 #include <core/Processable.h>
 #include <core/Port.h>
 #include <core/Bus.h>
+#include <core/Utils.h>
 #include <tuple>
 #include <future>
 
@@ -69,6 +70,7 @@ namespace saliency_sandbox {
                     PropertyMap m_properties;
                     bool m_eof;
                     std::string m_name;
+                    float m_fps;
 
                 protected:
 
@@ -78,7 +80,7 @@ namespace saliency_sandbox {
 
                 public:
 
-                    Output() : INode(), m_input(this), m_output(this), m_current(-1), m_eof(false) {
+                    Output() : INode(), m_input(this), m_output(this), m_current(-1), m_eof(false), m_fps(0.0f) {
 
                     }
 
@@ -105,13 +107,13 @@ namespace saliency_sandbox {
                         return this->m_output.port(index);
                     }
 
-                    //Output(const Output& output);
-
-                    //std::mutex proc_mutex;
-
                     virtual void process(time_t time) override {
-                        //this->proc_mutex.lock();
+                        std::chrono::high_resolution_clock::time_point t1, t2;
+                        long microseconds;
+
                         this->m_input.process(time);
+
+                        t1 = std::chrono::high_resolution_clock::now();
                         if (time < 0) {
                             this->m_current++;
                             this->calc();
@@ -120,16 +122,13 @@ namespace saliency_sandbox {
                                 this->m_current++;
                                 this->calc();
                             }
-                        //this->proc_mutex.unlock();
+                        t2 = std::chrono::high_resolution_clock::now();
+
+                        microseconds = std::chrono::duration_cast<std::chrono::microseconds>(t2-t1).count();
+                        this->m_fps = (1000.0f*1000.0f)/float(microseconds);
                     }
 
                     time_t time() override {
-                        //time_t c;
-                        //this->proc_mutex.lock();
-                        //c = this->m_current;
-                        //this->proc_mutex.unlock();
-                        //return c;
-
                         return this->m_current;
                     }
 
@@ -143,6 +142,10 @@ namespace saliency_sandbox {
 
                     void name(const char* name) override {
                         this->m_name = std::string(name);
+                    }
+
+                    float fps() override {
+                        return this->m_fps;
                     }
 
                     virtual void calc() = 0;

@@ -106,6 +106,7 @@ namespace saliency_sandbox {
             }
 
             IProcessable* dependency() override {
+                size_t n;
 
                 // return connceted port as dependency if set
                 if (this->m_connect != nullptr) {
@@ -115,7 +116,8 @@ namespace saliency_sandbox {
                 else if (this->m_node != nullptr) {
                     // check for circular dependencies
                     // be careful. this check does not cover all cases
-                    for(int i = 0; i < this->m_node->numInput(); i++)
+                    n = this->m_node->numInput();
+                    for(int i = 0; i < n; i++)
                         sserr << sscond(this->m_node->input(i) == this)
                               << "Circular dependencies detected. This may happen if an input port is not connected. Port name: \"" << this->name() << "\""
                               << ssthrow;
@@ -130,6 +132,10 @@ namespace saliency_sandbox {
                     this->dependency()->process(time);
                 if (this->m_connect != nullptr)
                     this->m_data = this->m_connect->m_data;
+            }
+
+            float fps() override {
+                return this->dependency()->fps();
             }
 
             time_t time() override {

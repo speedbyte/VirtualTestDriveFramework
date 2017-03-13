@@ -678,7 +678,7 @@ namespace saliency_sandbox {
                             break;
                         case generated::Pipeline_Node_Type_IOVideoReader:
                             gen << SetHeader("io/VideoReader");
-                            gen << SetClass("saliency_sandbox::io::VideoReader");
+                            gen << SetClass("saliency_sandbox::io::_VideoReader");
                             gen << SetTemplateArgument("width",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_WIDTH_S(RESOLUTION) );
                             gen << SetTemplateArgument("height",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_HEIGHT_S(RESOLUTION));
                             gen << SetConstructorArgument("path",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_string);
@@ -744,6 +744,16 @@ namespace saliency_sandbox {
                             gen << SetProperty("theta",generated::Pipeline_Node_Property_Type ::Pipeline_Node_Property_Type_pb_float);
                             gen << SetProperty("lambda",generated::Pipeline_Node_Property_Type ::Pipeline_Node_Property_Type_pb_float);
                             gen << SetProperty("gamma",generated::Pipeline_Node_Property_Type ::Pipeline_Node_Property_Type_pb_float);
+                            gen << SetInput("feature",0);
+                            break;
+                        case generated::Pipeline_Node_Type_SaliencyGBVS:
+                            gen << SetHeader("saliency/activation/GBVS");
+                            gen << SetClass("saliency_sandbox::saliency::activation::_GBVS");
+                            gen << SetTemplateArgument("width",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_WIDTH_S(RESOLUTION) );
+                            gen << SetTemplateArgument("height",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_HEIGHT_S(RESOLUTION));
+                            gen << SetTemplateArgument("iwidth",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,"24");
+                            gen << SetTemplateArgument("iheight",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,"24");
+                            gen << SetProperty("sigma",generated::Pipeline_Node_Property_Type ::Pipeline_Node_Property_Type_pb_float);
                             gen << SetInput("feature",0);
                             break;
                         case generated::Pipeline_Node_Type_UtilsFPSCounter:

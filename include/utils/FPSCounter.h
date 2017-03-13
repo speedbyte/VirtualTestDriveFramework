@@ -28,15 +28,12 @@ namespace saliency_sandbox {
             }
 
             void calc() override {
-                clock_t curr, delta;
                 int j;
                 float avg;
 
                 avg = 0.0f;
-                curr = clock();
-                delta = curr - this->m_clock;
-                this->m_clock = curr;
-                *this->m_xc = float(delta)/float(CLOCKS_PER_SEC);
+
+                *this->m_xc = this->input()->fps();
                 this->m_xc++;
                 if(this->m_xc >= &(this->m_x[_n]))
                     this->m_xc = this->m_x;
@@ -48,7 +45,7 @@ namespace saliency_sandbox {
                     j++;
                 }
                 avg /= j;
-                this->m_fps = 1.0f/avg;
+                this->m_fps = avg;
 
                 this->output()->value(&(this->m_fps));
             }

@@ -1,4 +1,4 @@
-name: "Boolean Maps Saliency";
+name: "GBVS";
 
 ##
 ## Read video
@@ -47,13 +47,13 @@ node {
 }
 
 ##
-## Calculate Boolean Map Activation
+## Calculate Itti Activation
 ## on each LAB channel
 ##
 
 node {
-    name: "Intensity Boolean Map";
-    type: SaliencyBooleanMaps;
+    name: "Intensity Itti";
+    type: SaliencyIttiKoch;
     input {
         node: "LAB feature Map";
         port: 0;
@@ -61,8 +61,8 @@ node {
 }
 
 node {
-    name: "Green-Red Feature Boolean Map";
-    type: SaliencyBooleanMaps;
+    name: "Green-Red Feature Itti";
+    type: SaliencyIttiKoch;
     input {
         node: "LAB feature Map";
         port: 1;
@@ -70,8 +70,8 @@ node {
 }
 
 node {
-    name: "Blue-Yellow Feature Boolean Map";
-    type: SaliencyBooleanMaps;
+    name: "Blue-Yellow Feature Itti";
+    type: SaliencyIttiKoch;
     input {
         node: "LAB feature Map";
         port: 2;
@@ -83,7 +83,7 @@ node {
 ##
 
 node {
-    name: "Merge Boolean Maps";
+    name: "Merge Itti";
     type: UtilsMatrixMerge;
     argument {
         name: "type";
@@ -91,21 +91,21 @@ node {
         value: "cv::Vec3f";
     }
     input {
-        node: "Intensity Boolean Map";
+        node: "Intensity Itti";
         port: 0;
     }
     input {
-        node: "Green-Red Feature Boolean Map";
+        node: "Green-Red Feature Itti";
         port: 0;
     }
     input {
-        node: "Blue-Yellow Feature Boolean Map";
+        node: "Blue-Yellow Feature Itti";
         port: 0;
     }
 }
 
 node {
-    name: "Boolean Map";
+    name: "Itti";
     type: UtilsMatrixSum;
     argument {
         name: "type";
@@ -113,7 +113,7 @@ node {
         value: "cv::Vec3f";
     }
     input {
-        node: "Merge Boolean Maps";
+        node: "Merge Itti";
         port: 0;
     }
 }
@@ -132,28 +132,28 @@ node {
 }
 
 node {
-    name: "Intensity Boolean Map FPS Counter";
+    name: "Intensity Itti FPS Counter";
     type: UtilsFPSCounter;
     input {
-        node: "Intensity Boolean Map";
+        node: "Intensity Itti";
         port: 0;
     }
 }
 
 node {
-    name: "Green-Red Feature Boolean Map FPS Counter";
+    name: "Green-Red Feature Itti FPS Counter";
     type: UtilsFPSCounter;
     input {
-        node: "Green-Red Feature Boolean Map";
+        node: "Green-Red Feature Itti";
         port: 0;
     }
 }
 
 node {
-    name: "Blue-Yellow Feature Boolean Map FPS Counter";
+    name: "Blue-Yellow Feature Itti FPS Counter";
     type: UtilsFPSCounter;
     input {
-        node: "Blue-Yellow Feature Boolean Map";
+        node: "Blue-Yellow Feature Itti";
         port: 0;
     }
 }
@@ -173,32 +173,32 @@ node {
     argument {
         name: "line1";
         type: pb_string;
-        value: "Intensity Boolean Map";
+        value: "Intensity Itti";
     }
     argument {
         name: "line2";
         type: pb_string;
-        value: "Green-Red Feature Boolean Map";
+        value: "Green-Red Feature Itti";
     }
     argument {
         name: "line3";
         type: pb_string;
-        value: "Blue-Yellow Feature Boolean Map";
+        value: "Blue-Yellow Feature Itti";
     }
     input {
         node: "Video Reader FPS Counter";
         port: 0;
     }
     input {
-        node: "Intensity Boolean Map FPS Counter";
+        node: "Intensity Itti FPS Counter";
         port: 0;
     }
     input {
-        node: "Green-Red Feature Boolean Map FPS Counter";
+        node: "Green-Red Feature Itti FPS Counter";
         port: 0;
     }
     input {
-        node: "Blue-Yellow Feature Boolean Map FPS Counter";
+        node: "Blue-Yellow Feature Itti FPS Counter";
         port: 0;
     }
 }
@@ -218,11 +218,11 @@ node {
 }
 
 ##
-## Plot Boolean Map
+## Plot Itti
 ##
 
 node {
-    name: "Boolean Map Heatmap";
+    name: "Itti Heatmap";
     type: UtilsImageConverter;
     argument {
         name: "input";
@@ -235,25 +235,24 @@ node {
         value: "saliency_sandbox::utils::_RGBImage";
     }
     input {
-        node: "Boolean Map";
+        node: "Itti";
         port: 0;
     }
 }
 
 node {
-    name: "Show Boolean Map";
+    name: "Show Itti";
     type: IOImageShow;
     argument {
         name: "window";
         type: pb_string;
-        value: "Boolean Maps";
+        value: "Itti";
     }
     input {
-        node: "Boolean Map Heatmap";
+        node: "Itti Heatmap";
         port: 0;
     }
 }
-
 
 ##
 ## Show input image

@@ -19,6 +19,8 @@ namespace saliency_sandbox {
             virtual time_t time() = 0;
 
             virtual bool eof() = 0;
+
+            virtual float fps() = 0;
         };
 
     }

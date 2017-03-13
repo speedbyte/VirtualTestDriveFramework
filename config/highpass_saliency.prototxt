@@ -1,57 +1,40 @@
-name: "Boolean Maps Saliency";
+name: "Highpass Saliency";
+
+##
+## Read video
+##
 
 node {
-    name: "Kitti Image Reader";
-    type: KittiLeftRGBImageReader;
+    name: "Video Reader";
+    type: IOVideoReader;
     argument {
         name: "path";
         type: pb_string;
-        value: "/media/geislerd/Documents/repo/Kitti/data/2011_09_29/2011_09_29_drive_0071_sync/";
+        value: "/media/geislerd/Documents/repo/Volkswagen-Drivers-Perception/private/old/data/vid/rotu_20161008.avi";
     }
 }
+
+##
+## Extract LAB color features
+##
 
 node {
     name: "Convert to LAB";
     type: UtilsImageConverter;
-    argument {
-        name: "width";
-        type: pb_uint32;
-        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::WIDTH";
-    }
-    argument {
-        name: "height";
-        type: pb_uint32;
-        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT";
-    }
-    argument {
-        name: "input";
-        type: pb_complex;
-        value: "saliency_sandbox::utils::_RGBImage";
-    }
     argument {
         name: "output";
         type: pb_complex;
         value: "saliency_sandbox::utils::_LABImage";
     }
     input {
-        node: "Kitti Image Reader";
+        node: "Video Reader";
         port: 0;
     }
 }
 
 node {
-    name: "Seperate Channels";
+    name: "LAB feature Map";
     type: UtilsMatrixSplit;
-    argument {
-        name: "width";
-        type: pb_uint32;
-        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::WIDTH";
-    }
-    argument {
-        name: "height";
-        type: pb_uint32;
-        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT";
-    }
     argument {
         name: "type";
         type: pb_complex;
@@ -63,190 +46,159 @@ node {
     }
 }
 
+##
+## Calculate Highpass Activation
+## on each LAB channel
+##
+
 node {
-    name: "Highpass Channel L";
+    name: "Intensity Highpass";
     type: SaliencyHighpass;
-    argument {
-        name: "width";
-        type: pb_uint32;
-        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::WIDTH";
-    }
-    argument {
-        name: "height";
-        type: pb_uint32;
-        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT";
-    }
     input {
-        node: "Seperate Channels";
+        node: "LAB feature Map";
         port: 0;
     }
 }
 
 node {
-    name: "Highpass Channel A";
+    name: "Green-Red Feature Highpass";
     type: SaliencyHighpass;
-    argument {
-        name: "width";
-        type: pb_uint32;
-        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::WIDTH";
-    }
-    argument {
-        name: "height";
-        type: pb_uint32;
-        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT";
-    }
     input {
-        node: "Seperate Channels";
+        node: "LAB feature Map";
         port: 1;
     }
 }
 
 node {
-    name: "Highpass Channel B";
+    name: "Blue-Yellow Feature Highpass";
     type: SaliencyHighpass;
-    argument {
-        name: "width";
-        type: pb_uint32;
-        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::WIDTH";
-    }
-    argument {
-        name: "height";
-        type: pb_uint32;
-        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT";
-    }
     input {
-        node: "Seperate Channels";
+        node: "LAB feature Map";
         port: 2;
     }
 }
 
+##
+## Sum up Highpass Activations
+##
+
 node {
-    name: "Merge Activations";
+    name: "Merge Highpass Activations";
     type: UtilsMatrixMerge;
     argument {
-        name: "width";
-        type: pb_uint32;
-        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::WIDTH";
-    }
-    argument {
-        name: "height";
-        type: pb_uint32;
-        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT";
-    }
-    argument {
         name: "type";
         type: pb_complex;
         value: "cv::Vec3f";
     }
     input {
-        node: "Highpass Channel L";
+        node: "Intensity Highpass";
         port: 0;
     }
     input {
-        node: "Highpass Channel A";
+        node: "Green-Red Feature Highpass";
         port: 0;
     }
     input {
-        node: "Highpass Channel B";
+        node: "Blue-Yellow Feature Highpass";
         port: 0;
     }
 }
 
 node {
-    name: "Sum Activations";
+    name: "Highpass";
     type: UtilsMatrixSum;
     argument {
-        name: "width";
-        type: pb_uint32;
-        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::WIDTH";
-    }
-    argument {
-        name: "height";
-        type: pb_uint32;
-        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT";
-    }
-    argument {
         name: "type";
         type: pb_complex;
         value: "cv::Vec3f";
     }
     input {
-        node: "Merge Activations";
+        node: "Merge Highpass Activations";
         port: 0;
     }
 }
 
-node {
-    name: "Boolean Maps Heatmap";
-    type: UtilsImageConverter;
-    argument {
-        name: "width";
-        type: pb_uint32;
-        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::WIDTH";
-    }
-    argument {
-        name: "height";
-        type: pb_uint32;
-        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT";
-    }
-    argument {
-        name: "input";
-        type: pb_complex;
-        value: "saliency_sandbox::utils::_HeatmapImage";
-    }
-    argument {
-        name: "output";
-        type: pb_complex;
-        value: "saliency_sandbox::utils::_RGBImage";
-    }
-    input {
-        node: "Sum Activations";
-        port: 0;
-    }
-}
+##
+## Time measurements
+##
 
 node {
-    name: "FPS Counter";
+    name: "Video Reader FPS Counter";
     type: UtilsFPSCounter;
     input {
-        node: "Sum Activations";
+        node: "Video Reader";
         port: 0;
     }
 }
+
+node {
+    name: "Intensity Highpass FPS Counter";
+    type: UtilsFPSCounter;
+    input {
+        node: "Intensity Highpass";
+        port: 0;
+    }
+}
+
+node {
+    name: "Green-Red Feature Highpass FPS Counter";
+    type: UtilsFPSCounter;
+    input {
+        node: "Green-Red Feature Highpass";
+        port: 0;
+    }
+}
+
+node {
+    name: "Blue-Yellow Feature Highpass FPS Counter";
+    type: UtilsFPSCounter;
+    input {
+        node: "Blue-Yellow Feature Highpass";
+        port: 0;
+    }
+}
+
+##
+## Plot time measurements
+##
 
 node {
     name: "FPS Plot";
     type: Plot;
+    argument {
+        name: "line0";
+        type: pb_string;
+        value: "Video Reader";
+    }
+    argument {
+        name: "line1";
+        type: pb_string;
+        value: "Intensity Highpass";
+    }
+    argument {
+        name: "line2";
+        type: pb_string;
+        value: "Green-Red Feature Highpass";
+    }
+    argument {
+        name: "line3";
+        type: pb_string;
+        value: "Blue-Yellow Feature Highpass";
+    }
     input {
-        node: "FPS Counter";
+        node: "Video Reader FPS Counter";
         port: 0;
     }
-}
-
-node {
-    name: "Show Highpass Activation";
-    type: IOImageShow;
-    argument {
-        name: "window";
-        type: pb_string;
-        value: "Boolean Maps";
-    }
     input {
-        node: "Boolean Maps Heatmap";
+        node: "Intensity Highpass FPS Counter";
         port: 0;
     }
-}
-
-node {
-    name: "Show Kitti Image";
-    type: IOImageShow;
-    argument {
-        name: "window";
-        type: pb_string;
-        value: "Raw Image";
+    input {
+        node: "Green-Red Feature Highpass FPS Counter";
+        port: 0;
     }
     input {
-        node: "Kitti Image Reader";
+        node: "Blue-Yellow Feature Highpass FPS Counter";
         port: 0;
     }
 }
@@ -261,6 +213,62 @@ node {
     }
     input {
         node: "FPS Plot";
+        port: 0;
+    }
+}
+
+##
+## Plot Highpass
+##
+
+node {
+    name: "Highpass Heatmap";
+    type: UtilsImageConverter;
+    argument {
+        name: "input";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_HeatmapImage";
+    }
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_RGBImage";
+    }
+    input {
+        node: "Highpass";
+        port: 0;
+    }
+}
+
+node {
+    name: "Show Highpass";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "Highpass Saliency";
+    }
+    input {
+        node: "Highpass Heatmap";
+        port: 0;
+    }
+}
+
+
+##
+## Show input image
+##
+
+node {
+    name: "Show Image";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "Raw Image";
+    }
+    input {
+        node: "Video Reader";
         port: 0;
     }
 }

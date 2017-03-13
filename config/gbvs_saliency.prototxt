@@ -1,4 +1,4 @@
-name: "Boolean Maps Saliency";
+name: "GBVS";
 
 ##
 ## Read video
@@ -47,13 +47,13 @@ node {
 }
 
 ##
-## Calculate Boolean Map Activation
+## Calculate GBVS Activation
 ## on each LAB channel
 ##
 
 node {
-    name: "Intensity Boolean Map";
-    type: SaliencyBooleanMaps;
+    name: "Intensity GBVS";
+    type: SaliencyGBVS;
     input {
         node: "LAB feature Map";
         port: 0;
@@ -61,8 +61,8 @@ node {
 }
 
 node {
-    name: "Green-Red Feature Boolean Map";
-    type: SaliencyBooleanMaps;
+    name: "Green-Red Feature GBVS";
+    type: SaliencyGBVS;
     input {
         node: "LAB feature Map";
         port: 1;
@@ -70,8 +70,8 @@ node {
 }
 
 node {
-    name: "Blue-Yellow Feature Boolean Map";
-    type: SaliencyBooleanMaps;
+    name: "Blue-Yellow Feature GBVS";
+    type: SaliencyGBVS;
     input {
         node: "LAB feature Map";
         port: 2;
@@ -83,7 +83,7 @@ node {
 ##
 
 node {
-    name: "Merge Boolean Maps";
+    name: "Merge GBVS";
     type: UtilsMatrixMerge;
     argument {
         name: "type";
@@ -91,21 +91,21 @@ node {
         value: "cv::Vec3f";
     }
     input {
-        node: "Intensity Boolean Map";
+        node: "Intensity GBVS";
         port: 0;
     }
     input {
-        node: "Green-Red Feature Boolean Map";
+        node: "Green-Red Feature GBVS";
         port: 0;
     }
     input {
-        node: "Blue-Yellow Feature Boolean Map";
+        node: "Blue-Yellow Feature GBVS";
         port: 0;
     }
 }
 
 node {
-    name: "Boolean Map";
+    name: "GBVS";
     type: UtilsMatrixSum;
     argument {
         name: "type";
@@ -113,7 +113,7 @@ node {
         value: "cv::Vec3f";
     }
     input {
-        node: "Merge Boolean Maps";
+        node: "Merge GBVS";
         port: 0;
     }
 }
@@ -132,28 +132,28 @@ node {
 }
 
 node {
-    name: "Intensity Boolean Map FPS Counter";
+    name: "Intensity GBVS FPS Counter";
     type: UtilsFPSCounter;
     input {
-        node: "Intensity Boolean Map";
+        node: "Intensity GBVS";
         port: 0;
     }
 }
 
 node {
-    name: "Green-Red Feature Boolean Map FPS Counter";
+    name: "Green-Red Feature GBVS FPS Counter";
     type: UtilsFPSCounter;
     input {
-        node: "Green-Red Feature Boolean Map";
+        node: "Green-Red Feature GBVS";
         port: 0;
     }
 }
 
 node {
-    name: "Blue-Yellow Feature Boolean Map FPS Counter";
+    name: "Blue-Yellow Feature GBVS FPS Counter";
     type: UtilsFPSCounter;
     input {
-        node: "Blue-Yellow Feature Boolean Map";
+        node: "Blue-Yellow Feature GBVS";
         port: 0;
     }
 }
@@ -173,32 +173,32 @@ node {
     argument {
         name: "line1";
         type: pb_string;
-        value: "Intensity Boolean Map";
+        value: "Intensity GBVS";
     }
     argument {
         name: "line2";
         type: pb_string;
-        value: "Green-Red Feature Boolean Map";
+        value: "Green-Red Feature GBVS";
     }
     argument {
         name: "line3";
         type: pb_string;
-        value: "Blue-Yellow Feature Boolean Map";
+        value: "Blue-Yellow Feature GBVS";
     }
     input {
         node: "Video Reader FPS Counter";
         port: 0;
     }
     input {
-        node: "Intensity Boolean Map FPS Counter";
+        node: "Intensity GBVS FPS Counter";
         port: 0;
     }
     input {
-        node: "Green-Red Feature Boolean Map FPS Counter";
+        node: "Green-Red Feature GBVS FPS Counter";
         port: 0;
     }
     input {
-        node: "Blue-Yellow Feature Boolean Map FPS Counter";
+        node: "Blue-Yellow Feature GBVS FPS Counter";
         port: 0;
     }
 }
@@ -218,11 +218,11 @@ node {
 }
 
 ##
-## Plot Boolean Map
+## Plot GBVS
 ##
 
 node {
-    name: "Boolean Map Heatmap";
+    name: "GBVS Heatmap";
     type: UtilsImageConverter;
     argument {
         name: "input";
@@ -235,25 +235,24 @@ node {
         value: "saliency_sandbox::utils::_RGBImage";
     }
     input {
-        node: "Boolean Map";
+        node: "GBVS";
         port: 0;
     }
 }
 
 node {
-    name: "Show Boolean Map";
+    name: "Show GBVS";
     type: IOImageShow;
     argument {
         name: "window";
         type: pb_string;
-        value: "Boolean Maps";
+        value: "GBVS";
     }
     input {
-        node: "Boolean Map Heatmap";
+        node: "GBVS Heatmap";
         port: 0;
     }
 }
-
 
 ##
 ## Show input image

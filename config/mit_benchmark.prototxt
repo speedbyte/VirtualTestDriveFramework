@@ -10,7 +10,7 @@ node {
     argument {
         name: "path";
         type: pb_string;
-        value: "/home/david/Data/CAT2000/trainSetClean/Stimuli/";
+        value: "/media/geislerd/Documents/repo/MIT/trainSetClean/Stimuli/";
     }
 }
 
@@ -20,7 +20,7 @@ node {
     argument {
         name: "path";
         type: pb_string;
-        value: "/home/david/Data/CAT2000/trainSetClean/FIXATIONMAPS/";
+        value: "/media/geislerd/Documents/repo/MIT/trainSetClean/FIXATIONMAPS/";
     }
 }
 
@@ -30,7 +30,7 @@ node {
     argument {
         name: "path";
         type: pb_string;
-        value: "/home/david/Data/CAT2000/trainSetClean/Saliency/";
+        value: "/media/geislerd/Documents/repo/MIT/trainSetClean/Saliency/";
     }
     argument {
         name: "image_format";
@@ -518,6 +518,796 @@ node {
  }
 
 #
+# GBVS
+#
+
+node {
+    name: "GBVS 32 Orientation 0°";
+    type: SaliencyGBVS;
+    argument {
+        name: "iwidth";
+        type: pb_uint32;
+        value: "32";
+    }
+    argument {
+        name: "iheight";
+        type: pb_uint32;
+        value: "32";
+    }
+    input {
+        node: "Orientation 0°";
+        port: 0;
+    }
+}
+
+node {
+    name: "GBVS 24 Orientation 0°";
+    type: SaliencyGBVS;
+    argument {
+        name: "iwidth";
+        type: pb_uint32;
+        value: "24";
+    }
+    argument {
+        name: "iheight";
+        type: pb_uint32;
+        value: "24";
+    }
+    input {
+        node: "Orientation 0°";
+        port: 0;
+    }
+}
+
+node {
+    name: "GBVS 16 Orientation 0°";
+    type: SaliencyGBVS;
+    argument {
+        name: "iwidth";
+        type: pb_uint32;
+        value: "16";
+    }
+    argument {
+        name: "iheight";
+        type: pb_uint32;
+        value: "16";
+    }
+    input {
+        node: "Orientation 0°";
+        port: 0;
+    }
+}
+
+node {
+    name: "GBVS 32 Orientation 45°";
+    type: SaliencyGBVS;
+    argument {
+        name: "iwidth";
+        type: pb_uint32;
+        value: "32";
+    }
+    argument {
+        name: "iheight";
+        type: pb_uint32;
+        value: "32";
+    }
+    input {
+        node: "Orientation 45°";
+        port: 0;
+    }
+}
+
+node {
+    name: "GBVS 24 Orientation 45°";
+    type: SaliencyGBVS;
+    argument {
+        name: "iwidth";
+        type: pb_uint32;
+        value: "24";
+    }
+    argument {
+        name: "iheight";
+        type: pb_uint32;
+        value: "24";
+    }
+    input {
+        node: "Orientation 45°";
+        port: 0;
+    }
+}
+
+node {
+    name: "GBVS 16 Orientation 45°";
+    type: SaliencyGBVS;
+    argument {
+        name: "iwidth";
+        type: pb_uint32;
+        value: "16";
+    }
+    argument {
+        name: "iheight";
+        type: pb_uint32;
+        value: "16";
+    }
+    input {
+        node: "Orientation 45°";
+        port: 0;
+    }
+}
+
+node {
+    name: "GBVS 32 Orientation 90°";
+    type: SaliencyGBVS;
+    argument {
+        name: "iwidth";
+        type: pb_uint32;
+        value: "32";
+    }
+    argument {
+        name: "iheight";
+        type: pb_uint32;
+        value: "32";
+    }
+    input {
+        node: "Orientation 90°";
+        port: 0;
+    }
+}
+
+node {
+    name: "GBVS 24 Orientation 90°";
+    type: SaliencyGBVS;
+    argument {
+        name: "iwidth";
+        type: pb_uint32;
+        value: "24";
+    }
+    argument {
+        name: "iheight";
+        type: pb_uint32;
+        value: "24";
+    }
+    input {
+        node: "Orientation 90°";
+        port: 0;
+    }
+}
+
+node {
+    name: "GBVS 16 Orientation 90°";
+    type: SaliencyGBVS;
+    argument {
+        name: "iwidth";
+        type: pb_uint32;
+        value: "16";
+    }
+    argument {
+        name: "iheight";
+        type: pb_uint32;
+        value: "16";
+    }
+    input {
+        node: "Orientation 90°";
+        port: 0;
+    }
+}
+
+node {
+    name: "GBVS 32 Orientation 135°";
+    type: SaliencyGBVS;
+    argument {
+        name: "iwidth";
+        type: pb_uint32;
+        value: "32";
+    }
+    argument {
+        name: "iheight";
+        type: pb_uint32;
+        value: "32";
+    }
+    input {
+        node: "Orientation 135°";
+        port: 0;
+    }
+}
+
+node {
+    name: "GBVS 24 Orientation 135°";
+    type: SaliencyGBVS;
+    argument {
+        name: "iwidth";
+        type: pb_uint32;
+        value: "24";
+    }
+    argument {
+        name: "iheight";
+        type: pb_uint32;
+        value: "24";
+    }
+    input {
+        node: "Orientation 135°";
+        port: 0;
+    }
+}
+
+node {
+    name: "GBVS 16 Orientation 135°";
+    type: SaliencyGBVS;
+    argument {
+        name: "iwidth";
+        type: pb_uint32;
+        value: "16";
+    }
+    argument {
+        name: "iheight";
+        type: pb_uint32;
+        value: "16";
+    }
+    input {
+        node: "Orientation 135°";
+        port: 0;
+    }
+}
+
+node {
+    name: "GBVS 32 Channel L";
+    type: SaliencyGBVS;
+    argument {
+        name: "iwidth";
+        type: pb_uint32;
+        value: "32";
+    }
+    argument {
+        name: "iheight";
+        type: pb_uint32;
+        value: "32";
+    }
+    input {
+        node: "Seperate Channels";
+        port: 0;
+    }
+}
+
+node {
+    name: "GBVS 24 Channel L";
+    type: SaliencyGBVS;
+    argument {
+        name: "iwidth";
+        type: pb_uint32;
+        value: "24";
+    }
+    argument {
+        name: "iheight";
+        type: pb_uint32;
+        value: "24";
+    }
+    input {
+        node: "Seperate Channels";
+        port: 0;
+    }
+}
+
+node {
+    name: "GBVS 16 Channel L";
+    type: SaliencyGBVS;
+    argument {
+        name: "iwidth";
+        type: pb_uint32;
+        value: "16";
+    }
+    argument {
+        name: "iheight";
+        type: pb_uint32;
+        value: "16";
+    }
+    input {
+        node: "Seperate Channels";
+        port: 0;
+    }
+}
+
+node {
+    name: "GBVS 32 Channel A";
+    type: SaliencyGBVS;
+    argument {
+        name: "iwidth";
+        type: pb_uint32;
+        value: "32";
+    }
+    argument {
+        name: "iheight";
+        type: pb_uint32;
+        value: "32";
+    }
+    input {
+        node: "Seperate Channels";
+        port: 1;
+    }
+}
+
+node {
+    name: "GBVS 24 Channel A";
+    type: SaliencyGBVS;
+    argument {
+        name: "iwidth";
+        type: pb_uint32;
+        value: "24";
+    }
+    argument {
+        name: "iheight";
+        type: pb_uint32;
+        value: "24";
+    }
+    input {
+        node: "Seperate Channels";
+        port: 1;
+    }
+}
+
+node {
+    name: "GBVS 16 Channel A";
+    type: SaliencyGBVS;
+    argument {
+        name: "iwidth";
+        type: pb_uint32;
+        value: "16";
+    }
+    argument {
+        name: "iheight";
+        type: pb_uint32;
+        value: "16";
+    }
+    input {
+        node: "Seperate Channels";
+        port: 1;
+    }
+}
+
+node {
+    name: "GBVS 32 Channel B";
+    type: SaliencyGBVS;
+    argument {
+        name: "iwidth";
+        type: pb_uint32;
+        value: "32";
+    }
+    argument {
+        name: "iheight";
+        type: pb_uint32;
+        value: "32";
+    }
+    input {
+        node: "Seperate Channels";
+        port: 2;
+    }
+}
+
+node {
+    name: "GBVS 24 Channel B";
+    type: SaliencyGBVS;
+    argument {
+        name: "iwidth";
+        type: pb_uint32;
+        value: "24";
+    }
+    argument {
+        name: "iheight";
+        type: pb_uint32;
+        value: "24";
+    }
+    input {
+        node: "Seperate Channels";
+        port: 2;
+    }
+}
+
+node {
+    name: "GBVS 16 Channel B";
+    type: SaliencyGBVS;
+    argument {
+        name: "iwidth";
+        type: pb_uint32;
+        value: "16";
+    }
+    argument {
+        name: "iheight";
+        type: pb_uint32;
+        value: "16";
+    }
+    input {
+        node: "Seperate Channels";
+        port: 2;
+    }
+}
+
+ node {
+     name: "Merge GBVS 32 Orientation Activations";
+     type: UtilsMatrixMerge;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec4f";
+     }
+     input {
+         node: "GBVS 32 Orientation 0°";
+         port: 0;
+     }
+     input {
+         node: "GBVS 32 Orientation 45°";
+         port: 0;
+     }
+     input {
+         node: "GBVS 32 Orientation 90°";
+         port: 0;
+     }
+     input {
+         node: "GBVS 32 Orientation 135°";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "Merge GBVS 24 Orientation Activations";
+     type: UtilsMatrixMerge;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec4f";
+     }
+     input {
+         node: "GBVS 24 Orientation 0°";
+         port: 0;
+     }
+     input {
+         node: "GBVS 24 Orientation 45°";
+         port: 0;
+     }
+     input {
+         node: "GBVS 24 Orientation 90°";
+         port: 0;
+     }
+     input {
+         node: "GBVS 24 Orientation 135°";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "Merge GBVS 16 Orientation Activations";
+     type: UtilsMatrixMerge;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec4f";
+     }
+     input {
+         node: "GBVS 16 Orientation 0°";
+         port: 0;
+     }
+     input {
+         node: "GBVS 16 Orientation 45°";
+         port: 0;
+     }
+     input {
+         node: "GBVS 16 Orientation 90°";
+         port: 0;
+     }
+     input {
+         node: "GBVS 16 Orientation 135°";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "GBVS 32 Orientation Activation";
+     type: UtilsMatrixSum;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec4f";
+     }
+     input {
+         node: "Merge GBVS 32 Orientation Activations";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "GBVS 24 Orientation Activation";
+     type: UtilsMatrixSum;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec4f";
+     }
+     input {
+         node: "Merge GBVS 24 Orientation Activations";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "GBVS 16 Orientation Activation";
+     type: UtilsMatrixSum;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec4f";
+     }
+     input {
+         node: "Merge GBVS 16 Orientation Activations";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "Merge GBVS Orientation Activations";
+     type: UtilsMatrixMerge;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec3f";
+     }
+     input {
+         node: "GBVS 32 Orientation Activation";
+         port: 0;
+     }
+     input {
+         node: "GBVS 24 Orientation Activation";
+         port: 0;
+     }
+     input {
+         node: "GBVS 16 Orientation Activation";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "GBVS Orientation Activation";
+     type: UtilsMatrixSum;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec3f";
+     }
+     input {
+         node: "Merge GBVS Orientation Activations";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "Merge GBVS 32 Color Activations";
+     type: UtilsMatrixMerge;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec2f";
+     }
+     input {
+         node: "GBVS 32 Channel A";
+         port: 0;
+     }
+     input {
+         node: "GBVS 32 Channel B";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "Merge GBVS 24 Color Activations";
+     type: UtilsMatrixMerge;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec2f";
+     }
+     input {
+         node: "GBVS 24 Channel A";
+         port: 0;
+     }
+     input {
+         node: "GBVS 24 Channel B";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "Merge GBVS 16 Color Activations";
+     type: UtilsMatrixMerge;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec2f";
+     }
+     input {
+         node: "GBVS 16 Channel A";
+         port: 0;
+     }
+     input {
+         node: "GBVS 16 Channel B";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "GBVS 32 Color Activation";
+     type: UtilsMatrixSum;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec2f";
+     }
+     input {
+         node: "Merge GBVS 32 Color Activations";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "GBVS 24 Color Activation";
+     type: UtilsMatrixSum;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec2f";
+     }
+     input {
+         node: "Merge GBVS 24 Color Activations";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "GBVS 16 Color Activation";
+     type: UtilsMatrixSum;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec2f";
+     }
+     input {
+         node: "Merge GBVS 16 Color Activations";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "Merge GBVS Color Activations";
+     type: UtilsMatrixMerge;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec3f";
+     }
+     input {
+         node: "GBVS 32 Color Activation";
+         port: 0;
+     }
+     input {
+         node: "GBVS 24 Color Activation";
+         port: 0;
+     }
+     input {
+         node: "GBVS 16 Color Activation";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "GBVS Color Activation";
+     type: UtilsMatrixSum;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec3f";
+     }
+     input {
+         node: "Merge GBVS Color Activations";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "Merge GBVS Intensity Activations";
+     type: UtilsMatrixMerge;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec3f";
+     }
+     input {
+         node: "GBVS 32 Channel L";
+         port: 0;
+     }
+     input {
+         node: "GBVS 24 Channel L";
+         port: 0;
+     }
+     input {
+         node: "GBVS 16 Channel L";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "GBVS Intensity Activation";
+     type: UtilsMatrixSum;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec3f";
+     }
+     input {
+         node: "Merge GBVS Intensity Activations";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "GBVS Normed Intensity Activation";
+     type: UtilsNormalize;
+     input {
+         node: "GBVS Intensity Activation";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "GBVS Normed Orientation Activation";
+     type: UtilsNormalize;
+     input {
+         node: "GBVS Orientation Activation";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "GBVS Normed Color Activation";
+     type: UtilsNormalize;
+     input {
+         node: "GBVS Color Activation";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "Merge GBVS Activations";
+     type: UtilsMatrixMerge;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec3f";
+     }
+     input {
+         node: "GBVS Normed Color Activation";
+         port: 0;
+     }
+     input {
+         node: "GBVS Normed Orientation Activation";
+         port: 0;
+     }
+     input {
+         node: "GBVS Normed Intensity Activation";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "GBVS";
+     type: UtilsMatrixSum;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec3f";
+     }
+     input {
+         node: "Merge GBVS Activations";
+         port: 0;
+     }
+ }
+
+#
 # Highpass Saliency
 #
 
@@ -585,6 +1375,54 @@ node {
  }
 
 #
+# Mixed Saliency
+#
+
+ node {
+     name: "Merge Mixed Activations";
+     type: UtilsMatrixMerge;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec<float,5>";
+     }
+     input {
+         node: "Highpass Saliency";
+         port: 0;
+     }
+     input {
+         node: "GBVS";
+         port: 0;
+     }
+     input {
+         node: "Itti & Koch";
+         port: 0;
+     }
+     input {
+         node: "Spectral Whitening";
+         port: 0;
+     }
+     input {
+         node: "Boolean Maps";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "Mixed Saliency";
+     type: UtilsMatrixSum;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec<float,5>";
+     }
+     input {
+         node: "Merge Mixed Activations";
+         port: 0;
+     }
+ }
+
+#
 # Pearson Evaluation
 #
 
@@ -628,6 +1466,19 @@ node {
 }
 
 node {
+    name: "Pearson Evaluation of GBVS";
+    type: SaliencyPearson;
+    input {
+        node: "GBVS";
+        port: 0;
+    }
+    input {
+        node: "Fixation Heatmap";
+        port: 0;
+    }
+}
+
+node {
     name: "Pearson Evaluation of Highpass";
     type: SaliencyPearson;
     input {
@@ -640,8 +1491,21 @@ node {
     }
 }
 
+node {
+    name: "Pearson Evaluation of Mixed";
+    type: SaliencyPearson;
+    input {
+        node: "Mixed Saliency";
+        port: 0;
+    }
+    input {
+        node: "Fixation Heatmap";
+        port: 0;
+    }
+}
+
 #
-# Pearson Evaluation
+# SotA Pearson Evaluation
 #
 
 node {
@@ -684,10 +1548,36 @@ node {
 }
 
 node {
+    name: "SotA Pearson Evaluation of GBVS";
+    type: SaliencyPearson;
+    input {
+        node: "GBVS";
+        port: 0;
+    }
+    input {
+        node: "SotA Saliency Heatmap";
+        port: 0;
+    }
+}
+
+node {
     name: "SotA Pearson Evaluation of Highpass";
     type: SaliencyPearson;
     input {
         node: "Highpass Saliency";
+        port: 0;
+    }
+    input {
+        node: "SotA Saliency Heatmap";
+        port: 0;
+    }
+}
+
+node {
+    name: "SotA Pearson Evaluation of Mixed";
+    type: SaliencyPearson;
+    input {
+        node: "Mixed Saliency";
         port: 0;
     }
     input {
@@ -808,6 +1698,43 @@ node {
 }
 
 #
+# Show GBVS Activation
+#
+
+node {
+    name: "GBVS Heatmap";
+    type: UtilsImageConverter;
+    argument {
+        name: "input";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_HeatmapImage";
+    }
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_RGBImage";
+    }
+    input {
+        node: "GBVS";
+        port: 0;
+    }
+}
+
+node {
+    name: "GBVS Maps";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "GBVS";
+    }
+    input {
+        node: "GBVS Heatmap";
+        port: 0;
+    }
+}
+
+#
 # Show Highpass Activation
 #
 
@@ -840,6 +1767,43 @@ node {
     }
     input {
         node: "Highpass Heatmap";
+        port: 0;
+    }
+}
+
+#
+# Show Mixed Activation
+#
+
+node {
+    name: "Mixed Heatmap";
+    type: UtilsImageConverter;
+    argument {
+        name: "input";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_HeatmapImage";
+    }
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_RGBImage";
+    }
+    input {
+        node: "Mixed Saliency";
+        port: 0;
+    }
+}
+
+node {
+    name: "Mixed Maps";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "Mixed Saliency";
+    }
+    input {
+        node: "Mixed Heatmap";
         port: 0;
     }
 }
@@ -1022,7 +1986,17 @@ node {
     argument {
         name: "line3";
         type: pb_string;
+        value: "GBVS";
+    }
+    argument {
+        name: "line4";
+        type: pb_string;
         value: "Highpass";
+    }
+    argument {
+        name: "line5";
+        type: pb_string;
+        value: "Mixed";
     }
     input {
         node: "Pearson Evaluation of Boolean Maps";
@@ -1037,7 +2011,15 @@ node {
         port: 0;
     }
     input {
+        node: "Pearson Evaluation of GBVS";
+        port: 0;
+    }
+    input {
         node: "Pearson Evaluation of Highpass";
+        port: 0;
+    }
+    input {
+        node: "Pearson Evaluation of Mixed";
         port: 0;
     }
 }
@@ -1091,7 +2073,17 @@ node {
     argument {
         name: "line3";
         type: pb_string;
+        value: "GBVS";
+    }
+    argument {
+        name: "line4";
+        type: pb_string;
         value: "Highpass";
+    }
+    argument {
+        name: "line5";
+        type: pb_string;
+        value: "Mixed";
     }
     input {
         node: "SotA Pearson Evaluation of Boolean Maps";
@@ -1106,7 +2098,15 @@ node {
         port: 0;
     }
     input {
+        node: "SotA Pearson Evaluation of GBVS";
+        port: 0;
+    }
+    input {
         node: "SotA Pearson Evaluation of Highpass";
+        port: 0;
+    }
+    input {
+        node: "SotA Pearson Evaluation of Mixed";
         port: 0;
     }
 }
