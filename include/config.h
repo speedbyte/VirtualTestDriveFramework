@@ -36,6 +36,6 @@
 #define STACK_SIZE 1024*1024*512
 #define PYRAMIDES 3
 #define THREADS 4
-#define RESOLUTION RES_QVGA
+#define RESOLUTION RES_VGA
 
 #endif //INC_CONFIG
