@@ -76,7 +76,8 @@ int main(int argc, char** argv) {
             ("output,o",po::value<fs::path>(),"place the compiled output into <file>")
             ("run,r","run pipeline after compilation")
             ("show,s","show pipeline graph")
-            ("load,l","load already compiled library if exists");
+            ("load,l","load already compiled library if exists")
+            ("framework,f",po::value<fs::path>(),"path to install directory");
 
     // parse commandline options
     try {
@@ -97,6 +98,22 @@ int main(int argc, char** argv) {
         // throw error if there was any error
         // while parsing the arguments
         po::notify(vm);
+
+        // find framework root
+        if(vm.count("framework")) {
+            root_path = vm["framework"].as<fs::path>();
+        } else {
+            root_path = argv[0];
+            root_path = root_path.parent_path().parent_path();
+        }
+
+        sserr << sspdir(root_path) << "\n\t\tframework root path is not a valid directory: " << root_path << ssthrow;
+        sserr << sspdir(root_path / "bin") << "\n\t\tframework root path is not a valid directory: " << root_path << ssthrow;
+        sserr << sspdir(root_path / "lib") << "\n\t\tframework root path is not a valid directory: " << root_path << ssthrow;
+        sserr << sspdir(root_path / "include") << "\n\t\tframework root path is not a valid directory: " << root_path << ssthrow;
+        sserr << sspfile(root_path / "bin" / "protobuild") << "\n\t\tframework root path is not a valid directory: " << root_path << ssthrow;
+
+
 
         // create output paths
         if(vm.count("output")) {
@@ -127,13 +144,14 @@ int main(int argc, char** argv) {
             compile_ss << PROTOBUILD_COMPILER << " ";
             compile_ss << source_path.c_str() << " -o " << lib_path.c_str() << " ";
             compile_ss << PROTOBUILD_COMPILER_FLAGS << " ";
-            compile_ss << "-I" << PROTOBUILD_COMPILER_INCLUDE << " ";
+            compile_ss << "-I" << (root_path / "include") << " ";
+            compile_ss << "-L" << (root_path / "lib") << " ";
 
 
             // collect libraries
             libs_ss = std::stringstream(PROTOBUILD_COMPILER_LIBS);
             while(std::getline(libs_ss,lib_s,';'))
-                compile_ss << " " << findlib(argv[0],lib_s).c_str() << " ";
+                compile_ss << " " << (root_path / "lib" / lib_s).c_str() << " ";
 
             // compile library
             sserr << sscond(system(compile_ss.str().c_str())) << "error while compiling pipeline" << ssthrow;

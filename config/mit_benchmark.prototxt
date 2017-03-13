@@ -10,7 +10,7 @@ node {
     argument {
         name: "path";
         type: pb_string;
-        value: "/media/geislerd/Documents/repo/MIT/trainSetClean/Stimuli/";
+        value: "/home/david/Data/CAT2000/trainSetClean/Stimuli/";
     }
 }
 
@@ -20,7 +20,22 @@ node {
     argument {
         name: "path";
         type: pb_string;
-        value: "/media/geislerd/Documents/repo/MIT/trainSetClean/FIXATIONMAPS/";
+        value: "/home/david/Data/CAT2000/trainSetClean/FIXATIONMAPS/";
+    }
+}
+
+node {
+    name: "SotA Saliency Reader";
+    type: IOImageReader;
+    argument {
+        name: "path";
+        type: pb_string;
+        value: "/home/david/Data/CAT2000/trainSetClean/Saliency/";
+    }
+    argument {
+        name: "image_format";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_IntensityImage";
     }
 }
 
@@ -38,6 +53,29 @@ node {
     }
     input {
         node: "Fixation Reader";
+        port: 0;
+    }
+}
+
+#
+# SotA Saliency Heatmap
+#
+
+node {
+    name: "SotA Saliency Heatmap";
+    type: UtilsImageConverter;
+    argument {
+        name: "input";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_IntensityImage";
+    }
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_HeatmapImage";
+    }
+    input {
+        node: "SotA Saliency Reader";
         port: 0;
     }
 }
@@ -603,6 +641,62 @@ node {
 }
 
 #
+# Pearson Evaluation
+#
+
+node {
+    name: "SotA Pearson Evaluation of Boolean Maps";
+    type: SaliencyPearson;
+    input {
+        node: "Boolean Maps";
+        port: 0;
+    }
+    input {
+        node: "SotA Saliency Heatmap";
+        port: 0;
+    }
+}
+
+node {
+    name: "SotA Pearson Evaluation of Spectral Whitening";
+    type: SaliencyPearson;
+    input {
+        node: "Spectral Whitening";
+        port: 0;
+    }
+    input {
+        node: "SotA Saliency Heatmap";
+        port: 0;
+    }
+}
+
+node {
+    name: "SotA Pearson Evaluation of Itti & Koch";
+    type: SaliencyPearson;
+    input {
+        node: "Itti & Koch";
+        port: 0;
+    }
+    input {
+        node: "SotA Saliency Heatmap";
+        port: 0;
+    }
+}
+
+node {
+    name: "SotA Pearson Evaluation of Highpass";
+    type: SaliencyPearson;
+    input {
+        node: "Highpass Saliency";
+        port: 0;
+    }
+    input {
+        node: "SotA Saliency Heatmap";
+        port: 0;
+    }
+}
+
+#
 # Show Boolean Maps Activation
 #
 
@@ -806,6 +900,43 @@ node {
 }
 
 #
+# Show SotA Saliency Heatmap
+#
+
+node {
+    name: "Convert SotA Saliency Heatmap to RGB";
+    type: UtilsImageConverter;
+    argument {
+        name: "input";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_HeatmapImage";
+    }
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_RGBImage";
+    }
+    input {
+        node: "SotA Saliency Heatmap";
+        port: 0;
+    }
+}
+
+node {
+    name: "Show SotA Saliency Heatmap";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "SotA Saliency Heatmap";
+    }
+    input {
+        node: "Convert SotA Saliency Heatmap to RGB";
+        port: 0;
+    }
+}
+
+#
 # FPS Plot
 #
 
@@ -821,6 +952,16 @@ node {
 node {
     name: "FPS Plot";
     type: Plot;
+    property {
+        name: "width";
+        type: pb_int;
+        value: "RES_WIDTH(RES_HD)";
+    }
+    property {
+        name: "height";
+        type: pb_int;
+        value: "RES_HEIGHT(RES_HD)";
+    }
     argument {
         name: "line0";
         type: pb_string;
@@ -853,6 +994,16 @@ node {
 node {
     name: "Evaluation Plot";
     type: Plot;
+    property {
+        name: "width";
+        type: pb_int;
+        value: "RES_WIDTH(RES_HD)";
+    }
+    property {
+        name: "height";
+        type: pb_int;
+        value: "RES_HEIGHT(RES_HD)";
+    }
     argument {
         name: "line0";
         type: pb_string;
@@ -901,6 +1052,75 @@ node {
     }
     input {
         node: "Evaluation Plot";
+        port: 0;
+    }
+}
+
+#
+# SotA Evaluation Plot
+#
+
+node {
+    name: "SotA Evaluation Plot";
+    type: Plot;
+    property {
+        name: "width";
+        type: pb_int;
+        value: "RES_WIDTH(RES_HD)";
+    }
+    property {
+        name: "height";
+        type: pb_int;
+        value: "RES_HEIGHT(RES_HD)";
+    }
+    argument {
+        name: "line0";
+        type: pb_string;
+        value: "Boolean Maps";
+    }
+    argument {
+        name: "line1";
+        type: pb_string;
+        value: "Spectral Whitening";
+    }
+    argument {
+        name: "line2";
+        type: pb_string;
+        value: "Itti & Koch";
+    }
+    argument {
+        name: "line3";
+        type: pb_string;
+        value: "Highpass";
+    }
+    input {
+        node: "SotA Pearson Evaluation of Boolean Maps";
+        port: 0;
+    }
+    input {
+        node: "SotA Pearson Evaluation of Spectral Whitening";
+        port: 0;
+    }
+    input {
+        node: "SotA Pearson Evaluation of Itti & Koch";
+        port: 0;
+    }
+    input {
+        node: "SotA Pearson Evaluation of Highpass";
+        port: 0;
+    }
+}
+
+node {
+    name: "Show SotA  Evaluation Plot";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "SotA Pearson Coefficent";
+    }
+    input {
+        node: "SotA Evaluation Plot";
         port: 0;
     }
 }
