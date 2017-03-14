@@ -6,11 +6,11 @@ name: "GBVS";
 
 node {
     name: "Video Reader";
-    type: IOVideoReader;
+    type: IOImageReader;
     argument {
         name: "path";
         type: pb_string;
-        value: "/media/geislerd/Documents/repo/Volkswagen-Drivers-Perception/private/old/data/vid/rotu_20161008.avi";
+        value: "${DIR_DATA}/kitti/2011_09_26/2011_09_26_drive_0001_sync/image_02/data";
     }
 }
 

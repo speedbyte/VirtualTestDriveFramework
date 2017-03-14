@@ -2,21 +2,21 @@
 // Created by geislerd on 10.02.17.
 //
 
+#include "kbhit.h"
+
 #include <src/core/node.pb.h>
 #include <src/tools/protobuild/build.h>
 
 #include <core/Utils.h>
-#include <utils/Error.h>
-#include <fcntl.h>
-#include <google/protobuf/io/zero_copy_stream_impl.h>
-#include <google/protobuf/text_format.h>
-#include <boost/smart_ptr.hpp>
-#include <iostream>
-#include <fstream>
-#include <dlfcn.h>
 #include <core/Pipeline.h>
 #include <core/CodeGen.h>
 
+// iostream
+#include <fstream>
+// dlload
+#include <dlfcn.h>
+
+// argument parser
 #include <boost/program_options.hpp>
 
 
@@ -69,10 +69,11 @@ int main(int argc, char** argv) {
             ("run,r","run pipeline after compilation")
             ("show,s","show pipeline graph")
             ("load,l","load already compiled library if exists")
-            ("framework,f",po::value<fs::path>(),"path to install directory");
+            ("framework,f",po::value<fs::path>(),"path to install directory")
+            ("wait,w","wait for key press after pipeline iteration");
 
-    // parse commandline options
     try {
+        // parse commandline options
         po::store(po::command_line_parser(argc, argv).options(opt_desc).positional(positionalOptions).run(),vm);
 
         // check for help flag
@@ -99,13 +100,12 @@ int main(int argc, char** argv) {
             root_path = root_path.parent_path().parent_path();
         }
 
+        // check fs
         sserr << sspdir(root_path) << "\n\t\tframework root path is not a valid directory: " << root_path << ssthrow;
         sserr << sspdir(root_path / "bin") << "\n\t\tframework root path is not a valid directory: " << root_path << ssthrow;
         sserr << sspdir(root_path / "lib") << "\n\t\tframework root path is not a valid directory: " << root_path << ssthrow;
         sserr << sspdir(root_path / "include") << "\n\t\tframework root path is not a valid directory: " << root_path << ssthrow;
         sserr << sspfile(root_path / "bin" / "protobuild") << "\n\t\tframework root path is not a valid directory: " << root_path << ssthrow;
-
-
 
         // create output paths
         if(vm.count("output")) {
@@ -175,8 +175,12 @@ int main(int argc, char** argv) {
         if(vm.count("run")) {
             std::cout << "run pipeline...";
             std::cout << "" << std::endl;
-            for (time_t time = 0; !pipeline.eof(); time++)
+            for (time_t time = 0; !pipeline.eof(); time++) {
                 pipeline.process(time);
+                if(vm.count("wait"))
+                    while(!kbhit())
+                        usleep(100);
+            }
             std::cout << " done" << std::endl;
         }
 

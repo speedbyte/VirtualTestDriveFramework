@@ -8,7 +8,7 @@
 #include <io/ImageReader.h>
 #include <boost/filesystem/path.hpp>
 #include <utils/Image.h>
-#include "TrackletReader.h"
+#include <kitti/TrackletReader.h>
 
 namespace saliency_sandbox {
     namespace kitti {
@@ -113,6 +113,7 @@ namespace saliency_sandbox {
                 cv::Point pf[4];
                 cv::Point center(0,0);
                 size_t num = 0;
+                std::stringstream saliency_ss;
 
                 tracklet.boundingbox(faces3D);
                 calibration.veloToCam(faces3D,faces2D,16,_camera);
@@ -142,6 +143,12 @@ namespace saliency_sandbox {
 
 
                 cv::putText(this->m_data,tracklet.label(),center,CV_FONT_HERSHEY_COMPLEX_SMALL, 0.8, cvScalar(255,255,255), 1, CV_AA);
+
+                if(tracklet.properties()->template has<float>("saliency")) {
+                    saliency_ss << "s: " << std::setprecision(2) << tracklet.properties()->template get<float>("saliency");
+                    cv::putText(this->m_data,saliency_ss.str(),cv::Point(center.x,center.y+14),CV_FONT_HERSHEY_COMPLEX_SMALL, 0.8, cvScalar(255,255,255), 1, CV_AA);
+                }
+
             }
 
             void drawTracklets(TrackletList& tracklets, Calibration& calibration) {
@@ -150,11 +157,94 @@ namespace saliency_sandbox {
             }
 
         public:
+
+            _DrawTracklet() {
+                this->template input<0>()->name("image");
+                this->template input<1>()->name("tracklet");
+                this->template input<2>()->name("calibration");
+
+                this->template output<0>()->name("image");
+                this->template output<0>()->value(&(this->m_data));
+            }
+
             void calc() override {
                 this->convert(*this->template input<0>()->value());
                 this->drawTracklets(*this->template input<1>()->value(),*this->template input<2>()->value());
 
                 this->template output<0>()->value(&(this->m_data));
+            }
+
+            void reset() override {
+
+            }
+        };
+
+        template<Camera _camera>
+        class TrackletSaliency : public saliency_sandbox::core::Node::template Input<
+                TrackletList,
+                saliency_sandbox::utils::_HeatmapImage<
+                        saliency_sandbox::kitti::ImageReader<_camera>::Image::WIDTH,
+                        saliency_sandbox::kitti::ImageReader<_camera>::Image::HEIGHT>,
+                Calibration>::template Output<TrackletList> {
+        public:
+            TrackletSaliency() {
+                this->template input<0>()->name("Tracklet");
+                this->template input<1>()->name("Saliency Map");
+                this->template input<2>()->name("Calibration");
+
+                this->template output<0>()->name("Tracklet");
+            }
+
+            void calc() override {
+                TrackletList* tl;
+                Tracklet* t;
+                Calibration* c;
+                cv::Vec3f faces3D[16];
+                cv::Vec2f faces2D[16];
+                cv::Mat1f mat, smat;
+                cv::Point2f min_b, max_b;
+                cv::Rect bb;
+                float sal;
+
+                tl = this->template input<0>()->value();
+                mat = this->template input<1>()->value()->mat();
+                c = this->template input<2>()->value();
+
+                for(int i = 0; i < tl->size(); i++) {
+                    t = (*tl)[i];
+
+                    t->boundingbox(faces3D);
+                    c->veloToCam(faces3D,faces2D,16,_camera);
+
+                    // find bounding box
+                    min_b = cv::Point2f(faces2D[0]);
+                    max_b = cv::Point2f(faces2D[0]);
+                    for(int j = 1; j < 16; j++) {
+                        min_b.x = MIN(min_b.x,faces2D[j].val[0]);
+                        max_b.x = MAX(max_b.x,faces2D[j].val[0]);
+                        min_b.y = MIN(min_b.y,faces2D[j].val[1]);
+                        max_b.y = MAX(max_b.y,faces2D[j].val[1]);
+                    }
+                    min_b.x = MAX(min_b.x,0);
+                    min_b.y = MAX(min_b.y,0);
+                    max_b.x = MAX(max_b.x,0);
+                    max_b.y = MAX(max_b.y,0);
+                    min_b.x = MIN(min_b.x,mat.cols-1);
+                    min_b.y = MIN(min_b.y,mat.rows-1);
+                    max_b.x = MIN(max_b.x,mat.cols-1);
+                    max_b.y = MIN(max_b.y,mat.rows-1);
+                    bb = cv::Rect(min_b,max_b);
+
+                    if(bb.area() <= 0)
+                        continue;
+                    smat = mat(bb);
+
+                    sal = (float)cv::mean(smat).val[0];
+
+                    t->properties()->template set<float>("saliency",sal);
+                }
+
+                this->template output<0>()->value(this->template input<0>()->value());
             }
 
             void reset() override {

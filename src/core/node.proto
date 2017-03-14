@@ -17,6 +17,10 @@ message Pipeline {
             KittiOXTSReader             = 107;
             KittiTrackletReader         = 108;
             KittiVelodyneReader         = 109;
+            KittiVelodynePolar          = 110;
+            KittiOXTSSelector           = 111;
+            KittiTrackletSaliency       = 112;
+            KittiTrackletDraw           = 113;
 
             // IO
             IOCSVReader                 = 201;

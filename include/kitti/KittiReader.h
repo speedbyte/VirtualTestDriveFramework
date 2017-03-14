@@ -15,14 +15,22 @@
 namespace saliency_sandbox {
     namespace kitti {
 
-        class KittiReader : public core::Node::template Input<>::template Output<VelodyneReader::Matrix,LeftGrayImageReader::Image,RightGrayImageReader::Image,LeftRGBImageReader::Image,RightRGBImageReader::Image,OXTSRow, TrackletList, Calibration> {
+        class KittiReader : public core::Node::template Input<>::template Output<
+                LeftGrayImageReader::Image,
+                RightGrayImageReader::Image,
+                LeftRGBImageReader::Image,
+                RightRGBImageReader::Image,
+                VelodyneReader::Matrix,
+                OXTSRow,
+                TrackletList,
+                Calibration> {
         private:
             boost::filesystem::path m_path;
-            VelodyneReader m_velodyne;
             LeftGrayImageReader m_image_left_gray;
             RightGrayImageReader m_image_right_gray;
             LeftRGBImageReader m_image_left_rgb;
             RightRGBImageReader m_image_right_rgb;
+            VelodyneReader m_velodyne;
             OXTSReader m_oxts;
             TrackletReader m_tracklet;
             CalibrationReader m_calibration;

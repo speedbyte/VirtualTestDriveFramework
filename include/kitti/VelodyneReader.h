@@ -127,6 +127,16 @@ namespace saliency_sandbox {
             VelodynePolarImage m_reflection;
 
         public:
+            _ConvertVelodyne2PolarImage() {
+                this->template output<0>()->name("distance");
+                this->template output<1>()->name("reflection");
+
+                this->template output<0>()->value(&(this->m_distance));
+                this->template output<1>()->value(&(this->m_reflection));
+
+                this->template input<0>()->name("velodyne");
+            }
+
             void calc() override {
                 cv::Mat4f in;
                 float x,y,z,w,r;

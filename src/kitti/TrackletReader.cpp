@@ -116,6 +116,10 @@ namespace saliency_sandbox {
             return this->m_tracklet->objectType;
         }
 
+        saliency_sandbox::core::PropertyMap* Tracklet::properties() {
+            return &(this->m_properties);
+        }
+
         void TrackletList::time(time_t time) {
             this->m_active_tracklets.clear();
             for (int i = 0; i < this->m_tracklets.size(); i++) {

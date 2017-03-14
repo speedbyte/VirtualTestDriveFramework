@@ -19,6 +19,7 @@ namespace saliency_sandbox {
 
         Line::Line(std::string name,saliency_sandbox::core::IPort* port, Gnuplot* gp) : m_name(name) , m_port(port) , m_gp(gp) , m_min(FLT_MAX) , m_max(-FLT_MAX) {
             port->connect(this->m_dummy.template output<0>());
+            port->name(this->m_name.c_str());
         }
 
         bool Line::active() {
@@ -53,7 +54,7 @@ namespace saliency_sandbox {
         }
 
         float Line::top() {
-            return this->m_data.end()->second;
+            return this->m_data[this->m_data.size()-1].second;
         }
 
         void Line::plot(bool smooth) {

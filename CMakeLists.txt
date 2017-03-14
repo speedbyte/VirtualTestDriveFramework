@@ -18,6 +18,9 @@ include_directories(include)
 
 
 install(DIRECTORY include/ DESTINATION include/ FILES_MATCHING PATTERN "*.h")
+install(DIRECTORY data/ DESTINATION data/)
+install(DIRECTORY config/ DESTINATION config/)
+install(DIRECTORY scripts/ DESTINATION scripts/)
 
 add_subdirectory(src/core/)
 add_subdirectory(src/utils/)

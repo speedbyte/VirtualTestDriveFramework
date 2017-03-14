@@ -152,6 +152,9 @@ namespace saliency_sandbox {
             for(node_iter = this->m_subsystem.begin();node_iter != node_end; node_iter++) {
                 inode = node_iter->second;
 
+                if(!strlen(inode->name()))
+                    continue;
+
                 node = graph.node(inode->name());
 
                 graph.set(node,"shape","rectangle");
@@ -159,7 +162,10 @@ namespace saliency_sandbox {
                 for(int i = 0; i < node_iter->second->numInput(); i++) {
                     iport = inode->input(i);
 
-                    input = graph.node(std::string(inode->name()) + ":" + std::string(iport->name()));
+                    if(!strlen(iport->name()))
+                        continue;
+
+                    input = graph.node(std::string(inode->name()) + ":" + std::string(iport->name()) + ":in");
 
                     graph.edge(input,node);
 
@@ -177,7 +183,10 @@ namespace saliency_sandbox {
                 for(int i = 0; i < node_iter->second->numOutput(); i++) {
                     oport = inode->output(i);
 
-                    output = graph.node(std::string(inode->name()) + ":" + std::string(oport->name()));
+                    if(!strlen(oport->name()))
+                        continue;
+
+                    output = graph.node(std::string(inode->name()) + ":" + std::string(oport->name()) + ":out");
 
                     graph.edge(node,output);
 
@@ -195,6 +204,9 @@ namespace saliency_sandbox {
 
             for(node_iter = this->m_subsystem.begin();node_iter != node_end; node_iter++) {
                 inode = node_iter->second;
+
+                if(!strlen(inode->name()))
+                    continue;
 
                 for(int i = 0; i < node_iter->second->numInput(); i++) {
                     iport = inode->input(i);

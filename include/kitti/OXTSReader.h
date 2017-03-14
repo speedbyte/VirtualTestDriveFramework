@@ -238,12 +238,12 @@ namespace saliency_sandbox {
             class Selector : public saliency_sandbox::core::Node::template Input<OXTSRow>::template Output<typename OXTSCSVReader::OutputPortListElement<_index>::type::type> {
             public:
                 Selector() {
-                    //this->template output<0>()->value(this->template input<0>()->value()->template value<_index>());
+
+                    this->template input<0>()->name("OXTS");
+                    this->template output<0>()->name("OXTS Channel");
                 }
                 void calc() override {
                     this->template output<0>()->value(this->template input<0>()->value()->template value<_index>());
-                    this->template input<0>()->name(this->template input<0>()->connect()->name());
-                    this->template output<0>()->name(this->template input<0>()->name());
                 }
 
                 void reset() override {

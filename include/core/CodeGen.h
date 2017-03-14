@@ -10,6 +10,7 @@
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <google/protobuf/text_format.h>
 #include <config.h>
+#include <boost/scoped_ptr.hpp>
 
 #ifndef CODE_GEN_H
 #define CODE_GEN_H
@@ -628,17 +629,44 @@ namespace saliency_sandbox {
                             gen << SetConstructorArgument("path",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_string);
                             gen << SetNoInput();
                             break;
+                        case generated::Pipeline_Node_Type_KittiOXTSSelector:
+                            gen << SetHeader("kitti/OXTSReader");
+                            gen << SetTemplateArgument("channel",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32);
+                            gen << SetClass("saliency_sandbox::kitti::OXTSRow::Selector");
+                            gen << SetInput("velodyne",0);
+                            break;
                         case generated::Pipeline_Node_Type_KittiTrackletReader:
                             gen << SetHeader("kitti/TrackletReader");
                             gen << SetClass("saliency_sandbox::kitti::TrackletReader");
                             gen << SetConstructorArgument("path",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_string);
                             gen << SetNoInput();
                             break;
+                        case generated::Pipeline_Node_Type_KittiTrackletSaliency:
+                            gen << SetHeader("kitti/TrackletReader");
+                            gen << SetClass("saliency_sandbox::kitti::TrackletSaliency");
+                            gen << SetTemplateArgument("camera",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_complex);
+                            gen << SetInput("tracklet",0);
+                            gen << SetInput("saliency",1);
+                            gen << SetInput("calibration",2);
+                            break;
+                        case generated::Pipeline_Node_Type_KittiTrackletDraw:
+                            gen << SetHeader("kitti/ImageReader");
+                            gen << SetClass("saliency_sandbox::kitti::_DrawTracklet");
+                            gen << SetTemplateArgument("camera",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_complex);
+                            gen << SetInput("image",0);
+                            gen << SetInput("tracklet",1);
+                            gen << SetInput("calibration",2);
+                            break;
                         case generated::Pipeline_Node_Type_KittiVelodyneReader:
                             gen << SetHeader("kitti/VelodyneReader");
                             gen << SetClass("saliency_sandbox::kitti::VelodyneReader");
                             gen << SetConstructorArgument("path",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_string);
                             gen << SetNoInput();
+                            break;
+                        case generated::Pipeline_Node_Type_KittiVelodynePolar:
+                            gen << SetHeader("kitti/VelodyneReader");
+                            gen << SetClass("saliency_sandbox::kitti::VelodyneReader::PolarImage");
+                            gen << SetInput("velodyne",0);
                             break;
                         case generated::Pipeline_Node_Type_IOCSVReader:
                             gen << SetHeader("io/CSVReader");

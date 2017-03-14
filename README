@@ -1,0 +1,21 @@
+INSTALL DEPENDENCIES
+    $ sudo apt-get install libgnuplot-iostream-dev
+    $ sudo apt-get install libboost-dev
+    $ sudo apt-get install libopencv-dev
+    $ sudo apt-get install libgraphviz-dev
+    $ sudo apt-get install libprotobuf-dev
+CONFIGURE PROJECT
+    $ cmake -DCMAKE_INSTALL_PREFIX=<path to install> <path to project
+BUILD & INSTALL PROJECT
+    $ make install
+    
+RUN EXAMPLE
+    $ source <path to install>/scripts/protobuild_example_object_saliency.sh -w -s -r
+    
+    -w waits for key press after each iteration
+    -s show the process graph
+    -r run pipeline after compilation
+    
+    -h / --help shows all available flags
+    
+

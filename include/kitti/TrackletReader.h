@@ -19,6 +19,7 @@ namespace saliency_sandbox {
             time_t m_time;
             cv::Matx33f m_rotation;
             cv::Vec3f m_translation;
+            saliency_sandbox::core::PropertyMap m_properties;
 
             void calcRotation();
 
@@ -42,6 +43,8 @@ namespace saliency_sandbox {
             void boundingbox(cv::Vec3f* faces);
 
             std::string label();
+
+            saliency_sandbox::core::PropertyMap* properties();
 
         };
 
