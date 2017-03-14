@@ -11,6 +11,6 @@ nocuda-debug:
     - cmake -DCMAKE_INSTALL_PREFIX=./install ../
     - make -j4 all
     - make install
-    - source ./install/scripts/protobuild_example_object_saliency.sh -w -s -r
+    - source ./install/scripts/protobuild_example_object_saliency.sh
   tags:
     - ubuntu

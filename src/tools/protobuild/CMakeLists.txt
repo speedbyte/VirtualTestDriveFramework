@@ -1,6 +1,5 @@
 MESSAGE("-- create protobuild tool target")
 
-
 list(APPEND SaliencySandbox_LIBS core io kitti plot saliency utils)
 
 foreach(SaliencySandbox_LIB ${SaliencySandbox_LIBS})
@@ -41,10 +40,6 @@ foreach(PROTOBUF_LIB ${PROTOBUF_LIBRARIES})
         message("skip lib: ${PROTOBUF_LIB}")
     endif()
 endforeach()
-
-
-
-
 
 configure_file(build.h.in build.h)
 
