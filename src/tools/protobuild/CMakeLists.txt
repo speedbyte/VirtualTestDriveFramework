@@ -32,8 +32,8 @@ foreach(OpenCV_LIB ${OpenCV_LIBS})
 endforeach()
 
 foreach(PROTOBUF_LIB ${PROTOBUF_LIBRARIES})
-    if(NOT "${PROTOBUF_LIB}" STREQUAL "-lpthread") #TODO check if file exits
-        get_filename_component(PROTOBUF_LIB_P ${PROTOBUF_LIB} REALPATH)
+    get_filename_component(PROTOBUF_LIB_P ${PROTOBUF_LIB} REALPATH)
+    if(EXISTS ${PROTOBUF_LIB_P})
         install(FILES ${PROTOBUF_LIB_P} DESTINATION lib/third/protobuf)
         get_filename_component(PROTOBUF_LIB_N ${PROTOBUF_LIB_P} NAME)
         list(APPEND PROTOBUILD_JITC_THIRD_DEP /third/protobuf/${PROTOBUF_LIB_N})
