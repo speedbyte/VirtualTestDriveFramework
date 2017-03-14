@@ -151,37 +151,43 @@ int main(int argc, char** argv) {
             std::cout << " done" << std::endl;
         }
 
-        // load library
-        std::cout << "load pipeline...";
-        dl = dlopen(lib_path.c_str(),RTLD_NOW);
-        sserr << sscond(!dl) << "cannot load shared library " << lib_path << ":" << dlerror() << ssthrow;
+        if(vm.count("show") || vm.count("run")) {
 
-        // get entry
-        funp = (create_pipeline_t) dlsym(dl, "create_pipeline");
-        sserr << sscond(!funp) << "cannot find entry point of shared library " << lib_path << ":" << dlerror()
-              << ssthrow;
-        std::cout << " done" << std::endl;
+            // load library
+            std::cout << "load pipeline...";
+            dl = dlopen(lib_path.c_str(), RTLD_NOW);
+            sserr << sscond(!dl) << "cannot load shared library " << lib_path << ":" << dlerror() << ssthrow;
 
-        // initialize pipeline
-        std::cout << "initialize pipeline...";
-        funp(pipeline);
-        pipeline.initialize();
-        std::cout << " done" << std::endl;
+            // get entry
+            funp = (create_pipeline_t) dlsym(dl, "create_pipeline");
+            sserr << sscond(!funp) << "cannot find entry point of shared library " << lib_path << ":" << dlerror()
+                  << ssthrow;
+            std::cout << " done" << std::endl;
 
-        if(vm.count("show")) {
-            pipeline.show();
-        }
+            // initialize pipeline
+            std::cout << "initialize pipeline...";
+            funp(pipeline);
+            pipeline.initialize();
+            std::cout << " done" << std::endl;
 
-        if(vm.count("run")) {
-            std::cout << "run pipeline...";
-            std::cout << "" << std::endl;
-            for (time_t time = 0; !pipeline.eof(); time++) {
-                pipeline.process(time);
-                if(vm.count("wait"))
-                    while(!kbhit())
+            if (vm.count("show")) {
+                pipeline.show();
+                if (vm.count("wait"))
+                    while (!kbhit())
                         usleep(100);
             }
-            std::cout << " done" << std::endl;
+
+            if (vm.count("run")) {
+                std::cout << "run pipeline...";
+                std::cout << "" << std::endl;
+                for (time_t time = 0; !pipeline.eof(); time++) {
+                    pipeline.process(time);
+                    if (vm.count("wait"))
+                        while (!kbhit())
+                            usleep(100);
+                }
+                std::cout << " done" << std::endl;
+            }
         }
 
     } catch(boost::program_options::required_option& e) {
