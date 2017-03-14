@@ -1,9 +1,12 @@
 INSTALL DEPENDENCIES
     $ sudo apt-get install libgnuplot-iostream-dev
-    $ sudo apt-get install libboost-dev
+    $ sudo apt-get install libboost-all-dev
     $ sudo apt-get install libopencv-dev
     $ sudo apt-get install libgraphviz-dev
     $ sudo apt-get install libprotobuf-dev
+    or all together:
+    $ sudo apt-get install libgnuplot-iostream-dev libboost-all-dev libopencv-dev  libgraphviz-dev libprotobuf-dev
+    
 CONFIGURE PROJECT
     $ cmake -DCMAKE_INSTALL_PREFIX=<path to install> <path to project
 BUILD & INSTALL PROJECT
