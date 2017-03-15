@@ -14,8 +14,6 @@ namespace saliency_sandbox {
 
     namespace core {
 
-
-
         template<typename _type>
         class _PropertyMapContainer {
         protected:
@@ -88,7 +86,6 @@ namespace saliency_sandbox {
             void clrAll() {
                 this->_clr<_types...>();
             }
-
 
         };
 

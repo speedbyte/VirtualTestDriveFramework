@@ -110,22 +110,31 @@ namespace saliency_sandbox {
                     virtual void process(time_t time) override {
                         std::chrono::high_resolution_clock::time_point t1, t2;
                         long microseconds;
+                        bool refresh_fps;
 
                         this->m_input.process(time);
 
-                        t1 = std::chrono::high_resolution_clock::now();
+                        refresh_fps = false;
+
                         if (time < 0) {
                             this->m_current++;
+                            t1 = std::chrono::high_resolution_clock::now();
                             this->calc();
+                            t2 = std::chrono::high_resolution_clock::now();
+                            refresh_fps = true;
                         } else
                             while(this->m_current < time) {
                                 this->m_current++;
+                                t1 = std::chrono::high_resolution_clock::now();
                                 this->calc();
+                                t2 = std::chrono::high_resolution_clock::now();
+                                refresh_fps = true;
                             }
-                        t2 = std::chrono::high_resolution_clock::now();
 
-                        microseconds = std::chrono::duration_cast<std::chrono::microseconds>(t2-t1).count();
-                        this->m_fps = (1000.0f*1000.0f)/float(microseconds);
+                        if(refresh_fps) {
+                            microseconds = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
+                            this->m_fps = (1000000.0f) / float(microseconds);
+                        }
                     }
 
                     time_t time() override {
