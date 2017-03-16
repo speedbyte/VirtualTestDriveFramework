@@ -570,7 +570,7 @@ namespace saliency_sandbox {
                             gen << CodeGen::SetNoInput();
                             break;
                         case generated::Pipeline_Node_Type_KittiTrackletSaliency:
-                            gen << CodeGen::SetHeader("kitti/TrackletReader");
+                            gen << CodeGen::SetHeader("kitti/TrackletSaliency");
                             gen << CodeGen::SetClass("saliency_sandbox::kitti::TrackletSaliency");
                             gen << CodeGen::SetTemplateArgument("camera",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_complex);
                             gen << CodeGen::SetInput("tracklet",0);
@@ -578,8 +578,8 @@ namespace saliency_sandbox {
                             gen << CodeGen::SetInput("calibration",2);
                             break;
                         case generated::Pipeline_Node_Type_KittiTrackletDraw:
-                            gen << CodeGen::SetHeader("kitti/ImageReader");
-                            gen << CodeGen::SetClass("saliency_sandbox::kitti::_DrawTracklet");
+                            gen << CodeGen::SetHeader("kitti/DrawTracklet");
+                            gen << CodeGen::SetClass("saliency_sandbox::kitti::DrawTracklet");
                             gen << CodeGen::SetTemplateArgument("camera",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_complex);
                             gen << CodeGen::SetInput("image",0);
                             gen << CodeGen::SetInput("tracklet",1);

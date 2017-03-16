@@ -12,11 +12,15 @@
 namespace saliency_sandbox {
     namespace saliency {
 
+        template<uint32_t _width, uint32_t _height>
+        class _SaliencyMap : public saliency_sandbox::utils::_HeatmapImage<_width, _height> {
+
+        };
+
         template<uint32_t _width, uint32_t _height, typename... _input>
-        class _Saliency
-                : public core::Node::template Input<_input...>::template Output<saliency_sandbox::utils::_HeatmapImage<_width, _height>> {
+        class _Saliency : public core::Node::template Input<_input...>::template Output<_SaliencyMap<_width, _height>> {
         public:
-            typedef saliency_sandbox::utils::_HeatmapImage<_width, _height> SaliencyMap;
+            typedef _SaliencyMap<_width, _height> SaliencyMap;
 
         private:
             SaliencyMap m_map;

@@ -175,6 +175,7 @@ namespace saliency_sandbox {
 
             static void run(IPort *port, time_t time, bool *join);
         };
+
         void process_port_thread(IPort* p, time_t time);
 
         template<uint32_t _index, typename _type, typename... _type_next>

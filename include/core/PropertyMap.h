@@ -22,11 +22,18 @@ namespace saliency_sandbox {
 
         template<typename _type, typename... _type_next>
         class _PropertyMapChain : protected _PropertyMapContainer<_type>, protected _PropertyMapChain<_type_next...> {
+        protected:
+
+            void clrChain();
 
         };
 
         template<typename _type>
-        class _PropertyMapChain<_type> { };
+        class _PropertyMapChain<_type> : protected _PropertyMapContainer<_type>{
+        protected:
+
+            void clrChain();
+        };
 
         template <typename... _types>
         class _PropertyMap : protected _PropertyMapChain< _types...>  {
@@ -34,58 +41,26 @@ namespace saliency_sandbox {
             template<typename _type>
             using m = _PropertyMapContainer<_type>;
 
-            template<typename t, typename... t_next>
-            void _clr() {
-                this->clr<t>();
-                if(sizeof...(t_next) > 0)
-                    this->_clr<t_next...>();
-            };
-
         public:
             template<typename t>
-            bool has(std::string name) {
-                return this->m<t>::m_map.find(name) != this->m<t>::m_map.end();
-            }
+            bool has(std::string name);
 
             template<typename t>
-            t& get(std::string name) {
-                sserr << sscond(!this->has<t>(name)) << "No property found with name \"" << name << "\n of type \"" << typeid(t).name() << "\"" << ssthrow;
-
-                return this->m<t>::m_map[name];
-            }
+            t& get(std::string name);
 
             template<typename t>
-            t& get(std::string name, t value) {
-                if(this->has<t>(name))
-                    return this->m<t>::m_map[name];
-                else {
-                    this->m<t>::m_map[name] = value;
-                    return this->m<t>::m_map[name];
-                }
-
-            }
+            t& get(std::string name, t value);
 
             template<typename t>
-            t& set(std::string name, t value) {
-                this->m<t>::m_map[name] = value;
-                return this->m<t>::m_map[name];
-            }
+            t& set(std::string name, t value);
 
             template<typename t>
-            void del(std::string name) {
-                sserr << sscond(!this->has<t>(name)) << "No property found with name \"" << name << "\n of type \"" << typeid(t).name() << "\"" << ssthrow;
-
-                this->m<t>::m_map.erase(name);
-            }
+            void del(std::string name);
 
             template<typename t>
-            void clr() {
-                this->m<t>::m_map.clear();
-            }
+            void clr();
 
-            void clrAll() {
-                this->_clr<_types...>();
-            }
+            void clrAll();
 
         };
 

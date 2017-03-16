@@ -9,6 +9,7 @@
 #include <plot/Plot.h>
 #include <io/ImageShow.h>
 #include <plot/GridLayout.h>
+#include <kitti/DrawTracklet.h>
 
 
 void process(bool saveOutput, boost::filesystem::path dataset, boost::filesystem::path output);
@@ -63,10 +64,10 @@ void process(bool saveOutput, boost::filesystem::path dataset, boost::filesystem
     saliency_sandbox::kitti::LeftRGBImageReader left_rgb_image_reader(dataset);
     saliency_sandbox::kitti::RightGrayImageReader right_gray_image_reader(dataset);
     saliency_sandbox::kitti::RightRGBImageReader right_rgb_image_reader(dataset);
-    saliency_sandbox::kitti::LeftGrayImageReader::DrawTracklet left_gray_image_draw_tracklet;
-    saliency_sandbox::kitti::LeftRGBImageReader::DrawTracklet left_rgb_image_draw_tracklet;
-    saliency_sandbox::kitti::RightGrayImageReader::DrawTracklet right_gray_image_draw_tracklet;
-    saliency_sandbox::kitti::RightRGBImageReader::DrawTracklet right_rgb_image_draw_tracklet;
+    saliency_sandbox::kitti::LeftGrayDrawTracklet left_gray_image_draw_tracklet;
+    saliency_sandbox::kitti::LeftRGBDrawTracklet left_rgb_image_draw_tracklet;
+    saliency_sandbox::kitti::RightGrayDrawTracklet right_gray_image_draw_tracklet;
+    saliency_sandbox::kitti::RightRGBDrawTracklet right_rgb_image_draw_tracklet;
     saliency_sandbox::plot::GridLayout<2,2> grid;
     saliency_sandbox::io::ImageShow show("Tracklets");
 
