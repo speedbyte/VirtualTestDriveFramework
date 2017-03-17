@@ -216,7 +216,10 @@ namespace saliency_sandbox {
                         graph.edge(ports[oport],ports[iport]);
                 }
             }
-
+            if(this->properties()->get<bool>("threaded",true))
+                cv::startWindowThread();
+            if(this->properties()->get("window_mode",(int) cv::WINDOW_AUTOSIZE) != cv::WINDOW_AUTOSIZE)
+                cv::resizeWindow("pipeline",this->properties()->get("width",512),this->properties()->get("height",512));
             cv::namedWindow("pipeline");
             cv::imshow("pipeline",graph.mat());
         }

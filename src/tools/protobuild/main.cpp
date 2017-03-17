@@ -136,8 +136,8 @@ int main(int argc, char** argv) {
             compile_ss << PROTOBUILD_COMPILER << " ";
             compile_ss << source_path.c_str() << " -o " << lib_path.c_str() << " ";
             compile_ss << PROTOBUILD_COMPILER_FLAGS << " ";
-            compile_ss << "-I" << (root_path / "include") << " ";
-            //compile_ss << "-I" << PROTOBUILD_COMPILER_INCLUDE << " ";
+            //compile_ss << "-I" << (root_path / "include") << " ";
+            compile_ss << "-I" << PROTOBUILD_COMPILER_INCLUDE << " ";
             compile_ss << "-L" << (root_path / "lib") << " ";
 
 

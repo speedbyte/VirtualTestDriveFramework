@@ -12,6 +12,7 @@
 #include <core/Utils.h>
 #include <tuple>
 #include <future>
+#include <cfloat>
 
 namespace saliency_sandbox {
 
@@ -133,7 +134,10 @@ namespace saliency_sandbox {
 
                         if(refresh_fps) {
                             microseconds = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
-                            this->m_fps = (1000000.0f) / float(microseconds);
+                            if(microseconds)
+                                this->m_fps = (1000000.0f) / float(microseconds);
+                            else
+                                this->m_fps = 0;
                         }
                     }
 

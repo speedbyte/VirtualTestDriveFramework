@@ -86,12 +86,17 @@ namespace saliency_sandbox {
                 cv::Matx<float, 3, 3>& R();
 
                 cv::Matx<float, 3, 1>& T();
+
+                cv::Matx44f TR();
             };
         private:
 
             Cam2Cam m_camera[4];
             Velo2Cam m_velodyne;
             OXTS2Velo m_oxts;
+
+            cv::Matx33f m_velo2cam_P[4];
+            cv::Matx44f m_velo2cam_TR[4];
 
             std::string read(std::ifstream& is, size_t num, float* val);
 
@@ -100,15 +105,22 @@ namespace saliency_sandbox {
 
         public:
 
+            Calibration(boost::filesystem::path path);
+
             void loadCamToCam(boost::filesystem::path path);
 
             void loadImuToVelo(boost::filesystem::path path);
 
             void loadVeloToCam(boost::filesystem::path path);
 
-            Calibration(boost::filesystem::path path);
-
             void veloToCam(cv::Vec3f* velo, cv::Vec2f* cam, size_t num, size_t camera);
+
+            void imuToVelo(cv::Vec3f* imu, cv::Vec3f* velo, size_t num);
+
+
+            void imuDirToVeloDir(cv::Vec3f *imu, cv::Vec3f *velo, size_t num);
+
+            cv::Matx44f imuToVeloTR();
         };
 
         class CalibrationReader : public saliency_sandbox::core::Node::template Input<>::template Output<Calibration> {

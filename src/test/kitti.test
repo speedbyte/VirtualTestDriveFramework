@@ -5,6 +5,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <kitti/KittiReader.h>
+#include <kitti/Velodyne2PolarImage.h>
 #include <kitti/TrackletReader.h>
 #include <kitti/CalibrationReader.h>
 #include <utils/Matrix.h>
@@ -163,7 +164,7 @@ BOOST_AUTO_TEST_SUITE(kitti)
         fclose(stream);
 
         saliency_sandbox::kitti::VelodyneReader velodyne_reader(data_base "/tmp/04");
-        saliency_sandbox::kitti::VelodyneReader::PolarImage velodyne2polar;
+        saliency_sandbox::kitti::Velodyne2PolarImage velodyne2polar;
         saliency_sandbox::kitti::VelodynePolarImage::ConvertRGB velodyne2polar_rgb;
 
         connect_port(velodyne_reader,0,velodyne2polar,0);

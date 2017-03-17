@@ -1,0 +1,510 @@
+name: "Ego Motion";
+
+##
+## Read video
+##
+
+node {
+    name: "Kitti Reader";
+    type: KittiReader;
+    argument {
+        name: "path";
+        type: pb_string;
+        #value: "${DIR_DATA}/kitti/2011_09_26/2011_09_26_drive_0001_sync/";
+        value: "/media/geislerd/Documents/repo/Kitti/data/2011_09_26/2011_09_26_drive_0029_sync/";
+    }
+}
+
+##
+## Show raw Kitti data
+##
+
+node {
+    name: "Show Camera 2";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "Kitti Cam 0";
+    }
+    input {
+        node: "Kitti Reader";
+        port: 2;
+    }
+}
+
+##
+## Show Velocity Plots
+##
+
+node {
+    name: "OXTS Forward Velocity";
+    type: KittiOXTSSelector;
+    argument {
+        name: "channel";
+        type: pb_uint32;
+        value: "8";
+    }
+    input {
+        node: "Kitti Reader";
+        port: 5;
+    }
+}
+
+node {
+    name: "OXTS Leftward Velocity";
+    type: KittiOXTSSelector;
+    argument {
+        name: "channel";
+        type: pb_uint32;
+        value: "9";
+    }
+    input {
+        node: "Kitti Reader";
+        port: 5;
+    }
+}
+
+node {
+    name: "OXTS Upward Velocity";
+    type: KittiOXTSSelector;
+    argument {
+        name: "channel";
+        type: pb_uint32;
+        value: "10";
+    }
+    input {
+        node: "Kitti Reader";
+        port: 5;
+    }
+}
+
+node {
+    name: "OXTS Velocity Plot";
+    type: Plot;
+    argument {
+        name: "line0";
+        type: pb_string;
+        value: "Forward";
+    }
+    argument {
+        name: "line1";
+        type: pb_string;
+        value: "Leftward";
+    }
+    argument {
+        name: "line2";
+        type: pb_string;
+        value: "Upward";
+    }
+    input {
+        node: "OXTS Forward Velocity";
+        port: 0;
+    }
+    input {
+        node: "OXTS Leftward Velocity";
+        port: 0;
+    }
+    input {
+        node: "OXTS Upward Velocity";
+        port: 0;
+    }
+}
+
+node {
+    name: "Show Velocity Plot";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "OXTS Velocity";
+    }
+    input {
+        node: "OXTS Velocity Plot";
+        port: 0;
+    }
+}
+
+##
+## Show Rotation Plots
+##
+
+node {
+    name: "OXTS Roll";
+    type: KittiOXTSSelector;
+    argument {
+        name: "channel";
+        type: pb_uint32;
+        value: "3";
+    }
+    input {
+        node: "Kitti Reader";
+        port: 5;
+    }
+}
+
+node {
+    name: "OXTS Pitch";
+    type: KittiOXTSSelector;
+    argument {
+        name: "channel";
+        type: pb_uint32;
+        value: "4";
+    }
+    input {
+        node: "Kitti Reader";
+        port: 5;
+    }
+}
+
+node {
+    name: "OXTS Yaw";
+    type: KittiOXTSSelector;
+    argument {
+        name: "channel";
+        type: pb_uint32;
+        value: "5";
+    }
+    input {
+        node: "Kitti Reader";
+        port: 5;
+    }
+}
+
+node {
+    name: "OXTS forward rate";
+    type: KittiOXTSSelector;
+    argument {
+        name: "channel";
+        type: pb_uint32;
+        value: "20";
+    }
+    input {
+        node: "Kitti Reader";
+        port: 5;
+    }
+}
+
+node {
+    name: "OXTS leftward rate";
+    type: KittiOXTSSelector;
+    argument {
+        name: "channel";
+        type: pb_uint32;
+        value: "21";
+    }
+    input {
+        node: "Kitti Reader";
+        port: 5;
+    }
+}
+
+node {
+    name: "OXTS upward rate";
+    type: KittiOXTSSelector;
+    argument {
+        name: "channel";
+        type: pb_uint32;
+        value: "22";
+    }
+    input {
+        node: "Kitti Reader";
+        port: 5;
+    }
+}
+
+node {
+    name: "OXTS Rotation Plot";
+    type: Plot;
+    argument {
+        name: "line0";
+        type: pb_string;
+        value: "roll";
+    }
+    argument {
+        name: "line1";
+        type: pb_string;
+        value: "pitch";
+    }
+    argument {
+        name: "line2";
+        type: pb_string;
+        value: "yaw";
+    }
+    argument {
+        name: "line3";
+        type: pb_string;
+        value: "forward rate";
+    }
+    argument {
+        name: "line4";
+        type: pb_string;
+        value: "leftward rate";
+    }
+    argument {
+        name: "line5";
+        type: pb_string;
+        value: "upward rate";
+    }
+    input {
+        node: "OXTS Roll";
+        port: 0;
+    }
+    input {
+        node: "OXTS Pitch";
+        port: 0;
+    }
+    input {
+        node: "OXTS Yaw";
+        port: 0;
+    }
+    input {
+        node: "OXTS forward rate";
+        port: 0;
+    }
+    input {
+        node: "OXTS leftward rate";
+        port: 0;
+    }
+    input {
+        node: "OXTS upward rate";
+        port: 0;
+    }
+}
+
+node {
+    name: "Show Rotation Plot";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "OXTS Rotation";
+    }
+    input {
+        node: "OXTS Rotation Plot";
+        port: 0;
+    }
+}
+
+##
+## Calculate Ego Motion
+##
+
+node {
+    name: "Kitti Pose";
+    type: KittiOXTSPose;
+    input {
+        node: "Kitti Reader";
+        port: 5;
+    }
+}
+
+node {
+    name: "Kitti Ego Motion";
+    type: KittiEgoMotion;
+    input {
+        node: "Kitti Reader";
+        port: 4;
+    }
+    input {
+        node: "Kitti Pose";
+        port: 0;
+    }
+    input {
+        node: "Kitti Reader";
+        port: 7;
+    }
+}
+
+node {
+    name: "Kitti Ego Motion FPS Counter";
+    type: UtilsFPSCounter;
+    input {
+        node: "Kitti Ego Motion";
+        port: 0;
+    }
+}
+
+##
+## Calculate Optical Motion
+##
+
+node {
+    name: "Convert to Gray";
+    type: UtilsImageConverter;
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::WIDTH";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT";
+    }
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_IntensityImage";
+    }
+    input {
+        node: "Kitti Reader";
+        port: 2;
+    }
+}
+
+node {
+    name: "Optical Motion";
+    type: OpticalFlow;
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::WIDTH";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT";
+    }
+    input {
+        node: "Convert to Gray";
+        port: 0;
+    }
+    input {
+        node: "Kitti Ego Motion";
+        port: 0;
+    }
+}
+
+node {
+    name: "Optical Motion FPS Counter";
+    type: UtilsFPSCounter;
+    input {
+        node: "Optical Motion";
+        port: 0;
+    }
+}
+
+##
+## Plot time measurements
+##
+
+node {
+    name: "FPS Plot";
+    type: Plot;
+    argument {
+        name: "line0";
+        type: pb_string;
+        value: "Ego Motion";
+    }
+    argument {
+        name: "line1";
+        type: pb_string;
+        value: "Optical Motion";
+    }
+    input {
+        node: "Kitti Ego Motion FPS Counter";
+        port: 0;
+    }
+    input {
+        node: "Optical Motion FPS Counter";
+        port: 0;
+    }
+}
+
+node {
+    name: "Show FPS Plot";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "FPS";
+    }
+    input {
+        node: "FPS Plot";
+        port: 0;
+    }
+}
+
+##
+## Show Ego Motion Optical Flow
+##
+
+node {
+    name: "Ego Motion Quiver";
+    type: PlotQuiver;
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::WIDTH";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT";
+    }
+    input {
+        node: "Kitti Ego Motion";
+        port: 0;
+    }
+    input {
+        node: "Kitti Reader";
+        port: 2;
+    }
+}
+
+node {
+    name: "Show Ego Motion Quiver";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "Ego Motion";
+    }
+    input {
+        node: "Ego Motion Quiver";
+        port: 0;
+    }
+}
+
+##
+## Show Optical Motion Flow
+##
+
+node {
+    name: "Optical Motion Quiver";
+    type: PlotQuiver;
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::WIDTH";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT";
+    }
+    input {
+        node: "Optical Motion";
+        port: 0;
+    }
+    input {
+        node: "Kitti Reader";
+        port: 2;
+    }
+}
+
+node {
+    name: "Show Optical Motion Quiver";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "Optical Motion";
+    }
+    input {
+        node: "Optical Motion Quiver";
+        port: 0;
+    }
+}
+

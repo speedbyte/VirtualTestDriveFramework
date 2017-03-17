@@ -295,7 +295,9 @@ namespace saliency_sandbox {
             define_image_converter(HSV,Heatmap);
 
             void convert(_RGBImage<_width,_height>* out) {
-                cv::cvtColor(*this,*out,CV_HSV2RGB);
+                cv::Mat3f rgb;
+                cv::cvtColor(*this,rgb,cv::COLOR_HSV2RGB);
+                rgb.convertTo(*out,CV_8UC3,255);
             }
             void convert(_LABImage<_width,_height>* out) {
                 _RGBImage<_width,_height> rgb;

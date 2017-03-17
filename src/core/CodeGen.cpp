@@ -511,6 +511,8 @@ namespace saliency_sandbox {
             std::string CodeGen::cpp(generated::Pipeline& pipeline) {
                 CodeGen gen;
 
+                sserr << sscond(!pipeline.node_size()) << "Pipeline \"" << pipeline.name() << "\" is empty" << ssthrow;
+
                 gen << SetPipeline(pipeline);
                 for(int i = 0; i < pipeline.node_size(); i++) {
                     gen << SetNode(i);
@@ -557,6 +559,11 @@ namespace saliency_sandbox {
                             gen << CodeGen::SetConstructorArgument("path",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_string);
                             gen << CodeGen::SetNoInput();
                             break;
+                        case generated::Pipeline_Node_Type_KittiOXTSPose:
+                            gen << CodeGen::SetHeader("kitti/OXTSPose");
+                            gen << CodeGen::SetClass("saliency_sandbox::kitti::OXTSPose");
+                            gen << CodeGen::SetInput("oxts",0);
+                            break;
                         case generated::Pipeline_Node_Type_KittiOXTSSelector:
                             gen << CodeGen::SetHeader("kitti/OXTSReader");
                             gen << CodeGen::SetTemplateArgument("channel",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32);
@@ -592,9 +599,17 @@ namespace saliency_sandbox {
                             gen << CodeGen::SetNoInput();
                             break;
                         case generated::Pipeline_Node_Type_KittiVelodynePolar:
-                            gen << CodeGen::SetHeader("kitti/VelodyneReader");
-                            gen << CodeGen::SetClass("saliency_sandbox::kitti::VelodyneReader::PolarImage");
+                            gen << CodeGen::SetHeader("kitti/Velodyne2PolarImage");
+                            gen << CodeGen::SetClass("saliency_sandbox::kitti::Velodyne2PolarImage");
                             gen << CodeGen::SetInput("velodyne",0);
+                            break;
+                        case generated::Pipeline_Node_Type_KittiEgoMotion:
+                            gen << CodeGen::SetHeader("kitti/EgoMotion");
+                            gen << CodeGen::SetClass("saliency_sandbox::kitti::EgoMotion");
+                            gen << CodeGen::SetTemplateArgument("camera",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_complex,"saliency_sandbox::kitti::Camera::LEFT_RGB");
+                            gen << CodeGen::SetInput("velodyne",0);
+                            gen << CodeGen::SetInput("oxts",1);
+                            gen << CodeGen::SetInput("calibration",2);
                             break;
                         case generated::Pipeline_Node_Type_IOCSVReader:
                             gen << CodeGen::SetHeader("io/CSVReader");
@@ -761,6 +776,23 @@ namespace saliency_sandbox {
                                 gen << CodeGen::SetInput(ss.str(), i);
                                 gen << CodeGen::SetConstructorArgument(ss.str(),generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_string,ss.str());
                             }
+                            break;
+                        case generated::Pipeline_Node_Type_PlotQuiver:
+                            gen << CodeGen::SetHeader("plot/Quiver");
+                            gen << CodeGen::SetClass("saliency_sandbox::plot::Quiver");
+                            gen << CodeGen::SetTemplateArgument("width",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_WIDTH_S(RESOLUTION) );
+                            gen << CodeGen::SetTemplateArgument("height",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_HEIGHT_S(RESOLUTION));
+                            gen << CodeGen::SetInput("flow",0);
+                            gen << CodeGen::SetInput("rgb",0);
+                            break;
+                        case generated::Pipeline_Node_Type_OpticalFlow:
+                            gen << CodeGen::SetHeader("flow/OpticalFlow");
+                            gen << CodeGen::SetClass("saliency_sandbox::flow::_OpticalFlow");
+                            gen << CodeGen::SetTemplateArgument("width",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_WIDTH_S(RESOLUTION) );
+                            gen << CodeGen::SetTemplateArgument("height",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_HEIGHT_S(RESOLUTION));
+                            gen << CodeGen::SetInput("next",0);
+                            if(pipeline.node(i).input_size() > 1)
+                                gen << CodeGen::SetInput("init",1);
                             break;
                         default:
                             sserr << "unknown node type: " << generated::Pipeline_Node::Type_Name(pipeline.node(i).type()) << ssthrow;

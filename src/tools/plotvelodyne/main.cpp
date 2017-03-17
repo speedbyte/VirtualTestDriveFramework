@@ -6,6 +6,7 @@
 #include <kitti/VelodyneReader.h>
 #include <io/ImageShow.h>
 #include <io/ImageWriter.h>
+#include <kitti/Velodyne2PolarImage.h>
 
 
 void process(bool saveOutput, boost::filesystem::path dataset, boost::filesystem::path output);
@@ -52,7 +53,7 @@ int main(int argc, char* argv[]) {
 void process(bool saveOutput, boost::filesystem::path dataset, boost::filesystem::path output) {
     saliency_sandbox::core::Pipeline pipeline;
     saliency_sandbox::kitti::VelodyneReader velodyne_reader(dataset);
-    saliency_sandbox::kitti::VelodyneReader::PolarImage v2pi;
+    saliency_sandbox::kitti::Velodyne2PolarImage v2pi;
     saliency_sandbox::kitti::VelodynePolarImage::ConvertRGB h2rgb;
     saliency_sandbox::io::ImageShow is(dataset.string());
     saliency_sandbox::io::ImageWriter iw(output.string());

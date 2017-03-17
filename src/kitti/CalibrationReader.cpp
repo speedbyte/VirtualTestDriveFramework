@@ -92,6 +92,14 @@ namespace saliency_sandbox {
 
         cv::Matx<float, 3, 1>& Calibration::OXTS2Velo::T() {
             return this->m_T;
+        }
+
+        cv::Matx44f Calibration::OXTS2Velo::TR() {
+            return cv::Matx<float,4,4>(
+                    this->m_R.val[0],this->m_R.val[1],this->m_R.val[2],this->m_T.val[0],
+                    this->m_R.val[3],this->m_R.val[4],this->m_R.val[5],this->m_T.val[1],
+                    this->m_R.val[6],this->m_R.val[7],this->m_R.val[8],this->m_T.val[2],
+                    0,0,0,1);
         };
 
         std::string Calibration::read(std::ifstream& is, size_t num, float* val) {
@@ -205,33 +213,65 @@ namespace saliency_sandbox {
         }
 
         Calibration::Calibration(boost::filesystem::path path) {
+            cv::Matx34f P_rect;
+
             this->loadCamToCam(path / "calib_cam_to_cam.txt");
             this->loadImuToVelo(path / "calib_imu_to_velo.txt");
             this->loadVeloToCam(path / "calib_velo_to_cam.txt");
+
+            for(int i = 0; i < 4; i++) {
+                this->m_velo2cam_TR[i] = this->m_camera[i].TR() * this->m_velodyne.TR();
+                P_rect = this->m_camera[i].P_rect();
+                this->m_velo2cam_P[i] = cv::Matx33f(
+                        P_rect.val[0],P_rect.val[1],P_rect.val[2],
+                        P_rect.val[4],P_rect.val[5],P_rect.val[6],
+                        P_rect.val[8],P_rect.val[9],P_rect.val[10]);
+            }
         }
 
         void Calibration::veloToCam(cv::Vec3f* velo, cv::Vec2f* cam, size_t num, size_t camera) {
-            cv::Matx44f TR;
-            cv::Matx34f P_rect;
-            cv::Matx33f P;
-
-            TR = this->m_camera[camera].TR() * this->m_velodyne.TR();
-            P_rect = this->m_camera[camera].P_rect();
-            P = cv::Matx33f(
-                    P_rect.val[0],P_rect.val[1],P_rect.val[2],
-                    P_rect.val[4],P_rect.val[5],P_rect.val[6],
-                    P_rect.val[8],P_rect.val[9],P_rect.val[10]);
-
             cv::Vec4f tmp4;
             cv::Vec3f tmp3;
             cv::Vec2f tmp2;
+
             for(int i = 0; i < num; i++) {
-                tmp4 = TR * cv::Vec4f(velo[i].val[0],velo[i].val[1],velo[i].val[2],1);
-                tmp3 = P * cv::Vec3f(tmp4.val[0],tmp4.val[1],tmp4.val[2]);
+                tmp4 = this->m_velo2cam_TR[camera] * cv::Vec4f(velo[i].val[0],velo[i].val[1],velo[i].val[2],1.0f);
+                tmp3 = this->m_velo2cam_P[camera] * cv::Vec3f(tmp4.val[0],tmp4.val[1],tmp4.val[2]);
                 tmp2.val[0] = tmp3[0] / tmp3[2];
                 tmp2.val[1] = tmp3[1] / tmp3[2];
                 cam[i] = tmp2;
             }
+        }
+
+        void Calibration::imuToVelo(cv::Vec3f* imu, cv::Vec3f* velo, size_t num) {
+            cv::Matx44f TR;
+            cv::Vec4f tmp;
+
+            TR = this->m_oxts.TR();
+
+            for(int i = 0; i < num; i++) {
+                tmp = TR * cv::Vec4f(imu[i].val[0],imu[i].val[1],imu[i].val[2],1.0f);
+                velo[i].val[0] = tmp.val[0];
+                velo[i].val[1] = tmp.val[1];
+                velo[i].val[2] = tmp.val[2];
+            }
+        }
+
+        void Calibration::imuDirToVeloDir(cv::Vec3f *imu, cv::Vec3f *velo, size_t num) {
+            cv::Matx33f R;
+            cv::Matx31f T;
+
+            T = this->m_oxts.T();
+            R = this->m_oxts.R();
+
+            for(int i = 0; i < num; i++) {
+                velo[i] = (R * (imu[i]+cv::Vec3f(T.val)))-cv::Vec3f(T.val);
+            }
+
+        }
+
+        cv::Matx44f Calibration::imuToVeloTR() {
+            return this->m_oxts.TR();
         }
 
         CalibrationReader::CalibrationReader(boost::filesystem::path path) : m_calibration(path / "..")  {

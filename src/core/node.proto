@@ -21,6 +21,8 @@ message Pipeline {
             KittiOXTSSelector           = 111;
             KittiTrackletSaliency       = 112;
             KittiTrackletDraw           = 113;
+            KittiEgoMotion              = 114;
+            KittiOXTSPose               = 115;
 
             // IO
             IOCSVReader                 = 201;
@@ -50,6 +52,10 @@ message Pipeline {
 
             // Plot
             Plot                        = 501;
+            PlotQuiver                  = 502;
+
+            // Optical Flow
+            OpticalFlow                 = 601;
         }
 
         required Type type = 2;
