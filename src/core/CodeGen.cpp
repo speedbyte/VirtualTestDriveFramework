@@ -611,6 +611,15 @@ namespace saliency_sandbox {
                             gen << CodeGen::SetInput("oxts",1);
                             gen << CodeGen::SetInput("calibration",2);
                             break;
+                        case generated::Pipeline_Node_Type_KittiDrawTrajectory:
+                            gen << CodeGen::SetHeader("kitti/DrawTrajectory");
+                            gen << CodeGen::SetClass("saliency_sandbox::kitti::DrawTrajectory");
+                            gen << CodeGen::SetTemplateArgument("camera",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_complex,"saliency_sandbox::kitti::Camera::LEFT_RGB");
+                            gen << CodeGen::SetTemplateArgument("frames",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,"5");
+                            gen << CodeGen::SetInput("oxts",0);
+                            gen << CodeGen::SetInput("calibration",1);
+                            gen << CodeGen::SetInput("rgb",2);
+                            break;
                         case generated::Pipeline_Node_Type_IOCSVReader:
                             gen << CodeGen::SetHeader("io/CSVReader");
                             gen << CodeGen::SetClass("saliency_sandbox::io::CSVReader");
@@ -793,6 +802,12 @@ namespace saliency_sandbox {
                             gen << CodeGen::SetInput("next",0);
                             if(pipeline.node(i).input_size() > 1)
                                 gen << CodeGen::SetInput("init",1);
+                            break;
+                        case generated::Pipeline_Node_Type_ExtrapolatePose:
+                            gen << CodeGen::SetHeader("flow/Trajectory");
+                            gen << CodeGen::SetClass("saliency_sandbox::flow::ExtrapolatePose");
+                            gen << CodeGen::SetTemplateArgument("frames",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,"5");
+                            gen << CodeGen::SetInput("pose",0);
                             break;
                         default:
                             sserr << "unknown node type: " << generated::Pipeline_Node::Type_Name(pipeline.node(i).type()) << ssthrow;

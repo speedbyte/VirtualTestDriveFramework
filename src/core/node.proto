@@ -23,6 +23,7 @@ message Pipeline {
             KittiTrackletDraw           = 113;
             KittiEgoMotion              = 114;
             KittiOXTSPose               = 115;
+            KittiDrawTrajectory         = 116;
 
             // IO
             IOCSVReader                 = 201;
@@ -56,6 +57,7 @@ message Pipeline {
 
             // Optical Flow
             OpticalFlow                 = 601;
+            ExtrapolatePose             = 602;
         }
 
         required Type type = 2;

@@ -7,21 +7,18 @@
 
 #include <core/Node.h>
 #include <utils/Matrix.h>
-#include "OXTSReader.h"
-#include "CalibrationReader.h"
+#include <kitti/OXTSReader.h>
+#include <kitti/CalibrationReader.h>
+#include <flow/Trajectory.h>
 
 namespace saliency_sandbox {
     namespace kitti {
 
-        class Pose : public saliency_sandbox::utils::_Matrix<4,4,float> {
-
-        };
-
         class OXTSPose : public saliency_sandbox::core::Node::
         template Input<OXTSRow>::
-        template Output<Pose> {
+        template Output<saliency_sandbox::flow::Pose> {
         private:
-            Pose m_pose;
+            saliency_sandbox::flow::Pose m_pose;
             float m_scale;
             cv::Matx44f m_Tr_0_inv;
 

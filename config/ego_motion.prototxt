@@ -325,6 +325,51 @@ node {
     }
 }
 
+
+##
+## Show Ego Motion Trajetory
+##
+
+node {
+    name: "Ego Motion Trajectory";
+    type: ExtrapolatePose;
+    input {
+        node: "Kitti Pose";
+        port: 0;
+    }
+}
+
+node {
+    name: "Draw Ego Motion Trajectory";
+    type: KittiDrawTrajectory;
+    input {
+        node: "Ego Motion Trajectory";
+        port: 0;
+    }
+    input {
+        node: "Kitti Reader";
+        port: 7;
+    }
+    input {
+        node: "Ego Motion Quiver";
+        port: 0;
+    }
+}
+
+node {
+    name: "Show Ego Motion Trajectory";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "Ego Motion Trajectory";
+    }
+    input {
+        node: "Draw Ego Motion Trajectory";
+        port: 0;
+    }
+}
+
 ##
 ## Calculate Optical Motion
 ##

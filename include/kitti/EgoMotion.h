@@ -6,6 +6,7 @@
 #define EGOMOTION_H
 
 #include <flow/Flow.h>
+#include <flow/Trajectory.h>
 #include <kitti/VelodyneReader.h>
 #include <kitti/OXTSReader.h>
 #include <kitti/CalibrationReader.h>
@@ -16,9 +17,7 @@ namespace saliency_sandbox {
     namespace kitti {
 
         template<Camera _cam>
-        class EgoMotion : public saliency_sandbox::flow::_Flow<ImageReader<_cam>::Image::WIDTH, ImageReader<_cam>::Image::HEIGHT,VelodyneReader::Matrix,Pose,Calibration> {
-        private:
-            cv::Matx44f m_last;
+        class EgoMotion : public saliency_sandbox::flow::_Flow<ImageReader<_cam>::Image::WIDTH, ImageReader<_cam>::Image::HEIGHT,VelodyneReader::Matrix,saliency_sandbox::flow::Pose,Calibration> {
         public:
             static const size_t WIDTH = ImageReader<_cam>::Image::WIDTH;
             static const size_t HEIGHT = ImageReader<_cam>::Image::HEIGHT;
@@ -90,8 +89,6 @@ namespace saliency_sandbox {
 
                     flow.template at<cv::Vec2f>((int)tmp2[1].val[1],(int)tmp2[1].val[0]) = tmp2[0]-tmp2[1];
                 }
-
-                this->m_last = oxts;
             }
 
             void reset() override {
