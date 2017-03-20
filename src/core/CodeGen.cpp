@@ -651,8 +651,8 @@ namespace saliency_sandbox {
                             gen << CodeGen::SetInput("image",0);
                             break;
                         case generated::Pipeline_Node_Type_IOImageWriter:
-                            gen << CodeGen::SetHeader("io/ImageWrite");
-                            gen << CodeGen::SetClass("saliency_sandbox::io::ImageWrite");
+                            gen << CodeGen::SetHeader("io/ImageWriter");
+                            gen << CodeGen::SetClass("saliency_sandbox::io::ImageWriter");
                             gen << CodeGen::SetConstructorArgument("path",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_string);
                             gen << CodeGen::SetInput("image",0);
                             break;
