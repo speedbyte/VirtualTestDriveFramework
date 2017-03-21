@@ -10,8 +10,8 @@ node {
     argument {
         name: "path";
         type: pb_string;
-        value: "${DIR_DATA}/kitti/2011_09_26/2011_09_26_drive_0001_sync/";
-        #value: "/media/geislerd/Documents/repo/Kitti/data/2011_09_26/2011_09_26_drive_0029_sync/";
+        #value: "${DIR_DATA}/kitti/2011_09_26/2011_09_26_drive_0001_sync/";
+        value: "/media/geislerd/Documents/repo/Kitti/data/2011_09_26/2011_09_26_drive_0029_sync/";
     }
 }
 

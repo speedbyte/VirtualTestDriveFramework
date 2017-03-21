@@ -221,8 +221,8 @@ namespace saliency_sandbox {
             if(this->properties()->get("window_mode",(int) cv::WINDOW_AUTOSIZE) != cv::WINDOW_AUTOSIZE)
                 cv::resizeWindow("pipeline",this->properties()->get("width",512),this->properties()->get("height",512));
             cv::namedWindow("pipeline");
-            //cv::imshow("pipeline",graph.mat());
-            cv::imwrite("pipeline.png",graph.mat());
+            cv::imshow("pipeline",graph.mat());
+            //cv::imwrite("pipeline.png",graph.mat());
         }
 
         const char *Pipeline::name() {
