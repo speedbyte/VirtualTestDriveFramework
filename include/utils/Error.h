@@ -51,9 +51,9 @@ namespace saliency_sandbox {
         };
 
 #define ssprefix "\n\tin file: " __FILE__ ":" BOOST_PP_STRINGIZE(__LINE__) "\n\tmessage:\n\t\t"
-#define sserr saliency_sandbox::utils::Error( ssprefix )
+#define sserr do { saliency_sandbox::utils::Error( ssprefix )
 #define sscond( cond ) saliency_sandbox::utils::Error::condition((cond))
-#define ssthrow &saliency_sandbox::utils::Error::runtime_exception
+#define ssthrow &saliency_sandbox::utils::Error::runtime_exception; } while(false)
 #define sspexits( path ) saliency_sandbox::utils::Error::path_exists( path ) << "no such file or directory: " << path
 #define sspfile( path ) saliency_sandbox::utils::Error::is_file( path ) << "file not found: " << path
 #define sspdir( path ) saliency_sandbox::utils::Error::is_directory( path ) << "directory not found: " << path

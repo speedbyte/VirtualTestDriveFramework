@@ -165,7 +165,7 @@ BOOST_AUTO_TEST_SUITE(kitti)
 
         saliency_sandbox::kitti::VelodyneReader velodyne_reader(data_base "/tmp/04");
         saliency_sandbox::kitti::Velodyne2PolarImage velodyne2polar;
-        saliency_sandbox::kitti::VelodynePolarImage::ConvertRGB velodyne2polar_rgb;
+        saliency_sandbox::utils::PolarHeatmapImage::ConvertRGB velodyne2polar_rgb;
 
         connect_port(velodyne_reader,0,velodyne2polar,0);
 

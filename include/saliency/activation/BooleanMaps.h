@@ -43,7 +43,7 @@ namespace saliency_sandbox {
                 }
 
                 float smoothSigma() {
-                    const float s = this->properties()->template get<float>("smooth_sigma",1.0f);
+                    const float s = this->properties()->template get<float>("smooth_sigma",3.0f);
 
                     return s;
                 }
@@ -51,6 +51,7 @@ namespace saliency_sandbox {
                 void calc() override {
                     this->map(0.0f);
                     this->booleanMaps(this->template input<0>()->value()->mat(),this->map(),this->filterSize(),this->smoothSigma(),this->numThresholds());
+                    cv::multiply(this->map(),this->fov(),this->map());
                 }
 
                 void reset() override {

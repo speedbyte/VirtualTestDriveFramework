@@ -380,7 +380,7 @@ namespace saliency_sandbox {
                     sserr << ssequal(argument->type(),templateArgument.type())
                           << "invlaid type for argument \"" << templateArgument.name()
                           << "\" expected type \"" << generated::Pipeline_Node_Argument::Type_Name(templateArgument.type())
-                          << "\" but got: \"" << generated::Pipeline_Node_Argument::Type_Name(argument->type());
+                          << "\" but got: \"" << generated::Pipeline_Node_Argument::Type_Name(argument->type()) << ssthrow;
 
                     this->pushTemplateArgument(argument);
                     return *this;
@@ -412,7 +412,7 @@ namespace saliency_sandbox {
                     sserr << ssequal(argument->type(),constructorArgument.type())
                           << "invlaid type for argument \"" << constructorArgument.name()
                           << "\" expected type \"" << generated::Pipeline_Node_Argument::Type_Name(constructorArgument.type())
-                          << "\" but got: \"" << generated::Pipeline_Node_Argument::Type_Name(argument->type());
+                          << "\" but got: \"" << generated::Pipeline_Node_Argument::Type_Name(argument->type()) << ssthrow;
 
                     this->pushConstructorArgument(argument);
                     return *this;
@@ -462,7 +462,7 @@ namespace saliency_sandbox {
                     sserr << ssequal(property->type(),sproperty.type())
                           << "invlaid type for property \"" << sproperty.name()
                           << "\" expected type \"" << generated::Pipeline_Node_Property::Type_Name(sproperty.type())
-                          << "\" but got: \"" << generated::Pipeline_Node_Property::Type_Name(property->type());
+                          << "\" but got: \"" << generated::Pipeline_Node_Property::Type_Name(property->type()) << ssthrow;
                 }
             }
 
@@ -619,6 +619,14 @@ namespace saliency_sandbox {
                             gen << CodeGen::SetInput("oxts",0);
                             gen << CodeGen::SetInput("calibration",1);
                             gen << CodeGen::SetInput("rgb",2);
+                            break;
+                        case generated::Pipeline_Node_Type_KittiFOVToCam:
+                            gen << CodeGen::SetHeader("kitti/FOVToCam");
+                            gen << CodeGen::SetClass("saliency_sandbox::kitti::FOVToCam");
+                            gen << CodeGen::SetTemplateArgument("camera",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_complex,"saliency_sandbox::kitti::Camera::LEFT_RGB");
+                            gen << CodeGen::SetInput("fov",0);
+                            gen << CodeGen::SetInput("depth",1);
+                            gen << CodeGen::SetInput("calibration",2);
                             break;
                         case generated::Pipeline_Node_Type_IOCSVReader:
                             gen << CodeGen::SetHeader("io/CSVReader");
@@ -808,6 +816,29 @@ namespace saliency_sandbox {
                             gen << CodeGen::SetClass("saliency_sandbox::flow::ExtrapolatePose");
                             gen << CodeGen::SetTemplateArgument("frames",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,"5");
                             gen << CodeGen::SetInput("pose",0);
+                            break;
+                        case generated::Pipeline_Node_Type_GazeRandom:
+                            gen << CodeGen::SetHeader("gaze/Random");
+                            gen << CodeGen::SetClass("saliency_sandbox::gaze::Random");
+                            gen << CodeGen::SetNoInput();
+                            break;
+                        case generated::Pipeline_Node_Type_GazeSelector:
+                            gen << CodeGen::SetHeader("gaze/Gaze");
+                            gen << CodeGen::SetClass("saliency_sandbox::gaze::Gaze::Selector");
+                            gen << CodeGen::SetTemplateArgument("component",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_complex);
+                            gen << CodeGen::SetInput("gaze",0);
+                            break;
+                        case generated::Pipeline_Node_Type_GazeMovementSelector:
+                            gen << CodeGen::SetHeader("gaze/GazeMovement");
+                            gen << CodeGen::SetClass("saliency_sandbox::gaze::GazeMovement::Selector");
+                            gen << CodeGen::SetTemplateArgument("component",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_complex);
+                            gen << CodeGen::SetInput("gaze_movement",0);
+                            break;
+                        case generated::Pipeline_Node_Type_GazeFOV:
+                            gen << CodeGen::SetHeader("gaze/FOV");
+                            gen << CodeGen::SetClass("saliency_sandbox::gaze::FOV");
+                            gen << CodeGen::SetInput("gaze",0);
+                            gen << CodeGen::SetInput("depth",1);
                             break;
                         default:
                             sserr << "unknown node type: " << generated::Pipeline_Node::Type_Name(pipeline.node(i).type()) << ssthrow;

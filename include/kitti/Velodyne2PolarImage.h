@@ -6,18 +6,19 @@
 #define VELODYNE2POLARIMAGE_H
 
 #include <kitti/VelodyneReader.h>
+#include <utils/Polar.h>
 
 namespace saliency_sandbox {
     namespace kitti {
 
-        typedef saliency_sandbox::utils::_HeatmapImage<360, 180> VelodynePolarImage;
-
         template<uint32_t _num_points>
         class _Velodyne2PolarImage
-                : public saliency_sandbox::core::Node::template Input<typename _VelodyneReader<_num_points>::Matrix>::template Output<VelodynePolarImage, VelodynePolarImage> {
+                : public saliency_sandbox::core::Node::
+                template Input<typename _VelodyneReader<_num_points>::Matrix>::
+                template Output<saliency_sandbox::utils::PolarHeatmapImage, saliency_sandbox::utils::PolarHeatmapImage> {
         private:
-            VelodynePolarImage m_distance;
-            VelodynePolarImage m_reflection;
+            saliency_sandbox::utils::PolarHeatmapImage m_distance;
+            saliency_sandbox::utils::PolarHeatmapImage m_reflection;
 
         public:
             _Velodyne2PolarImage();

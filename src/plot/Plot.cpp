@@ -116,7 +116,7 @@ namespace saliency_sandbox {
             } while((n<=0 || mat.cols == 0 || mat.rows == 0) && m < 100);
 
             if(m >= 100)
-                throw new std::exception(); //TODO: error handling
+                sserr << "error while read back gnuplot image. got " << n << " bytes total" << ssthrow;
 
             return mat;
         }

@@ -17,11 +17,11 @@ namespace saliency_sandbox {
 
         ImageReader<LEFT_RGB>::ImageReader(boost::filesystem::path path) : saliency_sandbox::io::_ImageReader<1242,375,saliency_sandbox::utils::_RGBImage>(path / "image_02" / "data") {
             this->template output<0>()->name("left_rgb");
-        };
+        }
 
         ImageReader<RIGHT_RGB>::ImageReader(boost::filesystem::path path) : saliency_sandbox::io::_ImageReader<1242,375,saliency_sandbox::utils::_RGBImage>(path / "image_03" / "data") {
             this->template output<0>()->name("right_rgb");
-        };
+        }
 
         template class ImageReader<LEFT_GRAY>;
         template class ImageReader<RIGHT_GRAY>;

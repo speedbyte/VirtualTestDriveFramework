@@ -56,7 +56,6 @@ namespace saliency_sandbox {
                 this->template output<0>()->value(&this->m_rgb);
             }
 
-
             void calc() override {
                 Calibration* calibration;
                 cv::Mat4f tr;
@@ -104,9 +103,6 @@ namespace saliency_sandbox {
                     p[1] = cv::Point(lc[i]);
                     p[2] = cv::Point(rc[i]);
                     p[3] = cv::Point(rc[i-1]);
-
-
-                    //cv::fillConvexPoly(rgb,p,4,cv::Scalar(255,255,255,128));
 
                     for(int j = 1; j < 4; j++)
                         cv::line(rgb,p[j-1],p[j],CV_RGB(0,255,0));

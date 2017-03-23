@@ -46,7 +46,7 @@ namespace saliency_sandbox {
                 connect_port(this->m_dummy_init,0,*this,1);
             }
 
-            void calc_bak_bak() {
+            void calc_bak() {
                 cv::Mat1b next, prev;
                 cv::Mat2f init,flow;
                 double pyr_scale, poly_sigma;
@@ -57,15 +57,15 @@ namespace saliency_sandbox {
                 init = this->template input<1>()->value()->mat();
                 flow = this->flow();
 
-                cv::GaussianBlur(init,init,cv::Size(31,31),5);
+                //cv::GaussianBlur(init,init,cv::Size(31,31),5);
 
                 pyr_scale = this->properties()->template get<float>("pyr_scale",0.5f);
                 poly_sigma = this->properties()->template get<float>("poly_sigma",1.1f);
 
-                levels = this->properties()->template get<int>("levels",10);
-                winsize = this->properties()->template get<int>("winsize",61);
-                iterations = this->properties()->template get<int>("iterations",100);
-                poly_n = this->properties()->template get<int>("poly_n",13);
+                levels = this->properties()->template get<int>("levels",1);
+                winsize = this->properties()->template get<int>("winsize",5);
+                iterations = this->properties()->template get<int>("iterations",1);
+                poly_n = this->properties()->template get<int>("poly_n",5);
                 flags = this->properties()->template get<int>("flags",cv::OPTFLOW_USE_INITIAL_FLOW);
 
                 if(init.data != flow.data)
@@ -77,7 +77,6 @@ namespace saliency_sandbox {
             }
 
             void calc() {
-                return;
                 cv::Mat1b next, prev;
                 std::vector<cv::Point2f> points[2];
                 std::vector<uchar> status;
@@ -94,23 +93,18 @@ namespace saliency_sandbox {
 
                 //cv::GaussianBlur(init,init,cv::Size(31,31),5);
 
-                /*
                 for(cv::Point2f p(0.0f,0.0f); p.x < _width; p.x++) {
                     for(p.y = 0.0f; p.y < _height; p.y++) {
                         v = init.template at<cv::Vec2f>(p);
                         if(v.val[0] < FLT_EPSILON && v.val[1] < FLT_EPSILON)
                             continue;
                         points[0].push_back(p);
-                        points[1].push_back(p+cv::Point2f(v*0.1));
+                        points[1].push_back(p+cv::Point2f(v));
                     }
                 }
-                 */
 
                 if(this->time() < 1)
                     this->m_prev.mat(next);
-
-                cv::goodFeaturesToTrack(prev,points[0],1000,0.01,10);
-
 
                 cv::calcOpticalFlowPyrLK(
                         prev,
@@ -119,10 +113,10 @@ namespace saliency_sandbox {
                         points[1],
                         status,
                         err,
-                        cv::Size(21,21),
-                        3,
-                        cv::TermCriteria(cv::TermCriteria::COUNT+cv::TermCriteria::EPS, 30, 0.1),
-                        /*cv::OPTFLOW_USE_INITIAL_FLOW*/0,
+                        cv::Size(3,3),
+                        5,
+                        cv::TermCriteria(cv::TermCriteria::COUNT+cv::TermCriteria::EPS, 100, 0.01),
+                        cv::OPTFLOW_USE_INITIAL_FLOW,
                         1e-4);
 
                 for(int i = 0; i < points[0].size(); i++) {
@@ -139,7 +133,7 @@ namespace saliency_sandbox {
 
 
 
-            void calc_bak_bak_bak() {
+            void calc_bak_bak_bak_bak() {
                 cv::Mat1b next, prev;
                 cv::Mat2f init,flow;
                 double pyr_scale, poly_sigma;
@@ -160,7 +154,7 @@ namespace saliency_sandbox {
                 flags = this->properties()->template get<int>("flags",cv::OPTFLOW_USE_INITIAL_FLOW);
 
 
-                cv::GaussianBlur(init,init,cv::Size(31,31),5);
+                //cv::GaussianBlur(init,init,cv::Size(31,31),5);
 
                 if(init.data != flow.data)
                     memcpy(flow.data,init.data,_width*_height*sizeof(cv::Vec2f));

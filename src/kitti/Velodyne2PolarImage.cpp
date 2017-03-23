@@ -40,8 +40,8 @@ namespace saliency_sandbox {
                 z = v->val[2];
                 w = v->val[3];
                 r = sqrtf(x * x + y * y + z * z);
-                c.y = ((int) (acosf(z / r) * rad2deg)) % 180;
-                c.x = ((int) ((atan2f(y, x) + M_PI) * rad2deg)) % 360;
+                c.y = ((int) (acosf(z / r) * rad2deg)) ;//% 180;
+                c.x = ((int) ((atan2f(y, x) /*+ M_PI*/) * rad2deg)) ;//% 360;
                 this->m_distance(c) = r;
                 this->m_reflection(c) = w;
             }

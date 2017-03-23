@@ -1,4 +1,176 @@
-name: "Object Saliency";
+name: "Kitti FOV";
+
+##
+## Random gaze generator
+##
+
+node {
+    name: "Random Gaze";
+    type: GazeRandom;
+}
+
+
+##
+## Extract Gaze components
+##
+
+node {
+    name: "Extract Origin X";
+    type: GazeSelector;
+    argument {
+        name: "component";
+        type: pb_complex;
+        value: "saliency_sandbox::gaze::Gaze::ORIGIN_X";
+    }
+    input {
+        node: "Random Gaze";
+        port: 0;
+    }
+}
+
+node {
+    name: "Extract Origin Y";
+    type: GazeSelector;
+    argument {
+        name: "component";
+        type: pb_complex;
+        value: "saliency_sandbox::gaze::Gaze::ORIGIN_Y";
+    }
+    input {
+        node: "Random Gaze";
+        port: 0;
+    }
+}
+
+node {
+    name: "Extract Origin Z";
+    type: GazeSelector;
+    argument {
+        name: "component";
+        type: pb_complex;
+        value: "saliency_sandbox::gaze::Gaze::ORIGIN_Z";
+    }
+    input {
+        node: "Random Gaze";
+        port: 0;
+    }
+}
+
+node {
+    name: "Extract Inclination";
+    type: GazeSelector;
+    argument {
+        name: "component";
+        type: pb_complex;
+        value: "saliency_sandbox::gaze::Gaze::ANGLE_INCLINATION";
+    }
+    input {
+        node: "Random Gaze";
+        port: 0;
+    }
+}
+
+node {
+    name: "Extract Azimuth";
+    type: GazeSelector;
+    argument {
+        name: "component";
+        type: pb_complex;
+        value: "saliency_sandbox::gaze::Gaze::ANGLE_AZIMUTH";
+    }
+    input {
+        node: "Random Gaze";
+        port: 0;
+    }
+}
+
+
+##
+## Plot Gaze
+##
+
+node {
+    name: "Origin Plot";
+    type: Plot;
+    argument {
+        name: "line0";
+        type: pb_string;
+        value: "x";
+    }
+    argument {
+        name: "line1";
+        type: pb_string;
+        value: "y";
+    }
+    argument {
+        name: "line2";
+        type: pb_string;
+        value: "z";
+    }
+    input {
+        node: "Extract Origin X";
+        port: 0;
+    }
+    input {
+        node: "Extract Origin Y";
+        port: 0;
+    }
+    input {
+        node: "Extract Origin Z";
+        port: 0;
+    }
+}
+
+node {
+    name: "Show Origin Plot";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "Origin";
+    }
+    input {
+        node: "Origin Plot";
+        port: 0;
+    }
+}
+
+node {
+    name: "Angle Plot";
+    type: Plot;
+    argument {
+        name: "line0";
+        type: pb_string;
+        value: "inclination";
+    }
+    argument {
+        name: "line1";
+        type: pb_string;
+        value: "azimuth";
+    }
+    input {
+        node: "Extract Inclination";
+        port: 0;
+    }
+    input {
+        node: "Extract Azimuth";
+        port: 0;
+    }
+}
+
+node {
+    name: "Show Angle Plot";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "Angle";
+    }
+    input {
+        node: "Angle Plot";
+        port: 0;
+    }
+}
 
 ##
 ## Read Kitti Dataset
@@ -10,41 +182,14 @@ node {
     argument {
         name: "path";
         type: pb_string;
-        value: "${DIR_DATA}/kitti/2011_09_26/2011_09_26_drive_0001_sync/";
+        #value: "${DIR_DATA}/kitti/2011_09_26/2011_09_26_drive_0001_sync/";
+        value: "/media/geislerd/Documents/repo/Kitti/data/2011_09_26/2011_09_26_drive_0029_sync/";
     }
 }
 
 ##
 ## Show raw Kitti data
 ##
-
-node {
-    name: "Show Camera 0";
-    type: IOImageShow;
-    argument {
-        name: "window";
-        type: pb_string;
-        value: "Kitti Cam 0";
-    }
-    input {
-        node: "Kitti Reader";
-        port: 0;
-    }
-}
-
-node {
-    name: "Show Camera 1";
-    type: IOImageShow;
-    argument {
-        name: "window";
-        type: pb_string;
-        value: "Kitti Cam 1";
-    }
-    input {
-        node: "Kitti Reader";
-        port: 1;
-    }
-}
 
 node {
     name: "Show Camera 2";
@@ -57,20 +202,6 @@ node {
     input {
         node: "Kitti Reader";
         port: 2;
-    }
-}
-
-node {
-    name: "Show Camera 3";
-    type: IOImageShow;
-    argument {
-        name: "window";
-        type: pb_string;
-        value: "Kitti Cam 3";
-    }
-    input {
-        node: "Kitti Reader";
-        port: 3;
     }
 }
 
@@ -174,277 +305,127 @@ node {
 }
 
 ##
-## Show Velocity Plots
+## Calculate FOV
 ##
 
 node {
-    name: "OXTS Latitude";
-    type: KittiOXTSSelector;
-    argument {
-        name: "channel";
-        type: pb_uint32;
-        value: "0";
-    }
+    name: "FOV";
+    type: GazeFOV;
     input {
-        node: "Kitti Reader";
-        port: 5;
-    }
-}
-
-node {
-    name: "OXTS Longitude";
-    type: KittiOXTSSelector;
-    argument {
-        name: "channel";
-        type: pb_uint32;
-        value: "1";
-    }
-    input {
-        node: "Kitti Reader";
-        port: 5;
-    }
-}
-
-node {
-    name: "OXTS Altitude";
-    type: KittiOXTSSelector;
-    argument {
-        name: "channel";
-        type: pb_uint32;
-        value: "2";
-    }
-    input {
-        node: "Kitti Reader";
-        port: 5;
-    }
-}
-
-node {
-    name: "OXTS Roll";
-    type: KittiOXTSSelector;
-    argument {
-        name: "channel";
-        type: pb_uint32;
-        value: "3";
-    }
-    input {
-        node: "Kitti Reader";
-        port: 5;
-    }
-}
-
-node {
-    name: "OXTS Pitch";
-    type: KittiOXTSSelector;
-    argument {
-        name: "channel";
-        type: pb_uint32;
-        value: "4";
-    }
-    input {
-        node: "Kitti Reader";
-        port: 5;
-    }
-}
-
-node {
-    name: "OXTS Heading";
-    type: KittiOXTSSelector;
-    argument {
-        name: "channel";
-        type: pb_uint32;
-        value: "5";
-    }
-    input {
-        node: "Kitti Reader";
-        port: 5;
-    }
-}
-
-node {
-    name: "OXTS Forward Velocity";
-    type: KittiOXTSSelector;
-    argument {
-        name: "channel";
-        type: pb_uint32;
-        value: "6";
-    }
-    input {
-        node: "Kitti Reader";
-        port: 5;
-    }
-}
-
-node {
-    name: "OXTS Leftward Velocity";
-    type: KittiOXTSSelector;
-    argument {
-        name: "channel";
-        type: pb_uint32;
-        value: "7";
-    }
-    input {
-        node: "Kitti Reader";
-        port: 5;
-    }
-}
-
-node {
-    name: "OXTS Upward Velocity";
-    type: KittiOXTSSelector;
-    argument {
-        name: "channel";
-        type: pb_uint32;
-        value: "8";
-    }
-    input {
-        node: "Kitti Reader";
-        port: 5;
-    }
-}
-
-node {
-    name: "OXTS Location Plot";
-    type: Plot;
-    argument {
-        name: "line0";
-        type: pb_string;
-        value: "Latitude";
-    }
-    argument {
-        name: "line1";
-        type: pb_string;
-        value: "Longitude";
-    }
-    argument {
-        name: "line2";
-        type: pb_string;
-        value: "Altitude";
-    }
-    input {
-        node: "OXTS Latitude";
+        node: "Random Gaze";
         port: 0;
     }
     input {
-        node: "OXTS Longitude";
-        port: 0;
-    }
-    input {
-        node: "OXTS Altitude";
+        node: "Velodyne polar image";
         port: 0;
     }
 }
 
 node {
-    name: "OXTS Rotation Plot";
-    type: Plot;
+    name: "FOV Heatmap";
+    type: UtilsImageConverter;
     argument {
-        name: "line0";
-        type: pb_string;
-        value: "Roll";
-    }
-    argument {
-        name: "line1";
-        type: pb_string;
-        value: "Pitch";
+        name: "width";
+        type: pb_uint32;
+        value: "360";
     }
     argument {
-        name: "line2";
-        type: pb_string;
-        value: "Heading";
+        name: "height";
+        type: pb_uint32;
+        value: "180";
+    }
+    argument {
+        name: "input";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_HeatmapImage";
+    }
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_RGBImage";
     }
     input {
-        node: "OXTS Roll";
-        port: 0;
-    }
-    input {
-        node: "OXTS Pitch";
-        port: 0;
-    }
-    input {
-        node: "OXTS Heading";
+        node: "FOV";
         port: 0;
     }
 }
 
 node {
-    name: "OXTS Velocity Plot";
-    type: Plot;
-    argument {
-        name: "line0";
-        type: pb_string;
-        value: "Forward";
-    }
-    argument {
-        name: "line1";
-        type: pb_string;
-        value: "Leftward";
-    }
-    argument {
-        name: "line2";
-        type: pb_string;
-        value: "Upward";
-    }
-    input {
-        node: "OXTS Forward Velocity";
-        port: 0;
-    }
-    input {
-        node: "OXTS Leftward Velocity";
-        port: 0;
-    }
-    input {
-        node: "OXTS Upward Velocity";
-        port: 0;
-    }
-}
-
-node {
-    name: "Show Location Plot";
+    name: "Show FOV";
     type: IOImageShow;
     argument {
         name: "window";
         type: pb_string;
-        value: "OXTS Location";
+        value: "FOV";
     }
     input {
-        node: "OXTS Location Plot";
+        node: "FOV Heatmap";
         port: 0;
     }
 }
 
 node {
-    name: "Show Rotation Plot";
-    type: IOImageShow;
-    argument {
-        name: "window";
-        type: pb_string;
-        value: "OXTS Rotation";
+    name: "FOV2Cam";
+    type: KittiFOVToCam;
+    input {
+        node: "FOV";
+        port: 0;
     }
     input {
-        node: "OXTS Rotation Plot";
+        node: "Velodyne polar image";
+        port: 0;
+    }
+    input {
+        node: "Kitti Reader";
+        port: 7;
+    }
+}
+
+node {
+    name: "FOV2Cam Heatmap";
+    type: UtilsImageConverter;
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::WIDTH";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT";
+    }
+    argument {
+        name: "input";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_HeatmapImage";
+    }
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_RGBImage";
+    }
+    input {
+        node: "FOV2Cam";
         port: 0;
     }
 }
 
 node {
-    name: "Show Velocity Plot";
+    name: "Show FOV2Cam";
     type: IOImageShow;
     argument {
         name: "window";
         type: pb_string;
-        value: "OXTS Velocity";
+        value: "FOV2Cam";
     }
     input {
-        node: "OXTS Velocity Plot";
+        node: "FOV2Cam Heatmap";
         port: 0;
     }
 }
-
-
 
 ##
-## Calculate Saliency
+## Extract LAB color features
 ##
 
 node {
@@ -495,6 +476,11 @@ node {
     }
 }
 
+##
+## Calculate Boolean Map Activation
+## on each LAB channel
+##
+
 node {
     name: "Intensity Boolean Map";
     type: SaliencyBooleanMaps;
@@ -510,6 +496,10 @@ node {
     }
     input {
         node: "LAB feature Map";
+        port: 0;
+    }
+    input {
+        node: "FOV2Cam";
         port: 0;
     }
 }
@@ -531,6 +521,10 @@ node {
         node: "LAB feature Map";
         port: 1;
     }
+    input {
+        node: "FOV2Cam";
+        port: 0;
+    }
 }
 
 node {
@@ -550,7 +544,15 @@ node {
         node: "LAB feature Map";
         port: 2;
     }
+    input {
+        node: "FOV2Cam";
+        port: 0;
+    }
 }
+
+##
+## Sum up Boolean Maps Activations
+##
 
 node {
     name: "Merge Boolean Maps";
@@ -608,6 +610,10 @@ node {
     }
 }
 
+##
+## Plot Boolean Map
+##
+
 node {
     name: "Boolean Map Heatmap";
     type: UtilsImageConverter;
@@ -643,74 +649,10 @@ node {
     argument {
         name: "window";
         type: pb_string;
-        value: "Boolean Map";
+        value: "Boolean Maps";
     }
     input {
         node: "Boolean Map Heatmap";
         port: 0;
     }
 }
-
-##
-## Calculate Tracklet Saliency
-##
-
-node {
-    name: "Tracklet Saliency";
-    type: KittiTrackletSaliency;
-    argument {
-        name: "camera";
-        type: pb_complex;
-        value: "saliency_sandbox::kitti::Camera::LEFT_RGB";
-    }
-    input {
-        node: "Kitti Reader";
-        port: 6;
-    }
-    input {
-        node: "Boolean Map";
-        port: 0;
-    }
-    input {
-        node: "Kitti Reader";
-        port: 7;
-    }
-}
-
-node {
-    name: "Draw Tracklets";
-    type: KittiTrackletDraw;
-    argument {
-        name: "camera";
-        type: pb_complex;
-        value: "saliency_sandbox::kitti::Camera::LEFT_RGB";
-    }
-    input {
-        node: "Kitti Reader";
-        port: 2;
-    }
-    input {
-        node: "Tracklet Saliency";
-        port: 0;
-    }
-    input {
-        node: "Kitti Reader";
-        port: 7;
-    }
-}
-
-node {
-    name: "Show Tracklet Saliency";
-    type: IOImageShow;
-    argument {
-        name: "window";
-        type: pb_string;
-        value: "Tracklet Saliency";
-    }
-    input {
-        node: "Draw Tracklets";
-        port: 0;
-    }
-}
-
-

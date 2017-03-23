@@ -54,7 +54,7 @@ void process(bool saveOutput, boost::filesystem::path dataset, boost::filesystem
     saliency_sandbox::core::Pipeline pipeline;
     saliency_sandbox::kitti::VelodyneReader velodyne_reader(dataset);
     saliency_sandbox::kitti::Velodyne2PolarImage v2pi;
-    saliency_sandbox::kitti::VelodynePolarImage::ConvertRGB h2rgb;
+    saliency_sandbox::utils::PolarHeatmapImage::ConvertRGB h2rgb;
     saliency_sandbox::io::ImageShow is(dataset.string());
     saliency_sandbox::io::ImageWriter iw(output.string());
 
