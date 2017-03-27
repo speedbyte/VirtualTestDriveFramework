@@ -40,6 +40,7 @@ namespace saliency_sandbox {
             const static size_t BYTES = WIDTH*HEIGHT*sizeof(_type);
 
             typedef cv::Mat_<_type> Mat;
+            typedef _type ValueType;
             typedef _MatrixSplitt<_width,_height,_type> Splitt;
             typedef _MatrixMerge<_width,_height,_type> Merge;
             typedef _MatrixSum<_width,_height,_type> Sum;

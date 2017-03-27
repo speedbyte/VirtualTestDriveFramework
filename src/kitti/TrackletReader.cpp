@@ -60,6 +60,14 @@ namespace saliency_sandbox {
             return cv::Vec3f(this->m_pose->rx, this->m_pose->ry, this->m_pose->rz);
         }
 
+        cv::Matx44f Tracklet::TR() {
+            return cv::Matx44f(
+                    this->m_rotation.val[0],this->m_rotation.val[1],this->m_rotation.val[2],this->m_translation.val[0],
+                    this->m_rotation.val[3],this->m_rotation.val[4],this->m_rotation.val[5],this->m_translation.val[1],
+                    this->m_rotation.val[6],this->m_rotation.val[7],this->m_rotation.val[8],this->m_translation.val[2],
+                    0.0f,0.0f,0.0f,1.0f);
+        }
+
         void Tracklet::points(cv::Vec3f *points) {
             points[0] = this->m_translation + (this->m_rotation *
                                                cv::Vec3f(this->m_tracklet->l / 2.0f, this->m_tracklet->w / 2.0f,
@@ -120,6 +128,18 @@ namespace saliency_sandbox {
             return &(this->m_properties);
         }
 
+        float Tracklet::l() {
+            return this->m_tracklet->l;
+        }
+
+        float Tracklet::w() {
+            return this->m_tracklet->w;
+        }
+
+        float Tracklet::h() {
+            return this->m_tracklet->h;
+        }
+
         void TrackletList::time(time_t time) {
             this->m_active_tracklets.clear();
             for (int i = 0; i < this->m_tracklets.size(); i++) {
@@ -163,5 +183,6 @@ namespace saliency_sandbox {
             for (int i = 0; i < this->m_tracklets.numberOfTracklets(); i++)
                 this->m_data.push(this->m_tracklets.getTracklet(i));
         }
+
     }
 }

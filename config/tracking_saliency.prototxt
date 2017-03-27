@@ -1,0 +1,273 @@
+name: "GBVS";
+
+##
+## Read video
+##
+
+node {
+    name: "Video Reader";
+    type: IOImageReader;
+    argument {
+        name: "path";
+        type: pb_string;
+        value: "${DIR_DATA}/kitti/2011_09_26/2011_09_26_drive_0001_sync/image_02/data";
+    }
+}
+
+##
+## Extract LAB color features
+##
+
+node {
+    name: "Convert to LAB";
+    type: UtilsImageConverter;
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_LABImage";
+    }
+    input {
+        node: "Video Reader";
+        port: 0;
+    }
+}
+
+node {
+    name: "LAB feature Map";
+    type: UtilsMatrixSplit;
+    argument {
+        name: "type";
+        type: pb_complex;
+        value: "cv::Vec3f";
+    }
+    input {
+        node: "Convert to LAB";
+        port: 0;
+    }
+}
+
+##
+## Calculate Itti Activation
+## on each LAB channel
+##
+
+node {
+    name: "Intensity Itti";
+    type: SaliencyIttiKoch;
+    input {
+        node: "LAB feature Map";
+        port: 0;
+    }
+}
+
+node {
+    name: "Green-Red Feature Itti";
+    type: SaliencyIttiKoch;
+    input {
+        node: "LAB feature Map";
+        port: 1;
+    }
+}
+
+node {
+    name: "Blue-Yellow Feature Itti";
+    type: SaliencyIttiKoch;
+    input {
+        node: "LAB feature Map";
+        port: 2;
+    }
+}
+
+##
+## Sum up Boolean Maps Activations
+##
+
+node {
+    name: "Merge Itti";
+    type: UtilsMatrixMerge;
+    argument {
+        name: "type";
+        type: pb_complex;
+        value: "cv::Vec3f";
+    }
+    input {
+        node: "Intensity Itti";
+        port: 0;
+    }
+    input {
+        node: "Green-Red Feature Itti";
+        port: 0;
+    }
+    input {
+        node: "Blue-Yellow Feature Itti";
+        port: 0;
+    }
+}
+
+node {
+    name: "Itti";
+    type: UtilsMatrixSum;
+    argument {
+        name: "type";
+        type: pb_complex;
+        value: "cv::Vec3f";
+    }
+    input {
+        node: "Merge Itti";
+        port: 0;
+    }
+}
+
+##
+## Time measurements
+##
+
+node {
+    name: "Video Reader FPS Counter";
+    type: UtilsFPSCounter;
+    input {
+        node: "Video Reader";
+        port: 0;
+    }
+}
+
+node {
+    name: "Intensity Itti FPS Counter";
+    type: UtilsFPSCounter;
+    input {
+        node: "Intensity Itti";
+        port: 0;
+    }
+}
+
+node {
+    name: "Green-Red Feature Itti FPS Counter";
+    type: UtilsFPSCounter;
+    input {
+        node: "Green-Red Feature Itti";
+        port: 0;
+    }
+}
+
+node {
+    name: "Blue-Yellow Feature Itti FPS Counter";
+    type: UtilsFPSCounter;
+    input {
+        node: "Blue-Yellow Feature Itti";
+        port: 0;
+    }
+}
+
+##
+## Plot time measurements
+##
+
+node {
+    name: "FPS Plot";
+    type: Plot;
+    argument {
+        name: "line0";
+        type: pb_string;
+        value: "Video Reader";
+    }
+    argument {
+        name: "line1";
+        type: pb_string;
+        value: "Intensity Itti";
+    }
+    argument {
+        name: "line2";
+        type: pb_string;
+        value: "Green-Red Feature Itti";
+    }
+    argument {
+        name: "line3";
+        type: pb_string;
+        value: "Blue-Yellow Feature Itti";
+    }
+    input {
+        node: "Video Reader FPS Counter";
+        port: 0;
+    }
+    input {
+        node: "Intensity Itti FPS Counter";
+        port: 0;
+    }
+    input {
+        node: "Green-Red Feature Itti FPS Counter";
+        port: 0;
+    }
+    input {
+        node: "Blue-Yellow Feature Itti FPS Counter";
+        port: 0;
+    }
+}
+
+node {
+    name: "Show FPS Plot";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "FPS";
+    }
+    input {
+        node: "FPS Plot";
+        port: 0;
+    }
+}
+
+##
+## Plot Itti
+##
+
+node {
+    name: "Itti Heatmap";
+    type: UtilsImageConverter;
+    argument {
+        name: "input";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_HeatmapImage";
+    }
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_RGBImage";
+    }
+    input {
+        node: "Itti";
+        port: 0;
+    }
+}
+
+node {
+    name: "Show Itti";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "Itti";
+    }
+    input {
+        node: "Itti Heatmap";
+        port: 0;
+    }
+}
+
+##
+## Show input image
+##
+
+node {
+    name: "Show Image";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "Raw Image";
+    }
+    input {
+        node: "Video Reader";
+        port: 0;
+    }
+}

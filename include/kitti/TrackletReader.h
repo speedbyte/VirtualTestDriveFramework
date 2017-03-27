@@ -38,6 +38,8 @@ namespace saliency_sandbox {
 
             cv::Vec3f rotation();
 
+            cv::Matx44f TR();
+
             void points(cv::Vec3f* points);
 
             void boundingbox(cv::Vec3f* faces);
@@ -45,6 +47,10 @@ namespace saliency_sandbox {
             std::string label();
 
             saliency_sandbox::core::PropertyMap* properties();
+
+            float l();
+            float w();
+            float h();
 
         };
 

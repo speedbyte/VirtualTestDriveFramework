@@ -10,8 +10,8 @@ node {
     argument {
         name: "path";
         type: pb_string;
-        #value: "${DIR_DATA}/kitti/2011_09_26/2011_09_26_drive_0001_sync/";
-        value: "/media/geislerd/Documents/repo/Kitti/data/2011_09_26/2011_09_26_drive_0029_sync/";
+        value: "${DIR_DATA}/kitti/2011_09_26/2011_09_26_drive_0001_sync/";
+        #value: "/media/geislerd/Documents/repo/Kitti/data/2011_09_26/2011_09_26_drive_0029_sync/";
     }
 }
 
@@ -297,6 +297,10 @@ node {
         node: "Kitti Reader";
         port: 5;
     }
+    input {
+        node: "Kitti Reader";
+        port: 7;
+    }
 }
 
 node {
@@ -415,6 +419,10 @@ node {
         node: "Convert to Gray";
         port: 0;
     }
+#    input {
+#        node: "Kitti Reader";
+#        port: 2;
+#    }
     input {
         node: "Kitti Ego Motion";
         port: 0;
@@ -553,3 +561,34 @@ node {
     }
 }
 
+##
+## Bird View
+##
+
+
+node {
+    name: "Bird View";
+    type: KittiDrawBirdView;
+    input {
+        node: "Ego Motion Trajectory";
+        port: 0;
+    }
+    input {
+        node: "Kitti Reader";
+        port: 6;
+    }
+}
+
+node {
+    name: "Show Bird View";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "Bird View";
+    }
+    input {
+        node: "Bird View";
+        port: 0;
+    }
+}

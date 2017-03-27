@@ -15,6 +15,7 @@ namespace saliency_sandbox {
             this->reset();
 
             this->template input()->name("frame");
+            this->template input()->checkPortSize(false);
         }
 
         VideoWriter::~VideoWriter() {
@@ -35,7 +36,7 @@ namespace saliency_sandbox {
             this->m_vw = cv::VideoWriter();
             if(this->input()->value() != nullptr) {
                 //TODO: codec and framerate as properties
-                this->m_vw.open(this->m_path.string(), this->properties()->get("codec",CV_FOURCC('M', 'J', 'P', 'G')), this->properties()->get("fps",60.0f), this->input()->value()->mat().size());
+                this->m_vw.open(this->m_path.string(), this->properties()->get("codec",CV_FOURCC('M', 'J', 'P', 'G')), this->properties()->get("fps",10.0f), this->input()->value()->mat().size());
             }
         }
     }

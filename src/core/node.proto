@@ -25,6 +25,7 @@ message Pipeline {
             KittiOXTSPose               = 115;
             KittiDrawTrajectory         = 116;
             KittiFOVToCam               = 117;
+            KittiDrawBirdView           = 118;
 
             // IO
             IOCSVReader                 = 201;
@@ -51,6 +52,7 @@ message Pipeline {
             SaliencyIttiKoch            = 405;
             SaliencyOrientation         = 406;
             SaliencyGBVS                = 407;
+            SaliencyTracking            = 408;
 
             // Plot
             Plot                        = 501;

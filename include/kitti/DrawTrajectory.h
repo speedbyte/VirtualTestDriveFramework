@@ -24,8 +24,6 @@ namespace saliency_sandbox {
         private:
             saliency_sandbox::utils::_RGBImage<WIDTH, HEIGHT> m_rgb;
 
-            cv::Mat3b copyToRgb();
-
             Calibration* calibration() {
                 return this->template input<1>()->value();
             };
@@ -66,7 +64,9 @@ namespace saliency_sandbox {
                 cv::Vec4f v[2];
                 cv::Matx44f TRl, TRr;
                 std::stringstream s;
+                float l;
 
+                l = FLT_MIN;
                 calibration = this->calibration();
                 tr = this->trajectory();
                 rgb = this->copyToRgb(this->template input<2>()->value());
@@ -84,20 +84,17 @@ namespace saliency_sandbox {
                     lr[i+1] = lr[0] + cv::Vec3f(v[0].val);
                     rr[i+1] = rr[0] + cv::Vec3f(v[1].val);
 
+                    // dont draw z extrapolation
                     lr[i+1].val[2] = lr[0].val[2];
                     rr[i+1].val[2] = rr[0].val[2];
                 }
-
-                lr[0] = cv::Vec3f(1.0f,1.1f,-1.73f);
-                rr[0] = cv::Vec3f(1.0f,-1.1f,-1.73f);
 
                 calibration->veloToCam(lr,lc,_n+1,_cam);
                 calibration->veloToCam(rr,rc,_n+1,_cam);
 
                 for(int i = 1; i < _n+1; i++) {
-                    if(lr[i-1].val[0] < 1.0f || rr[i-1].val[0] < 1.0f || lr[i].val[0] < 1.0f || rr[i].val[0] < 1.0f) {
+                    if(lr[i-1].val[0] < 1.0f || rr[i-1].val[0] < 1.0f || lr[i].val[0] < 1.0f || rr[i].val[0] < 1.0f)
                         continue;
-                    }
 
                     p[0] = cv::Point(lc[i-1]);
                     p[1] = cv::Point(lc[i]);
@@ -107,13 +104,14 @@ namespace saliency_sandbox {
                     for(int j = 1; j < 4; j++)
                         cv::line(rgb,p[j-1],p[j],CV_RGB(0,255,0));
 
-                    if((cv::Point2f(rc[i-1]).y - p[2].y) > 10) {
-                        s << i << "s";
+                    if(fabsf(p[2].y-l) > 10) {
+                        s << float(i)/10.0f << "s";
                         cv::putText(rgb, s.str(), p[2], CV_FONT_HERSHEY_COMPLEX_SMALL, 0.6, cv::Scalar(255, 255, 255), 1, CV_AA);
                         s = std::stringstream();
                         s << (int)roundf(lr[i].val[0]) << "m";
                         cv::putText(rgb, s.str(), p[1], CV_FONT_HERSHEY_COMPLEX_SMALL, 0.6, cv::Scalar(255, 255, 255), 1, CV_AA);
                         s = std::stringstream();
+                        l = p[2].y;
                     }
                 }
             }

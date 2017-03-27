@@ -26,7 +26,7 @@ namespace saliency_sandbox {
             cv::Mat1f mat, smat;
             cv::Point2f min_b, max_b;
             cv::Rect bb;
-            float sal;
+            float sal, rec;
 
             tl = this->template input<0>()->value();
             mat = this->template input<1>()->value()->mat();
@@ -57,13 +57,22 @@ namespace saliency_sandbox {
                 max_b.y = MIN(max_b.y, mat.rows - 1);
                 bb = cv::Rect(min_b, max_b);
 
-                if (bb.area() <= 0)
+                if (bb.area() <= 0) {
                     continue;
+                }
                 smat = mat(bb);
 
-                sal = (float) cv::mean(smat).val[0];
+                sal = (float)
+                                (cv::sum(smat)/cv::sum(mat)).val[0]*
+                                (cv::Rect(0,0,(int)saliency_sandbox::kitti::ImageReader<_camera>::Image::WIDTH,(int)saliency_sandbox::kitti::ImageReader<_camera>::Image::HEIGHT).area()/bb.area());
 
                 t->properties()->template set<float>("saliency", sal);
+                rec = t->properties()->template get<float>("recall", sal);
+                if(rec < sal)
+                    rec = MAX(sal,0.0f);
+                else
+                    rec = MAX(rec - (rec-sal)*0.05f,0.0f);
+                t->properties()->template set<float>("recall", rec);
             }
 
             this->template output<0>()->value(this->template input<0>()->value());

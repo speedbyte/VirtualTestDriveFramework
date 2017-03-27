@@ -563,6 +563,7 @@ namespace saliency_sandbox {
                             gen << CodeGen::SetHeader("kitti/OXTSPose");
                             gen << CodeGen::SetClass("saliency_sandbox::kitti::OXTSPose");
                             gen << CodeGen::SetInput("oxts",0);
+                            gen << CodeGen::SetInput("calib",1);
                             break;
                         case generated::Pipeline_Node_Type_KittiOXTSSelector:
                             gen << CodeGen::SetHeader("kitti/OXTSReader");
@@ -615,7 +616,7 @@ namespace saliency_sandbox {
                             gen << CodeGen::SetHeader("kitti/DrawTrajectory");
                             gen << CodeGen::SetClass("saliency_sandbox::kitti::DrawTrajectory");
                             gen << CodeGen::SetTemplateArgument("camera",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_complex,"saliency_sandbox::kitti::Camera::LEFT_RGB");
-                            gen << CodeGen::SetTemplateArgument("frames",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,"5");
+                            gen << CodeGen::SetTemplateArgument("frames",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,"20");
                             gen << CodeGen::SetInput("oxts",0);
                             gen << CodeGen::SetInput("calibration",1);
                             gen << CodeGen::SetInput("rgb",2);
@@ -627,6 +628,16 @@ namespace saliency_sandbox {
                             gen << CodeGen::SetInput("fov",0);
                             gen << CodeGen::SetInput("depth",1);
                             gen << CodeGen::SetInput("calibration",2);
+                            break;
+                        case generated::Pipeline_Node_Type_KittiDrawBirdView:
+                            gen << CodeGen::SetHeader("kitti/DrawBirdView");
+                            gen << CodeGen::SetClass("saliency_sandbox::kitti::DrawBirdView");
+                            gen << CodeGen::SetTemplateArgument("frames",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,"20");
+                            gen << CodeGen::SetInput("trajectory",0);
+                            gen << CodeGen::SetInput("valodyne",1);
+                            gen << CodeGen::SetInput("tracklets",2);
+                            gen << CodeGen::SetInput("fov",3);
+                            gen << CodeGen::SetInput("depth",4);
                             break;
                         case generated::Pipeline_Node_Type_IOCSVReader:
                             gen << CodeGen::SetHeader("io/CSVReader");
@@ -744,6 +755,14 @@ namespace saliency_sandbox {
                             gen << CodeGen::SetProperty("sigma",generated::Pipeline_Node_Property_Type ::Pipeline_Node_Property_Type_pb_float);
                             gen << CodeGen::SetInput("feature",0);
                             break;
+                        case generated::Pipeline_Node_Type_SaliencyTracking:
+                            gen << CodeGen::SetHeader("saliency/Tracking");
+                            gen << CodeGen::SetClass("saliency_sandbox::saliency::_Tracking");
+                            gen << CodeGen::SetTemplateArgument("width",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_WIDTH_S(RESOLUTION) );
+                            gen << CodeGen::SetTemplateArgument("height",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_HEIGHT_S(RESOLUTION));
+                            gen << CodeGen::SetInput("feature",0);
+                            gen << CodeGen::SetInput("flow",1);
+                            break;
                         case generated::Pipeline_Node_Type_UtilsFPSCounter:
                             gen << CodeGen::SetHeader("utils/FPSCounter");
                             gen << CodeGen::SetClass("saliency_sandbox::utils::FPSCounter");
@@ -814,7 +833,7 @@ namespace saliency_sandbox {
                         case generated::Pipeline_Node_Type_ExtrapolatePose:
                             gen << CodeGen::SetHeader("flow/Trajectory");
                             gen << CodeGen::SetClass("saliency_sandbox::flow::ExtrapolatePose");
-                            gen << CodeGen::SetTemplateArgument("frames",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,"5");
+                            gen << CodeGen::SetTemplateArgument("frames",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,"20");
                             gen << CodeGen::SetInput("pose",0);
                             break;
                         case generated::Pipeline_Node_Type_GazeRandom:

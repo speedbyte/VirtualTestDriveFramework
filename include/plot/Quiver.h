@@ -28,19 +28,21 @@ namespace saliency_sandbox {
                 cv::Mat3b rgb, quiver;
                 cv::Point2f v, vn, q, t;
                 float angle, magnitude;
+                int step;
 
                 flow = this->template input<0>()->value()->mat();
                 rgb = this->template input<1>()->value()->mat();
+                step = this->properties()->template get<int>("step",20);
 
                 this->m_quiver.mat(rgb);
                 quiver = this->m_quiver.mat();
 
-                for(cv::Point2f p(0,0); p.x < _width; p.x++) {
-                    for(p.y = 0; p.y < _height; p.y++) {
+                for(cv::Point2f p(0,0); p.x < _width; p.x+=step) {
+                    for(p.y = 0; p.y < _height; p.y+=step) {
                         v = flow.template at<cv::Vec2f>(p);
 
-                        if(v.x < FLT_EPSILON && v.y < FLT_EPSILON)
-                            continue;
+                        //if(fabsf(v.x) < FLT_EPSILON && fabsf(v.y) < FLT_EPSILON)
+                        //    continue;
 
                         q = p + v;
                         magnitude = sqrtf(v.x*v.x+v.y+v.y);

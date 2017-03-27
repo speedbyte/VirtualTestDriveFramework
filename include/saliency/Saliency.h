@@ -77,6 +77,10 @@ namespace saliency_sandbox {
                         m(xy) = v;
             }
 
+            SaliencyMap* saliencyMap() {
+                return &this->m_map;
+            }
+
             void normalize() {
                 if (this->properties()->template get<bool>("normalize_output", true))
                     cv::normalize(this->map(), this->map(), 0, 1, cv::NORM_MINMAX);

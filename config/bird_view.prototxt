@@ -1,0 +1,434 @@
+name: "Ego Motion";
+
+##
+## Read video
+##
+
+node {
+    name: "Kitti Reader";
+    type: KittiReader;
+    argument {
+        name: "path";
+        type: pb_string;
+        #value: "${DIR_DATA}/kitti/2011_09_26/2011_09_26_drive_0001_sync/";
+        value: "/media/geislerd/Documents/repo/Kitti/data/2011_09_26/2011_09_26_drive_0002_sync/";
+    }
+}
+
+node {
+    name: "Random Gaze";
+    type: GazeRandom;
+}
+
+##
+## Create Screenshots
+##
+
+node {
+    name: "Save Bird View";
+    type: IOVideoWriter;
+    argument {
+        name: "path";
+        type: pb_string;
+        value: "/home/geislerd/bird_view_02.avi";
+    }
+    input {
+        node: "Bird View";
+        port: 0;
+    }
+}
+
+##
+## Calculate Ego Motion
+##
+
+node {
+    name: "Kitti Pose";
+    type: KittiOXTSPose;
+    input {
+        node: "Kitti Reader";
+        port: 5;
+    }
+    input {
+        node: "Kitti Reader";
+        port: 7;
+    }
+}
+
+
+##
+## Show Ego Motion Trajetory
+##
+
+node {
+    name: "Ego Motion Trajectory";
+    type: ExtrapolatePose;
+    input {
+        node: "Kitti Pose";
+        port: 0;
+    }
+}
+
+node {
+    name: "Draw Ego Motion Trajectory";
+    type: KittiDrawTrajectory;
+    input {
+        node: "Ego Motion Trajectory";
+        port: 0;
+    }
+    input {
+        node: "Kitti Reader";
+        port: 7;
+    }
+    input {
+        node: "Kitti Reader";
+        port: 2;
+    }
+}
+
+node {
+    name: "Show Ego Motion Trajectory";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "Ego Motion Trajectory";
+    }
+    input {
+        node: "Draw Ego Motion Trajectory";
+        port: 0;
+    }
+}
+
+##
+## FOV
+##
+
+node {
+    name: "Velodyne polar image";
+    type: KittiVelodynePolar;
+    input {
+        node: "Kitti Reader";
+        port: 4;
+    }
+}
+
+node {
+    name: "FOV";
+    type: GazeFOV;
+    input {
+        node: "Random Gaze";
+        port: 0;
+    }
+    input {
+        node: "Velodyne polar image";
+        port: 0;
+    }
+}
+
+node {
+    name: "FOV2Cam";
+    type: KittiFOVToCam;
+    input {
+        node: "FOV";
+        port: 0;
+    }
+    input {
+        node: "Velodyne polar image";
+        port: 0;
+    }
+    input {
+        node: "Kitti Reader";
+        port: 7;
+    }
+}
+
+##
+## Bird View
+##
+
+
+node {
+    name: "Bird View";
+    type: KittiDrawBirdView;
+    input {
+        node: "Ego Motion Trajectory";
+        port: 0;
+    }
+    input {
+        node: "Kitti Reader";
+        port: 4;
+    }
+    input {
+        node: "Tracklet Saliency";
+        port: 0;
+    }
+    input {
+        node: "FOV";
+        port: 0;
+    }
+    input {
+        node: "Velodyne polar image";
+        port: 0;
+    }
+}
+
+node {
+    name: "Show Bird View";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "Bird View";
+    }
+    input {
+        node: "Bird View";
+        port: 0;
+    }
+}
+
+##
+## Saliency
+##
+
+node {
+    name: "Convert to LAB";
+    type: UtilsImageConverter;
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::WIDTH";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT";
+    }
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_LABImage";
+    }
+    input {
+        node: "Kitti Reader";
+        port: 2;
+    }
+}
+
+node {
+    name: "LAB feature Map";
+    type: UtilsMatrixSplit;
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::WIDTH";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT";
+    }
+    argument {
+        name: "type";
+        type: pb_complex;
+        value: "cv::Vec3f";
+    }
+    input {
+        node: "Convert to LAB";
+        port: 0;
+    }
+}
+
+node {
+    name: "Intensity Boolean Map";
+    type: SaliencyBooleanMaps;
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::WIDTH";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT";
+    }
+    input {
+        node: "LAB feature Map";
+        port: 0;
+    }
+    input {
+        node: "FOV2Cam";
+        port: 0;
+    }
+}
+
+node {
+    name: "Green-Red Feature Boolean Map";
+    type: SaliencyBooleanMaps;
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::WIDTH";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT";
+    }
+    input {
+        node: "LAB feature Map";
+        port: 1;
+    }
+    input {
+        node: "FOV2Cam";
+        port: 0;
+    }
+}
+
+node {
+    name: "Blue-Yellow Feature Boolean Map";
+    type: SaliencyBooleanMaps;
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::WIDTH";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT";
+    }
+    input {
+        node: "LAB feature Map";
+        port: 2;
+    }
+    input {
+        node: "FOV2Cam";
+        port: 0;
+    }
+}
+
+node {
+    name: "Merge Boolean Maps";
+    type: UtilsMatrixMerge;
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::WIDTH";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT";
+    }
+    argument {
+        name: "type";
+        type: pb_complex;
+        value: "cv::Vec3f";
+    }
+    input {
+        node: "Intensity Boolean Map";
+        port: 0;
+    }
+    input {
+        node: "Green-Red Feature Boolean Map";
+        port: 0;
+    }
+    input {
+        node: "Blue-Yellow Feature Boolean Map";
+        port: 0;
+    }
+}
+
+node {
+    name: "Boolean Map";
+    type: UtilsMatrixSum;
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::WIDTH";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT";
+    }
+    argument {
+        name: "type";
+        type: pb_complex;
+        value: "cv::Vec3f";
+    }
+    input {
+        node: "Merge Boolean Maps";
+        port: 0;
+    }
+}
+
+node {
+    name: "Tracklet Saliency";
+    type: KittiTrackletSaliency;
+    argument {
+        name: "camera";
+        type: pb_complex;
+        value: "saliency_sandbox::kitti::Camera::LEFT_RGB";
+    }
+    input {
+        node: "Kitti Reader";
+        port: 6;
+    }
+    input {
+        node: "Boolean Map";
+        port: 0;
+    }
+    input {
+        node: "Kitti Reader";
+        port: 7;
+    }
+}
+
+##
+## Plot Boolean Map
+##
+
+node {
+    name: "Boolean Map Heatmap";
+    type: UtilsImageConverter;
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::WIDTH";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT";
+    }
+    argument {
+        name: "input";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_HeatmapImage";
+    }
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_RGBImage";
+    }
+    input {
+        node: "Boolean Map";
+        port: 0;
+    }
+}
+
+node {
+    name: "Show Boolean Map";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "Boolean Maps";
+    }
+    input {
+        node: "Boolean Map Heatmap";
+        port: 0;
+    }
+}
