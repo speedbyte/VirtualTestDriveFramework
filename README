@@ -4,8 +4,10 @@ INSTALL DEPENDENCIES
     $ sudo apt-get install libopencv-dev
     $ sudo apt-get install libgraphviz-dev
     $ sudo apt-get install libprotobuf-dev
+    $ sudo apt-get install protobuf-compiler
     or all together:
-    $ sudo apt-get install libgnuplot-iostream-dev libboost-all-dev libopencv-dev  libgraphviz-dev libprotobuf-dev
+    $ sudo apt-get install libgnuplot-iostream-dev libboost-all-dev libopencv-dev  libgraphviz-dev libprotobuf-dev protobuf-compiler
+
     
 CONFIGURE PROJECT
     $ cmake -DCMAKE_INSTALL_PREFIX=<path to install> <path to project
