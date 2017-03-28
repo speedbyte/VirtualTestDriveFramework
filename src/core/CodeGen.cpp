@@ -750,8 +750,8 @@ namespace saliency_sandbox {
                             gen << CodeGen::SetClass("saliency_sandbox::saliency::activation::_GBVS");
                             gen << CodeGen::SetTemplateArgument("width",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_WIDTH_S(RESOLUTION) );
                             gen << CodeGen::SetTemplateArgument("height",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_HEIGHT_S(RESOLUTION));
-                            gen << CodeGen::SetTemplateArgument("iwidth",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,"24");
-                            gen << CodeGen::SetTemplateArgument("iheight",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,"24");
+                            gen << CodeGen::SetTemplateArgument("iwidth",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,"40");
+                            gen << CodeGen::SetTemplateArgument("iheight",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,"40");
                             gen << CodeGen::SetProperty("sigma",generated::Pipeline_Node_Property_Type ::Pipeline_Node_Property_Type_pb_float);
                             gen << CodeGen::SetInput("feature",0);
                             break;

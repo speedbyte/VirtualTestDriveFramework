@@ -1,4 +1,4 @@
-name: "Ego Motion";
+name: "VW Demo - BirdView";
 
 ##
 ## Read video
@@ -11,31 +11,12 @@ node {
         name: "path";
         type: pb_string;
         value: "/home/geislerd/vw-demo/demo/data/kitti/2011_09_26/2011_09_26_drive_0001_sync/";
-        #value: "/media/geislerd/Documents/repo/Kitti/data/2011_09_26/2011_09_26_drive_0002_sync/";
     }
 }
 
 node {
     name: "Random Gaze";
     type: GazeRandom;
-}
-
-##
-## Create Screenshots
-##
-
-node {
-    name: "Save Bird View";
-    type: IOVideoWriter;
-    argument {
-        name: "path";
-        type: pb_string;
-        value: "/home/geislerd/bird_view_02.avi";
-    }
-    input {
-        node: "Bird View";
-        port: 0;
-    }
 }
 
 ##
@@ -87,6 +68,28 @@ node {
 }
 
 node {
+    name: "Draw Tracklets";
+    type: KittiTrackletDraw;
+    argument {
+        name: "camera";
+        type: pb_complex;
+        value: "saliency_sandbox::kitti::Camera::LEFT_RGB";
+    }
+    input {
+        node: "Draw Ego Motion Trajectory";
+        port: 0;
+    }
+    input {
+        node: "Tracklet Saliency";
+        port: 0;
+    }
+    input {
+        node: "Kitti Reader";
+        port: 7;
+    }
+}
+
+node {
     name: "Show Ego Motion Trajectory";
     type: IOImageShow;
     argument {
@@ -95,7 +98,7 @@ node {
         value: "Ego Motion Trajectory";
     }
     input {
-        node: "Draw Ego Motion Trajectory";
+        node: "Draw Tracklets";
         port: 0;
     }
 }
@@ -144,53 +147,46 @@ node {
 }
 
 ##
-## Bird View
+## Saliency
 ##
 
+# extract velodyne features
 
 node {
-    name: "Bird View";
-    type: KittiDrawBirdView;
+    name: "Depth2Cam";
+    type: KittiFOVToCam;
     input {
-        node: "Ego Motion Trajectory";
-        port: 0;
-    }
-    input {
-        node: "Kitti Reader";
-        port: 4;
-    }
-    input {
-        node: "Tracklet Saliency";
-        port: 0;
-    }
-    input {
-        node: "FOV";
+        node: "Velodyne polar image";
         port: 0;
     }
     input {
         node: "Velodyne polar image";
         port: 0;
     }
+    input {
+        node: "Kitti Reader";
+        port: 7;
+    }
 }
 
 node {
-    name: "Show Bird View";
-    type: IOImageShow;
-    argument {
-        name: "window";
-        type: pb_string;
-        value: "Bird View";
+    name: "Reflection2Cam";
+    type: KittiFOVToCam;
+    input {
+        node: "Velodyne polar image";
+        port: 1;
     }
     input {
-        node: "Bird View";
+        node: "Velodyne polar image";
         port: 0;
+    }
+    input {
+        node: "Kitti Reader";
+        port: 7;
     }
 }
 
-##
-## Saliency
-##
-
+# extract lab features
 node {
     name: "Convert to LAB";
     type: UtilsImageConverter;
@@ -239,9 +235,57 @@ node {
     }
 }
 
+# calculate saliency maps
+
 node {
-    name: "Intensity Boolean Map";
-    type: SaliencyBooleanMaps;
+    name: "Depth Highpass Saliency";
+    type: SaliencyHighpass;
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::WIDTH";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT";
+    }
+    input {
+        node: "Depth2Cam";
+        port: 0;
+    }
+    input {
+        node: "FOV2Cam";
+        port: 0;
+    }
+}
+
+node {
+    name: "Reflection Highpass Saliency";
+    type: SaliencyHighpass;
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::WIDTH";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT";
+    }
+    input {
+        node: "Reflection2Cam";
+        port: 0;
+    }
+    input {
+        node: "FOV2Cam";
+        port: 0;
+    }
+}
+
+node {
+    name: "Intensity Highpass Saliency";
+    type: SaliencyHighpass;
     argument {
         name: "width";
         type: pb_uint32;
@@ -263,8 +307,8 @@ node {
 }
 
 node {
-    name: "Green-Red Feature Boolean Map";
-    type: SaliencyBooleanMaps;
+    name: "Green-Red Feature Highpass Saliency";
+    type: SaliencyHighpass;
     argument {
         name: "width";
         type: pb_uint32;
@@ -286,8 +330,8 @@ node {
 }
 
 node {
-    name: "Blue-Yellow Feature Boolean Map";
-    type: SaliencyBooleanMaps;
+    name: "Blue-Yellow Feature Highpass Saliency";
+    type: SaliencyHighpass;
     argument {
         name: "width";
         type: pb_uint32;
@@ -308,8 +352,9 @@ node {
     }
 }
 
+# combine saliency maps
 node {
-    name: "Merge Boolean Maps";
+    name: "Merge Highpass Saliencies";
     type: UtilsMatrixMerge;
     argument {
         name: "width";
@@ -324,24 +369,32 @@ node {
     argument {
         name: "type";
         type: pb_complex;
-        value: "cv::Vec3f";
+        value: "cv::Vec<float,5>";
     }
     input {
-        node: "Intensity Boolean Map";
+        node: "Depth Highpass Saliency";
         port: 0;
     }
     input {
-        node: "Green-Red Feature Boolean Map";
+        node: "Reflection Highpass Saliency";
         port: 0;
     }
     input {
-        node: "Blue-Yellow Feature Boolean Map";
+        node: "Intensity Highpass Saliency";
+        port: 0;
+    }
+    input {
+        node: "Green-Red Feature Highpass Saliency";
+        port: 0;
+    }
+    input {
+        node: "Blue-Yellow Feature Highpass Saliency";
         port: 0;
     }
 }
 
 node {
-    name: "Boolean Map";
+    name: "Highpass Saliency";
     type: UtilsMatrixSum;
     argument {
         name: "width";
@@ -356,14 +409,15 @@ node {
     argument {
         name: "type";
         type: pb_complex;
-        value: "cv::Vec3f";
+        value: "cv::Vec<float,5>";
     }
     input {
-        node: "Merge Boolean Maps";
+        node: "Merge Highpass Saliencies";
         port: 0;
     }
 }
 
+# assign saliency to tracklets
 node {
     name: "Tracklet Saliency";
     type: KittiTrackletSaliency;
@@ -377,7 +431,7 @@ node {
         port: 6;
     }
     input {
-        node: "Boolean Map";
+        node: "Highpass Saliency";
         port: 0;
     }
     input {
@@ -387,11 +441,11 @@ node {
 }
 
 ##
-## Plot Boolean Map
+## Plot Highpass Saliency
 ##
 
 node {
-    name: "Boolean Map Heatmap";
+    name: "Highpass Saliency Heatmap";
     type: UtilsImageConverter;
     argument {
         name: "width";
@@ -414,21 +468,78 @@ node {
         value: "saliency_sandbox::utils::_RGBImage";
     }
     input {
-        node: "Boolean Map";
+        node: "Highpass Saliency";
         port: 0;
     }
 }
 
 node {
-    name: "Show Boolean Map";
+    name: "Show Highpass Saliency";
     type: IOImageShow;
     argument {
         name: "window";
         type: pb_string;
-        value: "Boolean Maps";
+        value: "Highpass Saliencies";
     }
     input {
-        node: "Boolean Map Heatmap";
+        node: "Highpass Saliency Heatmap";
+        port: 0;
+    }
+}
+
+##
+## Bird View
+##
+
+node {
+    name: "Bird View";
+    type: KittiDrawBirdView;
+    input {
+        node: "Ego Motion Trajectory";
+        port: 0;
+    }
+    input {
+        node: "Kitti Reader";
+        port: 4;
+    }
+    input {
+        node: "Tracklet Saliency";
+        port: 0;
+    }
+    input {
+        node: "FOV";
+        port: 0;
+    }
+    input {
+        node: "Velodyne polar image";
+        port: 0;
+    }
+}
+
+node {
+    name: "Show Bird View";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "Bird View";
+    }
+    input {
+        node: "Bird View";
+        port: 0;
+    }
+}
+
+node {
+    name: "Save Bird View";
+    type: IOVideoWriter;
+    argument {
+        name: "path";
+        type: pb_string;
+        value: "/home/geislerd/bird_view_23.avi";
+    }
+    input {
+        node: "Bird View";
         port: 0;
     }
 }

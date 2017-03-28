@@ -91,18 +91,23 @@ namespace saliency_sandbox {
                 }
 
                 void calc() override {
-                    cv::Mat1f in;
+                    cv::Mat1f in, infov, fov;
 
                     in = this->template input<0>()->value()->mat();
+                    fov = this->fov();
+
+                    cv::multiply(in,fov,infov);
 
                     this->map(0.0f);
 
-                    cv::scaleAdd(this->m_csd_0.calc(in),1.0f/6.0f,this->map(),this->map());
-                    cv::scaleAdd(this->m_csd_1.calc(in),1.0f/6.0f,this->map(),this->map());
-                    cv::scaleAdd(this->m_csd_2.calc(in),1.0f/6.0f,this->map(),this->map());
-                    cv::scaleAdd(this->m_csd_3.calc(in),1.0f/6.0f,this->map(),this->map());
-                    cv::scaleAdd(this->m_csd_4.calc(in),1.0f/6.0f,this->map(),this->map());
-                    cv::scaleAdd(this->m_csd_5.calc(in),1.0f/6.0f,this->map(),this->map());
+                    cv::scaleAdd(this->m_csd_0.calc(infov),1.0f/6.0f,this->map(),this->map());
+                    cv::scaleAdd(this->m_csd_1.calc(infov),1.0f/6.0f,this->map(),this->map());
+                    cv::scaleAdd(this->m_csd_2.calc(infov),1.0f/6.0f,this->map(),this->map());
+                    cv::scaleAdd(this->m_csd_3.calc(infov),1.0f/6.0f,this->map(),this->map());
+                    cv::scaleAdd(this->m_csd_4.calc(infov),1.0f/6.0f,this->map(),this->map());
+                    cv::scaleAdd(this->m_csd_5.calc(infov),1.0f/6.0f,this->map(),this->map());
+
+                    cv::multiply(this->map(),fov,this->map());
                 }
 
                 void reset() override {

@@ -140,7 +140,8 @@ namespace saliency_sandbox {
 
                 cv::putText(out,"l: " + tracklet->label(),cv::Point2f(maxTrackletPoint.val[0]+sgn*52-30,maxTrackletPoint.val[1]+32),cv::FONT_HERSHEY_SIMPLEX,0.5,cv::Scalar::all(255.0f));
                 this->printProperty<float>(out,tracklet,"s","saliency",cv::Point2f(maxTrackletPoint.val[0]+sgn*52-30,maxTrackletPoint.val[1]+52));
-                this->printProperty<float>(out,tracklet,"r","recall",cv::Point2f(maxTrackletPoint.val[0]+sgn*52-30,maxTrackletPoint.val[1]+72));
+                this->printProperty<float>(out,tracklet,"m","max_saliency",cv::Point2f(maxTrackletPoint.val[0]+sgn*52-30,maxTrackletPoint.val[1]+72));
+                this->printProperty<float>(out,tracklet,"r","recall",cv::Point2f(maxTrackletPoint.val[0]+sgn*52-30,maxTrackletPoint.val[1]+92));
             }
 
             void drawTracklets(BirdViewImage::Mat& out) {

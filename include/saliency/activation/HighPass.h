@@ -34,6 +34,7 @@ namespace saliency_sandbox {
 
                 void calc() override {
                     this->highpass(this->template input<0>()->value()->mat(),this->map(),this->filterSize(),this->sigma());
+                    cv::multiply(this->fov(),this->map(),this->map());
                     this->normalize();
                 }
 

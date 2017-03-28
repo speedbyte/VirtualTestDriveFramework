@@ -50,6 +50,8 @@ namespace saliency_sandbox {
 
                     this->normalize();
                     this->attenuate();
+
+                    cv::multiply(this->map(),this->fov(),this->map());
                 }
 
                 void reset() override {

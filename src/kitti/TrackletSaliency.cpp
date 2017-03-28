@@ -63,10 +63,13 @@ namespace saliency_sandbox {
                 smat = mat(bb);
 
                 sal = (float)
-                                (cv::sum(smat)/cv::sum(mat)).val[0]*
-                                (cv::Rect(0,0,(int)saliency_sandbox::kitti::ImageReader<_camera>::Image::WIDTH,(int)saliency_sandbox::kitti::ImageReader<_camera>::Image::HEIGHT).area()/bb.area());
+                    (cv::sum(smat)/cv::sum(mat)).val[0]*
+                    (cv::Rect(0,0,(int)saliency_sandbox::kitti::ImageReader<_camera>::Image::WIDTH,(int)saliency_sandbox::kitti::ImageReader<_camera>::Image::HEIGHT).area()/bb.area());
 
                 t->properties()->template set<float>("saliency", sal);
+                t->properties()->template set<float>("max_saliency",MAX(sal, t->properties()->template get<float>("max_saliency",sal)));
+
+
                 rec = t->properties()->template get<float>("recall", sal);
                 if(rec < sal)
                     rec = MAX(sal,0.0f);
