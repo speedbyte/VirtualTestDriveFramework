@@ -5,9 +5,7 @@
 #ifndef PIPELINE_H
 #define PIPELINE_H
 
-#include <boost/unordered/unordered_map.hpp>
-#include <boost/unordered/unordered_set.hpp>
-#include <core/Node.h>
+#include <core/Core.h>
 
 namespace saliency_sandbox {
 

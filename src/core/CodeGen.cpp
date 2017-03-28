@@ -490,6 +490,12 @@ namespace saliency_sandbox {
                 for(int i = 0; i < this->pipeline().node_size(); i++)
                     ss << "\tpipeline.pushNode(\"" << this->pipeline().node(i).name().c_str() << "\",&node_" << i << ");" << std::endl;
                 ss << "}" << std::endl;
+                ss << "extern \"C\" saliency_sandbox::core::INode* new_pipeline() {" << std::endl;
+                ss << "\tsaliency_sandbox::core::Pipeline* pipeline = new saliency_sandbox::core::Pipeline();" << std::endl;
+                ss << "\tcreate_pipeline(*pipeline);" << std::endl;
+                ss << "\tpipeline->initialize();" << std::endl;
+                ss << "\treturn(pipeline);" << std::endl;
+                ss << "}" << std::endl;
                 return ss.str();
             }
 
@@ -662,6 +668,19 @@ namespace saliency_sandbox {
                             gen << CodeGen::SetTemplateArgument("image_format",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_complex,"saliency_sandbox::utils::_RGBImage");
                             gen << CodeGen::SetConstructorArgument("path",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_string);
                             gen << CodeGen::SetNoInput();
+                            break;
+                        case generated::Pipeline_Node_Type_IOImageMemoryReader:
+                            gen << CodeGen::SetHeader("io/ImageMemoryReader");
+                            gen << CodeGen::SetClass("saliency_sandbox::io::_ImageMemoryReader");
+                            gen << CodeGen::SetTemplateArgument("width",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_WIDTH_S(RESOLUTION) );
+                            gen << CodeGen::SetTemplateArgument("height",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_HEIGHT_S(RESOLUTION));
+                            gen << CodeGen::SetTemplateArgument("image_format",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_complex,"saliency_sandbox::utils::_RGBImage");
+                            //gen << CodeGen::SetInput("image",0);
+                            break;
+                        case generated::Pipeline_Node_Type_IOImageMemoryWriter:
+                            gen << CodeGen::SetHeader("io/ImageMemoryWriter");
+                            gen << CodeGen::SetClass("saliency_sandbox::io::ImageMemoryWriter");
+                            gen << CodeGen::SetInput("image",0);
                             break;
                         case generated::Pipeline_Node_Type_IOImageShow:
                             gen << CodeGen::SetHeader("io/ImageShow");

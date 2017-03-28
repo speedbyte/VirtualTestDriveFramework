@@ -35,6 +35,8 @@ message Pipeline {
             IOImageWriter               = 205;
             IOVideoReader               = 206;
             IOVideoWriter               = 207;
+            IOImageMemoryReader         = 208;
+            IOImageMemoryWriter         = 209;
 
             // Utils
             UtilsImageConverter         = 301;

@@ -19,6 +19,8 @@
 // argument parser
 #include <boost/program_options.hpp>
 
+#include <iostream>
+
 
 using namespace google::protobuf;
 using namespace google::protobuf::io;
@@ -160,8 +162,7 @@ int main(int argc, char** argv) {
 
             // get entry
             funp = (create_pipeline_t) dlsym(dl, "create_pipeline");
-            sserr << sscond(!funp) << "cannot find entry point of shared library " << lib_path << ":" << dlerror()
-                  << ssthrow;
+            sserr << sscond(!funp) << "cannot find entry point of shared library " << lib_path << ":" << dlerror() << ssthrow;
             std::cout << " done" << std::endl;
 
             // initialize pipeline

@@ -6,9 +6,7 @@
 #define PORT_H
 
 #include <tuple>
-#include <core/Processable.h>
-#include <core/Node.h>
-#include <core/Bus.h>
+#include <core/Core.h>
 #include <core/Utils.h>
 #include <utils/Error.h>
 #include <future>
@@ -19,21 +17,7 @@
 namespace saliency_sandbox {
 
     namespace core {
-
-        class INode;
-
-        class IPort : public IProcessable , public IBusChannel {
-        public:
-
-            virtual IPort *connect() = 0;
-
-            virtual void connect(IPort *port) = 0;
-
-            virtual IProcessable* dependency() = 0;
-
-            virtual INode* node() = 0;
-        };
-
+        
         template<typename _type>
         class Port : public IPort {
         public:
@@ -41,7 +25,7 @@ namespace saliency_sandbox {
         private:
             std::string m_name;
             type *m_data;
-            Port<type> *m_connect;
+            IPort *m_connect;
             INode* m_node;
             bool m_check_port_size;
 
@@ -131,7 +115,7 @@ namespace saliency_sandbox {
                 if(this->dependency()->time() < time || this->dependency()->time() < 0 || time < 0)
                     this->dependency()->process(time);
                 if (this->m_connect != nullptr)
-                    this->m_data = this->m_connect->m_data;
+                    this->m_data = (type*)this->m_connect->data();
             }
 
             float fps() override {

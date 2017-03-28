@@ -5,44 +5,20 @@
 #ifndef NODE_H
 #define NODE_H
 
-#include <core/PropertyMap.h>
-#include <core/Processable.h>
 #include <core/Port.h>
-#include <core/Bus.h>
 #include <core/Utils.h>
 #include <tuple>
-#include <future>
-#include <cfloat>
+#include <chrono>
 
 namespace saliency_sandbox {
 
     namespace core {
-
-        class IPort;
 
         template<typename _type>
         class Port;
 
         template<typename... _type>
         class PortList;
-
-        class INode : public IProcessable {
-
-        public:
-            virtual uint32_t numInput() = 0;
-
-            virtual uint32_t numOutput() = 0;
-
-            virtual IPort *input(uint32_t index) = 0;
-
-            virtual IPort *output(uint32_t index) = 0;
-
-            virtual PropertyMap *properties() = 0;
-
-            virtual const char* name() = 0;
-
-            virtual void name(const char* name) = 0;
-        };
 
         class Node {
         public:

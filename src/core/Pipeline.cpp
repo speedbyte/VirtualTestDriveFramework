@@ -6,7 +6,10 @@
 #include <graphviz/gvc.h>
 #include <highgui.h>
 #include <boost/lexical_cast.hpp>
+#include <boost/unordered_set.hpp>
 #include <utils/GraphViz.h>
+#include <core/Utils.h>
+#include <chrono>
 
 namespace saliency_sandbox {
 

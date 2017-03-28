@@ -6,7 +6,6 @@
 #define GAZE_H
 
 #include <opencv2/opencv.hpp>
-#include <core/Bus.h>
 #include <core/Node.h>
 
 namespace saliency_sandbox {
