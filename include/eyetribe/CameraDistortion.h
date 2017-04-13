@@ -1,0 +1,8 @@
+//
+// Created by geislerd on 13.04.17.
+//
+
+#ifndef EYETRIBE_CAMERADISTORTION_H
+#define EYETRIBE_CAMERADISTORTION_H
+
+#endif //EYETRIBE_CAMERADISTORTION_H
