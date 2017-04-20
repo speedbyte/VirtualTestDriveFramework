@@ -69,7 +69,7 @@ namespace salbox {
 
 	typedef Image<uint8_t> GrayscaleImage;
 	typedef Image<uint8_t[3]> RGBImage;
-	typedef Image<float> SalientMap;
+	typedef Image<float> SalientMap; //TODO: rename MaliencyMap
 }
 
 #endif //DRIVERMODEL2_IMAGE_H
