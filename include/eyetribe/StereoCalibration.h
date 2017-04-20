@@ -5,57 +5,54 @@
 #ifndef EYETRIBE_STEREOCALIBRATION_H
 #define EYETRIBE_STEREOCALIBRATION_H
 
-#include <eyetribe/VideoReader.h>
-#include <vector>
+#include <eyetribe/CameraCalibration.h>
 
 namespace saliency_sandbox {
     namespace eyetribe {
 
-        template <uint32_t _format>
+        typedef saliency_sandbox::utils::_Matrix<3,3,float> CameraCameraRotation;
+        typedef saliency_sandbox::utils::_Matrix<1,3,float> CameraCameraTranslation;
+        typedef saliency_sandbox::utils::_Matrix<3,3,float> EssentialMatrix;
+        typedef saliency_sandbox::utils::_Matrix<3,3,float> FundamentalMatrix;
+
+        template<uint32_t _format>
         class StereoCalibration : public saliency_sandbox::core::Node::
-            template Input<typename VideoReader<_format>::Image,typename VideoReader<_format>::Image>::
-            template Output<typename VideoReader<_format>::Image,typename VideoReader<_format>::Image> {
+            template Input<
+                CameraCorners,             // calibration pattern points in camera 0
+                CameraCorners,             // calibration pattern points in camera 1
+                CameraMatrix,              // camera 0 matrix
+                CameraDistortion,          // camera 0 distortion
+                CameraMatrix,              // camera 1 matrix
+                CameraDistortion,          // camera 1 distortion
+                bool,                      // camera 0 is calibrated
+                bool                       // camera 1 is calibrated
+            >::template Output<
+                CameraCameraRotation,      // rotation matrix from camera 0 to camera 1
+                CameraCameraTranslation,   // translation from camera 0 to camera 1
+                EssentialMatrix,           // essential matrix
+                FundamentalMatrix,         // fundamental matrix
+                bool                       // calibration was successful
+            > {
+        private:
+            ObjectCorners m_object_corners;
+            ObjectCornersList m_object_corners_list;
+            CameraCornersList m_camera_corners_list[2];
+
+            CameraCameraRotation m_R;
+            CameraCameraTranslation m_T;
+            EssentialMatrix m_E;
+            FundamentalMatrix m_F;
+
+            std::chrono::high_resolution_clock::time_point m_time;
+
+            bool m_valid;
+
+            bool collectPoints();
+
         public:
-            StereoCalibration() {
-                this->template input<0>()->name("image0");
-                this->template input<1>()->name("image1");
-            }
-
-            void calc() override {
-                cv::Mat1b input[2], scaled[2];
-                std::vector<cv::Vec2f> corners[2];
-                bool found[2];
-                cv::Size sz;
-                float scale;
-
-                sz = cv::Size(4,4);
-                scale = 0.15;
-
-                input[0] = this->template input<0>()->value()->mat();
-                input[1] = this->template input<1>()->value()->mat();
-
-                cv::resize(input[0],scaled[0],cv::Size(),scale,scale);
-                cv::resize(input[1],scaled[1],cv::Size(),scale,scale);
-
-                found[0] = cv::findChessboardCorners(scaled[0],sz,corners[0]);
-                found[1] = cv::findChessboardCorners(scaled[1],sz,corners[1]);
-
-                if(!found[0] || !found[1])
-                    return;
-
-                for(int i = 0; i < corners[0].size(); corners[0][i++] *= 1.0f/scale);
-                for(int i = 0; i < corners[1].size(); corners[1][i++] *= 1.0f/scale);
-
-                cv::cornerSubPix(input[0],corners[0],sz,cv::Size(-1,-1),cv::TermCriteria(cv::TermCriteria::COUNT+cv::TermCriteria::EPS, 30, 0.01));
-
-                cv::drawChessboardCorners(input[0],sz,corners[0],found[0]);
-                cv::drawChessboardCorners(input[1],sz,corners[1],found[1]);
-
-            }
-
-            void reset() override {
-
-            }
+            StereoCalibration();
+            void calc() override;
+            void reset() override;
         };
     }
 }

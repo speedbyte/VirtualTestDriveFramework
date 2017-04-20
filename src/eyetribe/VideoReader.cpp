@@ -42,7 +42,7 @@ namespace saliency_sandbox {
                 uvc_set_ctrl(this->m_uvc_device_handle,3,3,&light_a,2);
 
             // set exposure
-            exposure_a = (uint32_t)this->properties()->template get<int>("exposure",80);
+            exposure_a = (uint32_t)this->properties()->template get<int>("exposure",120);
             uvc_get_exposure_abs(this->m_uvc_device_handle,&exposure_b,UVC_GET_CUR);
             if(exposure_a != exposure_b)
                 uvc_set_exposure_abs(this->m_uvc_device_handle,exposure_a);
