@@ -11,7 +11,7 @@ namespace saliency_sandbox {
         void cb(uvc_frame_t *frame, void *data);
 
         template<uint32_t _format>
-        VideoReader<_format>::VideoReader(uint32_t device) : m_device(device), m_wait(true) {
+        VideoReader<_format>::VideoReader(uint32_t device) : m_device(device), m_led_code(0x000f) {
             this->output()->name("image");
             this->template output<0>()->value(&this->m_output);
 
@@ -19,48 +19,63 @@ namespace saliency_sandbox {
         }
 
         template<uint32_t _format>
-        void VideoReader<_format>::capture(uvc_frame_t *frame) {
-            if(frame->data_bytes != WIDTH*HEIGHT*sizeof(cv::Vec2b))
-                return;
-            this->m_mutex.lock();
-            this->m_yuvu = cv::Mat2b(HEIGHT,WIDTH,(cv::Vec2b*)frame->data);
-            cv::cvtColor(this->m_yuvu, this->m_output.mat(), CV_YUV2GRAY_YUYV, CV_8UC1);
-            this->m_wait = false;
-            this->m_mutex.unlock();
+        VideoReader<_format>::~VideoReader() {
+            uvc_stream_stop(this->m_uvc_stream_handle);
+            uvc_stream_close(this->m_uvc_stream_handle);
+            uvc_close(this->m_uvc_device_handle);
         }
 
         template<uint32_t _format>
         void VideoReader<_format>::calc() {
-            uint16_t light_a,light_b;
-            uint32_t exposure_a, exposure_b;
-            uint16_t gain_a, gain_b;
+            float mean_a, mean_b, mean_d;
+            uvc_frame* frame;
 
-            // turn on leds
-            light_a = this->properties()->template get<bool>("infrared",true)?uint16_t(0x000f):uint16_t(0x0000);
-            uvc_get_ctrl(this->m_uvc_device_handle,3,3,&light_b,2,UVC_GET_CUR);
-            if(light_a != light_b)
-                uvc_set_ctrl(this->m_uvc_device_handle,3,3,&light_a,2);
+            this->m_uvc_error = uvc_stream_get_frame(this->m_uvc_stream_handle,&frame,-1);
+            sserr << sscond(this->m_uvc_error < 0) << "error while grabbing frame: " << uvc_strerror(this->m_uvc_error) << ssthrow;
 
-            // set exposure
-            exposure_a = (uint32_t)this->properties()->template get<int>("exposure",120);
-            uvc_get_exposure_abs(this->m_uvc_device_handle,&exposure_b,UVC_GET_CUR);
-            if(exposure_a != exposure_b)
-                uvc_set_exposure_abs(this->m_uvc_device_handle,exposure_a);
+            if(frame == nullptr)
+                return;
 
-            // set gain
-            gain_a = (uint16_t)this->properties()->template get<int>("gain",50);
-            uvc_get_gain(this->m_uvc_device_handle,&gain_b,UVC_GET_CUR);
-            if(gain_a != gain_b)
-                uvc_set_gain(this->m_uvc_device_handle,gain_a);
+            if(frame->data_bytes == WIDTH*HEIGHT*sizeof(cv::Vec2b)) {
+                cv::cvtColor(
+                        cv::Mat2b(
+                                HEIGHT, WIDTH,
+                                (cv::Vec2b *) frame->data),
+                        this->m_output.mat(),
+                        CV_YUV2GRAY_YUYV,
+                        CV_8UC1);
+                cv::flip(this->m_output,this->m_output,1);
+            }
 
-            /*if(!this->m_wait) {
-                this->m_mutex.lock();
-                cv::cvtColor(this->m_yuvu, this->m_output.mat(), CV_YUV2GRAY_YUYV, CV_8UC1);
-                this->m_mutex.unlock();
-            }*/
-            this->m_mutex.unlock();
-            usleep(1);
-            this->m_mutex.lock();
+            mean_a = this->properties()->template get<float>("mean",50);
+            mean_b = float(cv::mean(this->m_output).val[0]);
+            mean_d = mean_a - mean_b;
+
+            if(mean_d < -3.0f) {
+                uvc_get_exposure_abs(this->m_uvc_device_handle,&this->m_cur_exposure,UVC_GET_CUR);
+                if(this->m_cur_exposure > this->m_min_exposure) {
+                    this->m_cur_exposure--;
+                    uvc_set_exposure_abs(this->m_uvc_device_handle,this->m_cur_exposure);
+                }else {
+                    uvc_get_gain(this->m_uvc_device_handle,&this->m_cur_gain,UVC_GET_CUR);
+                    if(this->m_cur_gain > this->m_min_gain) {
+                        this->m_cur_gain--;
+                        uvc_set_gain(this->m_uvc_device_handle, this->m_cur_gain);
+                    }
+                }
+            } else if(mean_d > 3.0f) {
+                uvc_get_gain(this->m_uvc_device_handle,&this->m_cur_gain,UVC_GET_CUR);
+                if(this->m_cur_gain < this->m_max_gain) {
+                    this->m_cur_gain++;
+                    uvc_set_gain(this->m_uvc_device_handle, this->m_cur_gain);
+                } else {
+                    uvc_get_exposure_abs(this->m_uvc_device_handle,&this->m_cur_exposure,UVC_GET_CUR);
+                    if(this->m_cur_exposure < this->m_max_exposure) {
+                        this->m_cur_exposure++;
+                        uvc_set_exposure_abs(this->m_uvc_device_handle,this->m_cur_exposure);
+                    }
+                }
+            }
         }
 
         template<uint32_t _format>
@@ -95,12 +110,12 @@ namespace saliency_sandbox {
             sserr << sscond(count <= this->m_device) << "device with index " << this->m_device << " not found" << ssthrow;
             this->m_uvc_device = this->m_uvc_device_list[this->m_device];
 
-            // clear device list
-            uvc_free_device_list(this->m_uvc_device_list,0);
-
             // open device
             this->m_uvc_error = uvc_open(this->m_uvc_device,&this->m_uvc_device_handle);
             sserr << sscond(this->m_uvc_error < 0) << "cannot open device (" << this->m_device << "): " << uvc_strerror(this->m_uvc_error) << ssthrow;
+
+            // clear device list
+            uvc_free_device_list(this->m_uvc_device_list,0);
 
             // setup format
             this->m_uvc_error = uvc_get_stream_ctrl_format_size(
@@ -112,15 +127,31 @@ namespace saliency_sandbox {
                   << "cannot create stream control for device (" << this->m_device << "): "
                   << uvc_strerror(this->m_uvc_error) << ssthrow;
 
+            // create stream
+            this->m_uvc_error = uvc_stream_open_ctrl(this->m_uvc_device_handle,&this->m_uvc_stream_handle,&this->m_uvc_control);
+            sserr << sscond(this->m_uvc_error < 0)
+                  << "cannot open stream for device (" << this->m_device << "): "
+                  << uvc_strerror(this->m_uvc_error) << ssthrow;
+
+            this->m_uvc_error = uvc_stream_start(this->m_uvc_stream_handle, nullptr, nullptr,0);
+            sserr << sscond(this->m_uvc_error < 0)
+                  << "cannot start stream for device (" << this->m_device << "): "
+                  << uvc_strerror(this->m_uvc_error) << ssthrow;
+
             // reverse engineered
             uvc_set_ctrl(this->m_uvc_device_handle,3,4,(void*)setup_data,8);
 
-            uvc_start_streaming(this->m_uvc_device_handle,&this->m_uvc_control,cb<_format>,this,0);
-        }
+            uvc_get_gain(this->m_uvc_device_handle,&this->m_min_gain,UVC_GET_MIN);
+            uvc_get_gain(this->m_uvc_device_handle,&this->m_max_gain,UVC_GET_MAX);
+            uvc_get_gain(this->m_uvc_device_handle,&this->m_cur_gain,UVC_GET_CUR);
 
-        template<uint32_t _format>
-        void cb(uvc_frame_t *frame, void *data) {
-            ((VideoReader<_format>*)data)->capture(frame);
+            uvc_get_exposure_abs(this->m_uvc_device_handle,&this->m_min_exposure,UVC_GET_MIN);
+            uvc_get_exposure_abs(this->m_uvc_device_handle,&this->m_max_exposure,UVC_GET_MAX);
+            uvc_get_exposure_abs(this->m_uvc_device_handle,&this->m_cur_exposure,UVC_GET_CUR);
+
+            uvc_set_gain(this->m_uvc_device_handle, 50);
+            uvc_set_exposure_abs(this->m_uvc_device_handle, 80);
+            uvc_set_ctrl(this->m_uvc_device_handle,3,3,&this->m_led_code,2);
         }
 
         template class VideoReader<0>;

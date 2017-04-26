@@ -55,16 +55,24 @@ namespace saliency_sandbox {
             uvc_device_t** m_uvc_device_list;
             uvc_device_handle_t* m_uvc_device_handle;
             uvc_stream_ctrl_t m_uvc_control;
+            uvc_stream_handle_t* m_uvc_stream_handle;
             uvc_error_t m_uvc_error;
 
             uint32_t m_device;
-            std::mutex m_mutex;
-            cv::Mat2b m_yuvu;
             Image m_output;
-            bool m_wait;
+
+            uint16_t m_min_gain;
+            uint16_t m_max_gain;
+            uint16_t m_cur_gain;
+            uint32_t m_min_exposure;
+            uint32_t m_max_exposure;
+            uint32_t m_cur_exposure;
+
+            uint16_t m_led_code;
+
         public:
             VideoReader(uint32_t device);
-            void capture(uvc_frame_t *frame);
+            virtual ~VideoReader();
             void calc() override;
             void reset() override;
         };

@@ -46,6 +46,7 @@ namespace saliency_sandbox {
             std::chrono::high_resolution_clock::time_point m_time;
 
             bool m_valid;
+            float m_error;
 
             bool collectPoints();
 
@@ -53,6 +54,7 @@ namespace saliency_sandbox {
             StereoCalibration();
             void calc() override;
             void reset() override;
+
         };
     }
 }

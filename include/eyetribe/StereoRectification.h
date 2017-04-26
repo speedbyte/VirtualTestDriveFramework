@@ -65,14 +65,14 @@ namespace saliency_sandbox {
 
             void calc() override {
                 cv::Mat tmp_R[3], tmp_P[2], tmp_Q, tmp_M[2], tmp_D[2], tmp_T;
-                const CameraMatrix& cameraMatrix0 = *this->template input<0>()->value();
-                const CameraDistortion& cameraDistortion0 = *this->template input<1>()->value();
-                const CameraMatrix& cameraMatrix1 = *this->template input<2>()->value();
-                const CameraDistortion& cameraDistortion1 = *this->template input<3>()->value();
-                const CameraCameraRotation R = *this->template input<4>()->value();
-                const CameraCameraTranslation T = *this->template input<5>()->value();
-                const bool valid = *this->template input<6>()->value();
-                const cv::Size sz = cv::Size(Format<_format>::WIDTH,Format<_format>::HEIGHT);
+                const CameraMatrix& cameraMatrix0           = *this->template input<0>()->value();
+                const CameraDistortion& cameraDistortion0   = *this->template input<1>()->value();
+                const CameraMatrix& cameraMatrix1           = *this->template input<2>()->value();
+                const CameraDistortion& cameraDistortion1   = *this->template input<3>()->value();
+                const CameraCameraRotation& R               = *this->template input<4>()->value();
+                const CameraCameraTranslation& T            = *this->template input<5>()->value();
+                const bool valid                            = *this->template input<6>()->value();
+                const cv::Size sz                           = cv::Size(Format<_format>::WIDTH,Format<_format>::HEIGHT);
 
                 if(!valid)
                     return;
@@ -107,7 +107,14 @@ namespace saliency_sandbox {
                 tmp_P[1].convertTo(this->m_P[1],CV_32FC1);
                 tmp_Q.convertTo(this->m_Q,CV_32FC1);
 
-                this->m_valid = false;
+                std::cout << "Stereo Rectification: " << std::endl;
+                std::cout << "R[0]: " << this->m_R[0] << std::endl;
+                std::cout << "P[0]: " << this->m_P[0] << std::endl;
+                std::cout << "R[1]: " << this->m_R[1] << std::endl;
+                std::cout << "P[1]: " << this->m_P[1] << std::endl;
+                std::cout << "Q: " << this->m_Q << std::endl;
+
+                this->m_valid = true;
             }
 
             void reset() override {
@@ -116,6 +123,34 @@ namespace saliency_sandbox {
                 this->m_P[0].clear();
                 this->m_P[1].clear();
                 this->m_Q.clear();
+
+                /*
+                this->m_R[0].template at<float>(0) = 0.967757881f;
+                this->m_R[0].template at<float>(1) = 0.251882195f;
+                this->m_R[0].template at<float>(3) = -0.251882195f;
+                this->m_R[0].template at<float>(4) = 0.967757881f;
+                this->m_R[0].template at<float>(8) = 1.0f;
+
+                this->m_R[1].template at<float>(0) = 0.967757881f;
+                this->m_R[1].template at<float>(1) = 0.251882195f;
+                this->m_R[1].template at<float>(3) = -0.251882195f;
+                this->m_R[1].template at<float>(4) = 0.967757881f;
+                this->m_R[1].template at<float>(8) = 1.0f;
+
+                this->m_P[0].template at<float>(0) = 3806.82397f;
+                this->m_P[0].template at<float>(2) = 222.984985f;
+                this->m_P[0].template at<float>(5) = 3806.82397f;
+                this->m_P[0].template at<float>(6) = 661.948059f;
+                this->m_P[0].template at<float>(10) = 1.0f;
+
+                this->m_P[1].template at<float>(0) = 3806.82397f;
+                this->m_P[1].template at<float>(2) = 222.984985f;
+                this->m_P[1].template at<float>(3) = 287156.688f;
+                this->m_P[1].template at<float>(5) = 3806.82397f;
+                this->m_P[1].template at<float>(6) = 661.948059f;
+                this->m_P[1].template at<float>(10) = 1.0f;
+                 */
+
                 this->m_valid = false;
             }
         };

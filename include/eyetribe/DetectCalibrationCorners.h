@@ -46,9 +46,9 @@ namespace saliency_sandbox {
 
                 in = this->template input<0>()->value()->mat();
                 scales = this->properties()->template get<int>("scales",1);
-                rows = this->properties()->template get<int>("rows",4);
-                cols = this->properties()->template get<int>("cols",4);
-                dist = this->properties()->template get<float>("dist",14);
+                rows = this->properties()->template get<int>("rows",8);
+                cols = this->properties()->template get<int>("cols",8);
+                dist = this->properties()->template get<float>("dist",12.7f);
                 num = rows*cols;
 
                 this->m_camera_corners.clear();
@@ -68,9 +68,10 @@ namespace saliency_sandbox {
                 for(int i = 0; i < num; i++)
                     this->m_camera_corners[i] *= powf(2.0f,scales);
 
-                for(int x = 0; x < cols; x++)
-                    for(int y = 0; y < rows; y++)
-                        this->m_object_corners.push_back(cv::Vec3f(x*dist-(cols-1)*dist*0.5f,y*dist-(rows-1)*dist*0.5f,0.0f));
+                for(int y = 0; y < rows; y++)
+                    for(int x = 0; x < cols; x++)
+                        //this->m_object_corners.push_back(cv::Vec3f(x*dist-(cols-1)*dist*0.5f,y*dist-(rows-1)*dist*0.5f,0.0f));
+                        this->m_object_corners.push_back(cv::Vec3f(x*dist,y*dist,0.0f));
             }
 
             void reset() override { }

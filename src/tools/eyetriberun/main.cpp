@@ -12,7 +12,7 @@
 #include <eyetribe/GlintDetector.h>
 #include <eyetribe/StereoGlintMatcher.h>
 
-#define FORMAT 2
+#define FORMAT 1
 
 saliency_sandbox::eyetribe::VideoReader<FORMAT> vr0(0);
 saliency_sandbox::eyetribe::VideoReader<FORMAT> vr1(1);
@@ -99,6 +99,7 @@ int main(int argc, char** argv) {
     sgm.template input<3>()->connect(gd1.template output<0>());
     sgm.template input<4>()->connect(sr.template output<2>());
     sgm.template input<5>()->connect(sr.template output<3>());
+    sgm.template input<6>()->connect(sr.template output<4>());
 
     for(time_t t = 0; true; t++) {
         sgm.process(t);

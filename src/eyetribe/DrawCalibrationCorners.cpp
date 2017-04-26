@@ -29,7 +29,7 @@ namespace saliency_sandbox {
             this->m_image.mat(in);
 
             if(valid)
-                cv::drawChessboardCorners(this->m_image.mat(),cv::Size(4,4),corners,valid);
+                cv::drawChessboardCorners(this->m_image.mat(),cv::Size(8,8),corners,valid);
         }
 
         template <uint32_t _format>

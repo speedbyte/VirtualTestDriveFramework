@@ -51,7 +51,7 @@ namespace saliency_sandbox {
                     this->m_density.template at<float>(mean*0.1) += 1.0f;
                 }
 
-                cv::GaussianBlur(this->m_density,this->m_density,cv::Size(33,33),5.0f);
+                cv::GaussianBlur(this->m_density,this->m_density,cv::Size(33,33),7.0f);
                 cv::normalize(this->m_density,this->m_density,0,1,cv::NORM_MINMAX);
                 cv::namedWindow("DENSITY");
                 cv::imshow("DENSITY",this->m_density);
@@ -75,12 +75,12 @@ namespace saliency_sandbox {
 
             float coverage() {
                 cv::Mat1f thresh;
-                cv::threshold(this->m_density,thresh,0.1,1.0,cv::THRESH_BINARY);
+                cv::threshold(this->m_density,thresh,0.2,1.0,cv::THRESH_BINARY);
 
                 return float(cv::sum(thresh).val[0] / (thresh.cols*thresh.rows));
             }
 
-            void collect(CameraCorners* camera_corners, ObjectCorners* objct_corners, bool* valid, saliency_sandbox::core::PropertyMap* pm) {
+            void collect(CameraCorners* camera_corners, ObjectCorners* object_corners, bool* valid, saliency_sandbox::core::PropertyMap* pm) {
                 int max, idx;
                 float coverage, min_coverage;
 
@@ -91,18 +91,17 @@ namespace saliency_sandbox {
                     return;
 
                 max = pm->template get<int>("max",50);
-                min_coverage = pm->template get<float>("coverage",0.75f);
+                min_coverage = pm->template get<float>("coverage",0.65f);
 
                 if(this->m_camera_corners.size() > max) {
                     idx = this->findCornerToDelete();
                     this->m_camera_corners[idx] = *camera_corners;
-                    this->m_object_corners[idx] = *objct_corners;
+                    this->m_object_corners[idx] = *object_corners;
                     coverage = this->coverage();
-                    std::cout << coverage << std::endl;
                     this->m_valid = coverage > min_coverage;
                 } else {
                     this->m_camera_corners.push_back(*camera_corners);
-                    this->m_object_corners.push_back(*objct_corners);
+                    this->m_object_corners.push_back(*object_corners);
                 }
 
                 return;

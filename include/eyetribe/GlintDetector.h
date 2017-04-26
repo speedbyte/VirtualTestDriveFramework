@@ -10,7 +10,6 @@
 namespace saliency_sandbox {
     namespace eyetribe {
 
-        typedef saliency_sandbox::utils::_Matrix<31,31,float> GlintKernel;
         typedef std::pair<cv::Point,double> Glint;
         typedef std::vector<Glint> GlintList;
 
@@ -19,7 +18,6 @@ namespace saliency_sandbox {
         template Input<typename Format<_format>::Image>::template Output<GlintList> {
         private:
             GlintList m_glints;
-            GlintKernel m_kernel;
 
         public:
             GlintDetector() {
@@ -31,40 +29,74 @@ namespace saliency_sandbox {
                 this->reset();
             }
 
+#define dshow( name , I ) do {\
+            cv::Mat1f name##_tmp_d; \
+            cv::normalize(I,name##_tmp_d,0.0f,1.0f,cv::NORM_MINMAX,CV_32FC1); \
+            cv::namedWindow(#name); \
+            cv::imshow(#name,I); \
+            } while(false);
+
+            float thresh(const cv::Mat1b &in, cv::Mat1b &thresh, int glint_size) {
+                double meanVal, maxVal, threshVal;
+
+                minMaxLoc(in, nullptr, &maxVal, nullptr, nullptr);
+                meanVal = mean(in).val[0];
+                threshVal = maxVal*0.15 + meanVal*0.85;
+
+                adaptiveThreshold(in, thresh, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, glint_size, -threshVal);
+
+                return float(threshVal);
+            }
+
             void calc() override {
-                cv::Mat1b in = this->template input<0>()->value()->mat();
-                const int sz = this->properties()->template get<int>("glint_size",71);
-                const cv::Rect ir(0,0,in.cols,in.rows);
-                cv::Mat1f t, r[3], k;
+                cv::Mat1b in, thresh;
+                int sz;
+                cv::Rect ir, reg;
                 Glint tmp;
-                cv::Rect reg;
-                cv::Mat1b thresh, l[10];
+                double th;
+
 
                 this->m_glints.clear();
 
+                in = this->template input<0>()->value()->mat();
+                sz = this->properties()->template get<int>("glint_size",51);
+                ir = cv::Rect(0,0,in.cols,in.rows);
+                th = this->thresh(in, thresh, sz);
 
-                cv::GaussianBlur(in,l[0],cv::Size(13,13),0.20f);
-                cv::GaussianBlur(in,l[1],cv::Size(13,13),2.00f);
-                cv::subtract(l[0],l[1],l[3]);
-                cv::threshold(l[3],l[4],cv::mean(l[3]).val[0]*100,255,cv::THRESH_BINARY);
-                cv::GaussianBlur(l[4],l[5],cv::Size(sz,sz),4.0f);
-                //cv::Mat1f tt; cv::normalize(l[5],tt,0.0f,1.0f,cv::NORM_MINMAX,CV_32FC1);cv::namedWindow("AA");cv::imshow("AA",tt);
-
-                for(int i = 0 ; i < 100; i++) {
-                    cv::minMaxLoc(l[5], nullptr,&tmp.second, nullptr,&tmp.first);
-                    if(tmp.second < FLT_MIN)
-                        break;
+                /*
+                cv::Mat1b p;
+                cv::pyrDown(in,p);
+                std::vector<cv::Point2f> ps;
+                if(cv::findCirclesGridDefault(p,cv::Size(8,8),ps)) {
+                    tmp.first = ps[0]*2;
                     this->m_glints.push_back(tmp);
-                    l[5](ir & cv::Rect(tmp.first.x-sz,tmp.first.y-sz,sz*2,sz*2)) = 0;
+                    tmp.first = ps[ps.size()-1]*2;
+                    this->m_glints.push_back(tmp);
                 }
+                return;
+*/
+
+                for(int i = 0; i < 16; i++) {
+                    cv::minMaxLoc(in, nullptr, &tmp.second, nullptr, &tmp.first,thresh);
+
+                    if(tmp.first.x <= 0 || tmp.first.y <= 0 || tmp.second < th)
+                        break;
+
+                    reg = ir & cv::Rect(tmp.first.x-sz,tmp.first.y-sz,sz*2,sz*2);
+
+                    tmp.second -= cv::mean(in(reg),thresh(reg)).val[0];
+
+                    thresh(reg) = 0;
+
+                    this->m_glints.push_back(tmp);
+                }
+
+                std::sort(this->m_glints.begin(),this->m_glints.end(),[](const Glint& g0, const Glint& g1){ return g0.second > g1.second;});
+                while(this->m_glints.size() > 4)
+                    this->m_glints.pop_back();
             }
 
             void reset() override {
-                this->m_glints.clear();
-
-                this->m_kernel.clear();
-                cv::subtract(this->m_kernel,-1,this->m_kernel);
-                this->m_kernel.template at<float>((this->m_kernel.rows-1)/2,(this->m_kernel.cols-1)/2) = (this->m_kernel.rows*this->m_kernel.cols -1);
             }
         };
     }

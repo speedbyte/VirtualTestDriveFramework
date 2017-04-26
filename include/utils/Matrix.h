@@ -55,7 +55,7 @@ namespace saliency_sandbox {
                 return cv::Mat_<_type>(_height,_width,this->m_value);
             }
 
-            void mat(cv::Mat& mat) {
+            void mat(const cv::Mat& mat) {
                 memcpy(this->m_value,mat.data,this->bytes());
             }
 
