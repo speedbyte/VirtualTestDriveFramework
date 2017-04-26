@@ -69,6 +69,20 @@ message Pipeline {
             GazeSelector                = 702;
             GazeMovementSelector        = 703;
             GazeFOV                     = 704;
+
+            //ADTF
+            ADTFGazeReader              = 801;
+            ADTFGazeMovementWriter      = 802;
+            ADTFGazeTrackingWriter      = 803;
+            ADTFGrayscaleImageReader    = 804;
+            ADTFRGBImageReader          = 805;
+            ADTFSaliencyMapReader       = 806;
+            ADTFGrayscaleImageWriter    = 807;
+            ADTFRGBImageWriter          = 808;
+            ADTFSaliencyMapWriter       = 809;
+            ADTFTrackedObjectReader     = 810;
+            ADTFTrackedObjectSaliencyWriter = 811;
+            ADTFVisualPerceptionWriter  = 812;
         }
 
         required Type type = 2;

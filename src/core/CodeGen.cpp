@@ -878,6 +878,78 @@ namespace saliency_sandbox {
                             gen << CodeGen::SetInput("gaze",0);
                             gen << CodeGen::SetInput("depth",1);
                             break;
+                        case generated::Pipeline_Node_Type_ADTFGazeReader:
+                            gen << CodeGen::SetHeader("adtf/io/GazeReader");
+                            gen << CodeGen::SetClass("saliency_sandbox::adtf::GazeReader");
+                            gen << CodeGen::SetInput("gaze",0);
+                            break;
+                        case generated::Pipeline_Node_Type_ADTFGazeMovementWriter:
+                            gen << CodeGen::SetHeader("adtf/io/GazeWriter");
+                            gen << CodeGen::SetClass("saliency_sandbox::adtf::GazeMovementWriter");
+                            gen << CodeGen::SetInput("gaze_movement",0);
+                            break;
+                        case generated::Pipeline_Node_Type_ADTFGazeTrackingWriter:
+                            gen << CodeGen::SetHeader("adtf/io/GazeWriter");
+                            gen << CodeGen::SetClass("saliency_sandbox::adtf::GazeTrackingWriter");
+                            gen << CodeGen::SetInput("tracklets",0);
+                            break;
+                        case generated::Pipeline_Node_Type_ADTFGrayscaleImageReader:
+                            gen << CodeGen::SetHeader("adtf/io/ImageReader");
+                            gen << CodeGen::SetClass("saliency_sandbox::adtf::GrayscaleImageReader");
+                            gen << CodeGen::SetTemplateArgument("width",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_WIDTH_S(RESOLUTION) );
+                            gen << CodeGen::SetTemplateArgument("height",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_HEIGHT_S(RESOLUTION));
+                            gen << CodeGen::SetInput("image",0);
+                            break;
+                        case generated::Pipeline_Node_Type_ADTFRGBImageReader:
+                            gen << CodeGen::SetHeader("adtf/io/ImageReader");
+                            gen << CodeGen::SetClass("saliency_sandbox::adtf::RGBImageReader");
+                            gen << CodeGen::SetTemplateArgument("width",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_WIDTH_S(RESOLUTION) );
+                            gen << CodeGen::SetTemplateArgument("height",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_HEIGHT_S(RESOLUTION));
+                            gen << CodeGen::SetInput("image",0);
+                            break;
+                        case generated::Pipeline_Node_Type_ADTFSaliencyMapReader:
+                            gen << CodeGen::SetHeader("adtf/io/ImageReader");
+                            gen << CodeGen::SetClass("saliency_sandbox::adtf::SaliencyMapReader");
+                            gen << CodeGen::SetTemplateArgument("width",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_WIDTH_S(RESOLUTION) );
+                            gen << CodeGen::SetTemplateArgument("height",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_HEIGHT_S(RESOLUTION));
+                            gen << CodeGen::SetInput("saliency",0);
+                            break;
+                        case generated::Pipeline_Node_Type_ADTFGrayscaleImageWriter:
+                            gen << CodeGen::SetHeader("adtf/io/ImageWriter");
+                            gen << CodeGen::SetClass("saliency_sandbox::adtf::GrayscaleImageWriter");
+                            gen << CodeGen::SetTemplateArgument("width",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_WIDTH_S(RESOLUTION) );
+                            gen << CodeGen::SetTemplateArgument("height",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_HEIGHT_S(RESOLUTION));
+                            gen << CodeGen::SetInput("image",0);
+                            break;
+                        case generated::Pipeline_Node_Type_ADTFRGBImageWriter:
+                            gen << CodeGen::SetHeader("adtf/io/ImageWriter");
+                            gen << CodeGen::SetClass("saliency_sandbox::adtf::RGBImageWriter");
+                            gen << CodeGen::SetTemplateArgument("width",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_WIDTH_S(RESOLUTION) );
+                            gen << CodeGen::SetTemplateArgument("height",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_HEIGHT_S(RESOLUTION));
+                            gen << CodeGen::SetInput("image",0);
+                            break;
+                        case generated::Pipeline_Node_Type_ADTFSaliencyMapWriter:
+                            gen << CodeGen::SetHeader("adtf/io/ImageWriter");
+                            gen << CodeGen::SetClass("saliency_sandbox::adtf::SaliencyMapWriter");
+                            gen << CodeGen::SetTemplateArgument("width",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_WIDTH_S(RESOLUTION) );
+                            gen << CodeGen::SetTemplateArgument("height",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_HEIGHT_S(RESOLUTION));
+                            gen << CodeGen::SetInput("saliency",0);
+                            break;
+                        case generated::Pipeline_Node_Type_ADTFTrackedObjectReader:
+                            gen << CodeGen::SetHeader("adtf/io/TrackedObjectReader");
+                            gen << CodeGen::SetClass("saliency_sandbox::adtf::TrackedObjectReader");
+                            gen << CodeGen::SetInput("tracklets",0);
+                            break;
+                        case generated::Pipeline_Node_Type_ADTFTrackedObjectSaliencyWriter:
+                            gen << CodeGen::SetHeader("adtf/io/TrackedObjectSaliencyWriter");
+                            gen << CodeGen::SetClass("saliency_sandbox::adtf::TrackedObjectSaliencyWriter");
+                            gen << CodeGen::SetInput("tracklets",0);
+                            break;
+                        case generated::Pipeline_Node_Type_ADTFVisualPerceptionWriter:
+                            gen << CodeGen::SetHeader("adtf/io/VisualPerceptionWriter");
+                            gen << CodeGen::SetClass("saliency_sandbox::adtf::VisualPerceptionWriter");
+                            gen << CodeGen::SetInput("tracklets",0);
+                            break;
                         default:
                             sserr << "unknown node type: " << generated::Pipeline_Node::Type_Name(pipeline.node(i).type()) << ssthrow;
                     }
