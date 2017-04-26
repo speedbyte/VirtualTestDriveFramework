@@ -20,13 +20,13 @@ namespace saliency_sandbox {
 
         Gaze::Gaze(cv::Vec3f origin, cv::Vec3f direction) :
                 m_origin(origin),
-                m_angle(origin.val[2] / sqrtf(origin.val[0]*origin.val[0]+origin.val[1]*origin.val[1]+origin.val[2]*origin.val[2]),atan2f(origin.val[1],origin.val[0])){
+                m_angle(direction.val[2] / sqrtf(direction.val[0]*direction.val[0]+direction.val[1]*direction.val[1]+direction.val[2]*direction.val[2]),atan2f(direction.val[1],direction.val[0])){
 
         }
 
         Gaze::Gaze(cv::Point3f origin, cv::Vec3f direction) :
                 m_origin(origin),
-                m_angle(origin.z / sqrtf(origin.x*origin.x+origin.y*origin.y+origin.z*origin.z),atan2f(origin.y,origin.x)) {
+                m_angle(direction.val[2] / sqrtf(direction.val[0]*direction.val[0]+direction.val[1]*direction.val[1]+direction.val[2]*direction.val[2]),atan2f(direction.val[1],direction.val[0])){
 
         }
 

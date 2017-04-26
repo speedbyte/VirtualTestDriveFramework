@@ -85,7 +85,7 @@ namespace saliency_sandbox {
         template<Camera _camera>
         DrawTracklet<_camera>::DrawTracklet() {
             this->template input<0>()->name("image");
-            this->template input<1>()->name("tracklet");
+            this->template input<1>()->name("tracking");
             this->template input<2>()->name("calibration");
 
             this->template output<0>()->name("image");

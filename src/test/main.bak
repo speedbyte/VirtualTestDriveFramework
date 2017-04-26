@@ -5,7 +5,7 @@
 
 #include <iostream>
 #include <io/ImageShow.h>
-#include <io/ImageReader.h>
+#include <io/ConvertImage.h>
 #include <io/VideoReader.h>
 #include <io/ImageWriter.h>
 #include <io/VideoWriter.h>

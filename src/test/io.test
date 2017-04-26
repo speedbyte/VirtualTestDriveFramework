@@ -4,7 +4,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <io/ImageReader.h>
+#include <io/ConvertImage.h>
 #include <io/ImageShow.h>
 #include <io/ImageWriter.h>
 #include <io/VideoReader.h>

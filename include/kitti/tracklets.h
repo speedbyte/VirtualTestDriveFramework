@@ -47,7 +47,7 @@
 
             ~Tracklets() {}
 
-            // pose of tracklet at specific frame
+            // pose of tracking at specific frame
             struct tPose {
 
                 double tx, ty, tz;         // translation wrt. Velodyne coordinates
@@ -133,14 +133,14 @@
                 BOOST_SERIALIZATION_SPLIT_MEMBER()
             };
 
-            // tracklet with meta information and vector of poses
+            // tracking with meta information and vector of poses
             struct tTracklet {
 
                 std::string objectType;  // object type: 'Car', 'Pedestrian', etc.
                 float h, w, l;       // height, width, length of bounding box
-                int first_frame; // number of first frame of tracklet
-                std::vector<tPose> poses;       // poses of this tracklet
-                int finished;    // is this tracklet fully labeled?
+                int first_frame; // number of first frame of tracking
+                std::vector<tPose> poses;       // poses of this tracking
+                int finished;    // is this tracking fully labeled?
 
                 tTracklet() {}
 
@@ -161,7 +161,7 @@
                   else finished = 0;
                 }
 
-                // return last frame index of tracklet wrt. to sequence
+                // return last frame index of tracking wrt. to sequence
                 int lastFrame() {
                   return first_frame + poses.size() - 1;
                 }
@@ -172,17 +172,17 @@
               return tracklets.size();
             }
 
-            // get tracklet with given id, ranging [0..#tracklets-1]
+            // get tracking with given id, ranging [0..#tracklets-1]
             tTracklet *getTracklet(int tracklet_id) {
               return &tracklets[tracklet_id];
             }
 
-            // push back a tracklet
+            // push back a tracking
             void addTracklet(tTracklet tracklet) {
               tracklets.push_back(tracklet);
             }
 
-            // returns pose pointer, if requested tracklet is active at given frame
+            // returns pose pointer, if requested tracking is active at given frame
             bool getPose(int tracklet_id, int frame_number, tPose *&pose) {
               if (!isActive(tracklet_id, frame_number)) {
                 return false;
@@ -193,7 +193,7 @@
               }
             }
 
-            // checks if tracklet wit given id exists at given frame
+            // checks if tracking wit given id exists at given frame
             bool isActive(int tracklet_id, int frame_number) {
               if (tracklet_id < 0 || tracklet_id >= (int) tracklets.size())
                 return false;
@@ -236,7 +236,7 @@
 
         };
 
-        // set the version of the stored tracklet data
+        // set the version of the stored tracking data
         BOOST_CLASS_VERSION(Tracklets::tTracklet, 1)
         BOOST_CLASS_VERSION(Tracklets::tPose, 2)
 

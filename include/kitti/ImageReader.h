@@ -5,7 +5,7 @@
 #ifndef KITTIIMAGEREADER_H
 #define KITTIIMAGEREADER_H
 
-#include <io/ImageReader.h>
+#include <io/ConvertImage.h>
 #include <boost/filesystem/path.hpp>
 #include <utils/Image.h>
 #include <kitti/TrackletReader.h>

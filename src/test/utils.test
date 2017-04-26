@@ -4,7 +4,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <io/ImageReader.h>
+#include <io/ConvertImage.h>
 #include <utils/Matrix.h>
 
 #define data_base "/media/geislerd/Documents/repo/SaliencySandbox2.0/data/test/"
