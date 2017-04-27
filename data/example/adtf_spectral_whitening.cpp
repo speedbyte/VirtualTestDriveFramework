@@ -53,50 +53,15 @@
  */
 #include <utils/Matrix.h>
 /* 
- * include header for node "Video Reader FPS Counter"
- * instance type: "saliency_sandbox::utils::FPSCounter"
- */
-#include <utils/FPSCounter.h>
-/* 
- * include header for node "Red Spectral Whitening FPS Counter"
- * instance type: "saliency_sandbox::utils::FPSCounter"
- */
-#include <utils/FPSCounter.h>
-/* 
- * include header for node "Green Spectral Whitening FPS Counter"
- * instance type: "saliency_sandbox::utils::FPSCounter"
- */
-#include <utils/FPSCounter.h>
-/* 
- * include header for node "Blue Spectral Whitening FPS Counter"
- * instance type: "saliency_sandbox::utils::FPSCounter"
- */
-#include <utils/FPSCounter.h>
-/* 
- * include header for node "FPS Plot"
- * instance type: "saliency_sandbox::plot::Plot"
- */
-#include <plot/Plot.h>
-/* 
- * include header for node "Show FPS Plot"
- * instance type: "saliency_sandbox::io::ImageShow"
- */
-#include <io/ImageShow.h>
-/* 
  * include header for node "Spectral Whitening Heatmap"
  * instance type: "saliency_sandbox::utils::_ImageConvert"
  */
 #include <utils/Image.h>
 /* 
- * include header for node "Show Spectral Whitening Heatmap"
- * instance type: "saliency_sandbox::io::ImageShow"
+ * include header for node "Video Writer"
+ * instance type: "saliency_sandbox::adtf::RGBImageWriter"
  */
-#include <io/ImageShow.h>
-/* 
- * include header for node "Show Image"
- * instance type: "saliency_sandbox::io::ImageShow"
- */
-#include <io/ImageShow.h>
+#include <adtf/io/ImageWriter.h>
 
 /* 
  * declare instance of node "Video Reader"
@@ -139,41 +104,13 @@ saliency_sandbox::utils::_MatrixMerge<uint32_t(1242),uint32_t(375),cv::Vec3f> no
  */
 saliency_sandbox::utils::_MatrixSum<uint32_t(1242),uint32_t(375),cv::Vec3f> node_9;
 /* 
- * declare instance of node "Video Reader FPS Counter"
- */
-saliency_sandbox::utils::FPSCounter node_10;
-/* 
- * declare instance of node "Red Spectral Whitening FPS Counter"
- */
-saliency_sandbox::utils::FPSCounter node_11;
-/* 
- * declare instance of node "Green Spectral Whitening FPS Counter"
- */
-saliency_sandbox::utils::FPSCounter node_12;
-/* 
- * declare instance of node "Blue Spectral Whitening FPS Counter"
- */
-saliency_sandbox::utils::FPSCounter node_13;
-/* 
- * declare instance of node "FPS Plot"
- */
-saliency_sandbox::plot::Plot node_14(std::string("Video Reader"),std::string("Red Spectral Whitening"),std::string("Green Spectral Whitening"),std::string("Blue Spectral Whitening"));
-/* 
- * declare instance of node "Show FPS Plot"
- */
-saliency_sandbox::io::ImageShow node_15(std::string("FPS"));
-/* 
  * declare instance of node "Spectral Whitening Heatmap"
  */
-saliency_sandbox::utils::_ImageConvert<uint32_t(1242),uint32_t(375),saliency_sandbox::utils::_HeatmapImage,saliency_sandbox::utils::_RGBImage> node_16;
+saliency_sandbox::utils::_ImageConvert<uint32_t(1242),uint32_t(375),saliency_sandbox::utils::_HeatmapImage,saliency_sandbox::utils::_RGBImage> node_10;
 /* 
- * declare instance of node "Show Spectral Whitening Heatmap"
+ * declare instance of node "Video Writer"
  */
-saliency_sandbox::io::ImageShow node_17(std::string("Spectral Whitening"));
-/* 
- * declare instance of node "Show Image"
- */
-saliency_sandbox::io::ImageShow node_18(std::string("Raw Image"));
+saliency_sandbox::adtf::RGBImageWriter<uint32_t(1242),uint32_t(375)> node_11;
 
 extern "C" void create_pipeline(saliency_sandbox::core::Pipeline& pipeline) {
 	/*
@@ -217,39 +154,11 @@ extern "C" void create_pipeline(saliency_sandbox::core::Pipeline& pipeline) {
 	 */
 
 	/*
-	 * set properties of node "Video Reader FPS Counter"
-	 */
-
-	/*
-	 * set properties of node "Red Spectral Whitening FPS Counter"
-	 */
-
-	/*
-	 * set properties of node "Green Spectral Whitening FPS Counter"
-	 */
-
-	/*
-	 * set properties of node "Blue Spectral Whitening FPS Counter"
-	 */
-
-	/*
-	 * set properties of node "FPS Plot"
-	 */
-
-	/*
-	 * set properties of node "Show FPS Plot"
-	 */
-
-	/*
 	 * set properties of node "Spectral Whitening Heatmap"
 	 */
 
 	/*
-	 * set properties of node "Show Spectral Whitening Heatmap"
-	 */
-
-	/*
-	 * set properties of node "Show Image"
+	 * set properties of node "Video Writer"
 	 */
 
 
@@ -353,112 +262,22 @@ extern "C" void create_pipeline(saliency_sandbox::core::Pipeline& pipeline) {
 		sserr << "error while connecting port 0 of node \"node_9\" (\"Spectral Whitening\") with port 0 of node \"node_8\" (\"Merge Spectral Whitening Activations\")\n" << err.what() << ssthrow;
 	}
 	/* 
-	 * connect output port 0 of node "Video Reader"
-	 * to input port 0 of node "Video Reader FPS Counter"
-	 */
-	try {
-		connect_port(node_0,0,node_10,0);
-	} catch(std::runtime_error& err) {
-		sserr << "error while connecting port 0 of node \"node_10\" (\"Video Reader FPS Counter\") with port 0 of node \"node_0\" (\"Video Reader\")\n" << err.what() << ssthrow;
-	}
-	/* 
-	 * connect output port 0 of node "Red Spectral Whitening"
-	 * to input port 0 of node "Red Spectral Whitening FPS Counter"
-	 */
-	try {
-		connect_port(node_5,0,node_11,0);
-	} catch(std::runtime_error& err) {
-		sserr << "error while connecting port 0 of node \"node_11\" (\"Red Spectral Whitening FPS Counter\") with port 0 of node \"node_5\" (\"Red Spectral Whitening\")\n" << err.what() << ssthrow;
-	}
-	/* 
-	 * connect output port 0 of node "Green Spectral Whitening"
-	 * to input port 0 of node "Green Spectral Whitening FPS Counter"
-	 */
-	try {
-		connect_port(node_6,0,node_12,0);
-	} catch(std::runtime_error& err) {
-		sserr << "error while connecting port 0 of node \"node_12\" (\"Green Spectral Whitening FPS Counter\") with port 0 of node \"node_6\" (\"Green Spectral Whitening\")\n" << err.what() << ssthrow;
-	}
-	/* 
-	 * connect output port 0 of node "Blue Spectral Whitening"
-	 * to input port 0 of node "Blue Spectral Whitening FPS Counter"
-	 */
-	try {
-		connect_port(node_7,0,node_13,0);
-	} catch(std::runtime_error& err) {
-		sserr << "error while connecting port 0 of node \"node_13\" (\"Blue Spectral Whitening FPS Counter\") with port 0 of node \"node_7\" (\"Blue Spectral Whitening\")\n" << err.what() << ssthrow;
-	}
-	/* 
-	 * connect output port 0 of node "Video Reader FPS Counter"
-	 * to input port 0 of node "FPS Plot"
-	 */
-	try {
-		connect_port(node_10,0,node_14,0);
-	} catch(std::runtime_error& err) {
-		sserr << "error while connecting port 0 of node \"node_14\" (\"FPS Plot\") with port 0 of node \"node_10\" (\"Video Reader FPS Counter\")\n" << err.what() << ssthrow;
-	}
-	/* 
-	 * connect output port 0 of node "Red Spectral Whitening FPS Counter"
-	 * to input port 1 of node "FPS Plot"
-	 */
-	try {
-		connect_port(node_11,0,node_14,1);
-	} catch(std::runtime_error& err) {
-		sserr << "error while connecting port 1 of node \"node_14\" (\"FPS Plot\") with port 0 of node \"node_11\" (\"Red Spectral Whitening FPS Counter\")\n" << err.what() << ssthrow;
-	}
-	/* 
-	 * connect output port 0 of node "Green Spectral Whitening FPS Counter"
-	 * to input port 2 of node "FPS Plot"
-	 */
-	try {
-		connect_port(node_12,0,node_14,2);
-	} catch(std::runtime_error& err) {
-		sserr << "error while connecting port 2 of node \"node_14\" (\"FPS Plot\") with port 0 of node \"node_12\" (\"Green Spectral Whitening FPS Counter\")\n" << err.what() << ssthrow;
-	}
-	/* 
-	 * connect output port 0 of node "Blue Spectral Whitening FPS Counter"
-	 * to input port 3 of node "FPS Plot"
-	 */
-	try {
-		connect_port(node_13,0,node_14,3);
-	} catch(std::runtime_error& err) {
-		sserr << "error while connecting port 3 of node \"node_14\" (\"FPS Plot\") with port 0 of node \"node_13\" (\"Blue Spectral Whitening FPS Counter\")\n" << err.what() << ssthrow;
-	}
-	/* 
-	 * connect output port 0 of node "FPS Plot"
-	 * to input port 0 of node "Show FPS Plot"
-	 */
-	try {
-		connect_port(node_14,0,node_15,0);
-	} catch(std::runtime_error& err) {
-		sserr << "error while connecting port 0 of node \"node_15\" (\"Show FPS Plot\") with port 0 of node \"node_14\" (\"FPS Plot\")\n" << err.what() << ssthrow;
-	}
-	/* 
 	 * connect output port 0 of node "Spectral Whitening"
 	 * to input port 0 of node "Spectral Whitening Heatmap"
 	 */
 	try {
-		connect_port(node_9,0,node_16,0);
+		connect_port(node_9,0,node_10,0);
 	} catch(std::runtime_error& err) {
-		sserr << "error while connecting port 0 of node \"node_16\" (\"Spectral Whitening Heatmap\") with port 0 of node \"node_9\" (\"Spectral Whitening\")\n" << err.what() << ssthrow;
+		sserr << "error while connecting port 0 of node \"node_10\" (\"Spectral Whitening Heatmap\") with port 0 of node \"node_9\" (\"Spectral Whitening\")\n" << err.what() << ssthrow;
 	}
 	/* 
 	 * connect output port 0 of node "Spectral Whitening Heatmap"
-	 * to input port 0 of node "Show Spectral Whitening Heatmap"
+	 * to input port 0 of node "Video Writer"
 	 */
 	try {
-		connect_port(node_16,0,node_17,0);
+		connect_port(node_10,0,node_11,0);
 	} catch(std::runtime_error& err) {
-		sserr << "error while connecting port 0 of node \"node_17\" (\"Show Spectral Whitening Heatmap\") with port 0 of node \"node_16\" (\"Spectral Whitening Heatmap\")\n" << err.what() << ssthrow;
-	}
-	/* 
-	 * connect output port 0 of node "Video Reader"
-	 * to input port 0 of node "Show Image"
-	 */
-	try {
-		connect_port(node_0,0,node_18,0);
-	} catch(std::runtime_error& err) {
-		sserr << "error while connecting port 0 of node \"node_18\" (\"Show Image\") with port 0 of node \"node_0\" (\"Video Reader\")\n" << err.what() << ssthrow;
+		sserr << "error while connecting port 0 of node \"node_11\" (\"Video Writer\") with port 0 of node \"node_10\" (\"Spectral Whitening Heatmap\")\n" << err.what() << ssthrow;
 	}
 
 	pipeline.pushNode("Video Reader",&node_0);
@@ -471,15 +290,8 @@ extern "C" void create_pipeline(saliency_sandbox::core::Pipeline& pipeline) {
 	pipeline.pushNode("Blue Spectral Whitening",&node_7);
 	pipeline.pushNode("Merge Spectral Whitening Activations",&node_8);
 	pipeline.pushNode("Spectral Whitening",&node_9);
-	pipeline.pushNode("Video Reader FPS Counter",&node_10);
-	pipeline.pushNode("Red Spectral Whitening FPS Counter",&node_11);
-	pipeline.pushNode("Green Spectral Whitening FPS Counter",&node_12);
-	pipeline.pushNode("Blue Spectral Whitening FPS Counter",&node_13);
-	pipeline.pushNode("FPS Plot",&node_14);
-	pipeline.pushNode("Show FPS Plot",&node_15);
-	pipeline.pushNode("Spectral Whitening Heatmap",&node_16);
-	pipeline.pushNode("Show Spectral Whitening Heatmap",&node_17);
-	pipeline.pushNode("Show Image",&node_18);
+	pipeline.pushNode("Spectral Whitening Heatmap",&node_10);
+	pipeline.pushNode("Video Writer",&node_11);
 }
 extern "C" saliency_sandbox::core::INode* new_pipeline() {
 	saliency_sandbox::core::Pipeline* pipeline = new saliency_sandbox::core::Pipeline();

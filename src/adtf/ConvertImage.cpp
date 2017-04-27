@@ -32,5 +32,7 @@ namespace saliency_sandbox {
         template class ConvertImage<uint8_t>;
         template class ConvertImage<uint8_t[3]>;
         template class ConvertImage<float>;
+
+        template class ConvertImage<cv::Vec3b>;
     }
 }

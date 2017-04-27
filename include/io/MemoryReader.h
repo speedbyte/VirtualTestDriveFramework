@@ -17,34 +17,14 @@ namespace saliency_sandbox {
             typedef _out Output;
 
         private:
-
-            class DummyNode : public saliency_sandbox::core::Node::template Input<>::template Output<_in> {
-            private:
-                MemoryReader* m_instance;
-            public:
-
-                DummyNode(MemoryReader* instance) : m_instance(instance) {
-
-                }
-
-                void calc() override {
-                    this->template output<0>()->value(this->m_instance->template input<0>()->value());
-                }
-
-                void reset() override {
-
-                }
-            };
-
             Output m_out;
-            DummyNode m_dummy;
 
         public:
 
             template<typename... _arg_t>
-            MemoryReader(_arg_t... args) : m_out(args...), m_dummy(this) {
+            MemoryReader(_arg_t... args) : m_out(args...) {
                 this->template input<0>()->name("in");
-                this->template input<0>()->connect(this->m_dummy.template output<0>());
+                this->template input<0>()->checkDependencies(false);
 
                 this->template output<0>()->name("out");
                 this->template output<0>()->value(&this->m_out);

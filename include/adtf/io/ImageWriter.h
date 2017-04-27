@@ -19,18 +19,18 @@ namespace saliency_sandbox {
                 public saliency_sandbox::io::MemoryWriter<saliency_sandbox::utils::_Matrix<_width,_height,_type>,salbox::Image<_type>>,
                 protected saliency_sandbox::adtf::ConvertImage<_type> {
         public:
-            ImageWriter() : MemoryWriter(_width,_height) { };
+            ImageWriter() : saliency_sandbox::io::MemoryWriter<saliency_sandbox::utils::_Matrix<_width,_height,_type>,salbox::Image<_type>>(_width,_height) { };
 
-            void cvt(Input *in, Output *out) override {
+            void cvt(saliency_sandbox::utils::_Matrix<_width,_height,_type> *in, salbox::Image<_type> *out) override {
                 this->convert(in,out);
             };
         };
 
         template<uint32_t _width, uint32_t _height>
-        class GrayscaleImageWriter : public ImageWriter<_width,_height,uint8_t> { };
+        class GrayscaleImageWriter : public ImageWriter<_width,_height,uchar> { };
 
         template<uint32_t _width, uint32_t _height>
-        class RGBImageWriter : public ImageWriter<_width,_height,uint8_t[3]> { };
+        class RGBImageWriter : public ImageWriter<_width,_height,cv::Vec3b> { };
 
         template<uint32_t _width, uint32_t _height>
         class SaliencyMapWriter : public ImageWriter<_width,_height,float> { };

@@ -28,6 +28,7 @@ namespace saliency_sandbox {
             IPort *m_connect;
             INode* m_node;
             bool m_check_port_size;
+            bool m_check_dependencies;
 
         public:
             Port(INode* node) :
@@ -36,7 +37,8 @@ namespace saliency_sandbox {
                     m_data(nullptr),
                     m_connect(nullptr),
                     m_node(node),
-                    m_check_port_size(true) {
+                    m_check_port_size(true),
+                    m_check_dependencies(true) {
 
             }
 
@@ -112,10 +114,20 @@ namespace saliency_sandbox {
             }
 
             void process(time_t time) override {
-                if(this->dependency()->time() < time || this->dependency()->time() < 0 || time < 0)
-                    this->dependency()->process(time);
-                if (this->m_connect != nullptr)
-                    this->m_data = (type*)this->m_connect->data();
+                if(this->checkDependencies()) {
+                    if (this->dependency()->time() < time || this->dependency()->time() < 0 || time < 0)
+                        this->dependency()->process(time);
+                    if (this->m_connect != nullptr)
+                        this->m_data = (type *) this->m_connect->data();
+                }
+            }
+
+            bool checkDependencies() {
+                return this->m_check_dependencies;
+            }
+
+            void checkDependencies(bool check_dependencies) {
+                this->m_check_dependencies = check_dependencies;
             }
 
             float fps() override {

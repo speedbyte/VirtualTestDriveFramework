@@ -25,10 +25,10 @@ namespace saliency_sandbox {
         };
 
         template<uint32_t _width, uint32_t _height>
-        class GrayscaleImageReader : public ImageReader<_width,_height,uint8_t> { };
+        class GrayscaleImageReader : public ImageReader<_width,_height,uchar> { };
 
         template<uint32_t _width, uint32_t _height>
-        class RGBImageReader : public ImageReader<_width,_height,uint8_t[3]> { };
+        class RGBImageReader : public ImageReader<_width,_height,cv::Vec3b> { };
 
         template<uint32_t _width, uint32_t _height>
         class SaliencyMapReader : public ImageReader<_width,_height,float> { };

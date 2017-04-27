@@ -263,100 +263,100 @@ node {
 ## Time measurements
 ##
 
-node {
-    name: "Video Reader FPS Counter";
-    type: UtilsFPSCounter;
-    input {
-        node: "Video Reader";
-        port: 0;
-    }
-}
+#node {
+#    name: "Video Reader FPS Counter";
+#    type: UtilsFPSCounter;
+#    input {
+#        node: "Video Reader";
+#        port: 0;
+#    }
+#}
 
-node {
-    name: "Red Spectral Whitening FPS Counter";
-    type: UtilsFPSCounter;
-    input {
-        node: "Red Spectral Whitening";
-        port: 0;
-    }
-}
+#node {
+#    name: "Red Spectral Whitening FPS Counter";
+#    type: UtilsFPSCounter;
+#    input {
+#        node: "Red Spectral Whitening";
+#        port: 0;
+#    }
+#}
 
-node {
-    name: "Green Spectral Whitening FPS Counter";
-    type: UtilsFPSCounter;
-    input {
-        node: "Green Spectral Whitening";
-        port: 0;
-    }
-}
+#node {
+#    name: "Green Spectral Whitening FPS Counter";
+#    type: UtilsFPSCounter;
+#    input {
+#        node: "Green Spectral Whitening";
+#        port: 0;
+#    }
+#}
 
-node {
-    name: "Blue Spectral Whitening FPS Counter";
-    type: UtilsFPSCounter;
-    input {
-        node: "Blue Spectral Whitening";
-        port: 0;
-    }
-}
+#node {
+#    name: "Blue Spectral Whitening FPS Counter";
+#    type: UtilsFPSCounter;
+#    input {
+#        node: "Blue Spectral Whitening";
+#        port: 0;
+#    }
+#}
 
 ##
 ## Plot time measurements
 ##
 
-node {
-    name: "FPS Plot";
-    type: Plot;
-    argument {
-        name: "line0";
-        type: pb_string;
-        value: "Video Reader";
-    }
-    argument {
-        name: "line1";
-        type: pb_string;
-        value: "Red Spectral Whitening";
-    }
-    argument {
-        name: "line2";
-        type: pb_string;
-        value: "Green Spectral Whitening";
-    }
-    argument {
-        name: "line3";
-        type: pb_string;
-        value: "Blue Spectral Whitening";
-    }
-    input {
-        node: "Video Reader FPS Counter";
-        port: 0;
-    }
-    input {
-        node: "Red Spectral Whitening FPS Counter";
-        port: 0;
-    }
-    input {
-        node: "Green Spectral Whitening FPS Counter";
-        port: 0;
-    }
-    input {
-        node: "Blue Spectral Whitening FPS Counter";
-        port: 0;
-    }
-}
+#node {
+#    name: "FPS Plot";
+#    type: Plot;
+#    argument {
+#        name: "line0";
+#        type: pb_string;
+#        value: "Video Reader";
+#    }
+#    argument {
+#        name: "line1";
+#        type: pb_string;
+#        value: "Red Spectral Whitening";
+#    }
+#    argument {
+#        name: "line2";
+#        type: pb_string;
+#        value: "Green Spectral Whitening";
+#    }
+#    argument {
+#        name: "line3";
+#        type: pb_string;
+#        value: "Blue Spectral Whitening";
+#    }
+#    input {
+#        node: "Video Reader FPS Counter";
+#        port: 0;
+#    }
+#    input {
+#        node: "Red Spectral Whitening FPS Counter";
+#        port: 0;
+#    }
+#    input {
+#        node: "Green Spectral Whitening FPS Counter";
+#        port: 0;
+#    }
+#    input {
+#        node: "Blue Spectral Whitening FPS Counter";
+#        port: 0;
+#    }
+#}
 
-node {
-    name: "Show FPS Plot";
-    type: IOImageShow;
-    argument {
-        name: "window";
-        type: pb_string;
-        value: "FPS";
-    }
-    input {
-        node: "FPS Plot";
-        port: 0;
-    }
-}
+#node {
+#    name: "Show FPS Plot";
+#    type: IOImageShow;
+#    argument {
+#        name: "window";
+#        type: pb_string;
+#        value: "FPS";
+#    }
+#    input {
+#        node: "FPS Plot";
+#        port: 0;
+#    }
+#}
 
 
 
@@ -393,13 +393,36 @@ node {
     }
 }
 
+#node {
+#    name: "Show Spectral Whitening Heatmap";
+#    type: IOImageShow;
+#    argument {
+#        name: "window";
+#        type: pb_string;
+#        value: "Spectral Whitening";
+#    }
+#    input {
+#        node: "Spectral Whitening Heatmap";
+#        port: 0;
+#    }
+#}
+
+##
+## Write Spectral Whitening
+##
+
 node {
-    name: "Show Spectral Whitening Heatmap";
-    type: IOImageShow;
+    name: "Video Writer";
+    type: ADTFRGBImageWriter;
     argument {
-        name: "window";
-        type: pb_string;
-        value: "Spectral Whitening";
+        name: "width";
+        type: pb_uint32;
+        value: "1242";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "375";
     }
     input {
         node: "Spectral Whitening Heatmap";
@@ -411,16 +434,16 @@ node {
 ## Show input image
 ##
 
-node {
-    name: "Show Image";
-    type: IOImageShow;
-    argument {
-        name: "window";
-        type: pb_string;
-        value: "Raw Image";
-    }
-    input {
-        node: "Video Reader";
-        port: 0;
-    }
-}
+#node {
+#    name: "Show Image";
+#    type: IOImageShow;
+#    argument {
+#        name: "window";
+#        type: pb_string;
+#        value: "Raw Image";
+#    }
+#    input {
+#        node: "Video Reader";
+#        port: 0;
+#    }
+#}
