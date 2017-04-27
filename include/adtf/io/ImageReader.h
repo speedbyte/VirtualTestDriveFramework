@@ -17,11 +17,9 @@ namespace saliency_sandbox {
         template<uint32_t _width, uint32_t _height, typename _type>
         class ImageReader :
                 public saliency_sandbox::io::MemoryReader<salbox::Image<_type>,saliency_sandbox::utils::_Matrix<_width,_height,_type>>,
-                protected saliency_sandbox::adtf::ConvertImage<_type> {
+                public saliency_sandbox::adtf::ConvertImage<_type> {
         public:
-            ImageReader() : MemoryReader() { };
-
-            void cvt(Input *in, Output *out) override {
+            void cvt(salbox::Image<_type> *in, saliency_sandbox::utils::_Matrix<_width,_height,_type> *out) override {
                 this->convert(in,out);
             };
         };

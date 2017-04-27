@@ -881,7 +881,6 @@ namespace saliency_sandbox {
                         case generated::Pipeline_Node_Type_ADTFGazeReader:
                             gen << CodeGen::SetHeader("adtf/io/GazeReader");
                             gen << CodeGen::SetClass("saliency_sandbox::adtf::GazeReader");
-                            gen << CodeGen::SetInput("gaze",0);
                             break;
                         case generated::Pipeline_Node_Type_ADTFGazeMovementWriter:
                             gen << CodeGen::SetHeader("adtf/io/GazeWriter");
@@ -898,21 +897,18 @@ namespace saliency_sandbox {
                             gen << CodeGen::SetClass("saliency_sandbox::adtf::GrayscaleImageReader");
                             gen << CodeGen::SetTemplateArgument("width",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_WIDTH_S(RESOLUTION) );
                             gen << CodeGen::SetTemplateArgument("height",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_HEIGHT_S(RESOLUTION));
-                            gen << CodeGen::SetInput("image",0);
                             break;
                         case generated::Pipeline_Node_Type_ADTFRGBImageReader:
                             gen << CodeGen::SetHeader("adtf/io/ImageReader");
                             gen << CodeGen::SetClass("saliency_sandbox::adtf::RGBImageReader");
                             gen << CodeGen::SetTemplateArgument("width",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_WIDTH_S(RESOLUTION) );
                             gen << CodeGen::SetTemplateArgument("height",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_HEIGHT_S(RESOLUTION));
-                            gen << CodeGen::SetInput("image",0);
                             break;
                         case generated::Pipeline_Node_Type_ADTFSaliencyMapReader:
                             gen << CodeGen::SetHeader("adtf/io/ImageReader");
                             gen << CodeGen::SetClass("saliency_sandbox::adtf::SaliencyMapReader");
                             gen << CodeGen::SetTemplateArgument("width",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_WIDTH_S(RESOLUTION) );
                             gen << CodeGen::SetTemplateArgument("height",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32,RES_HEIGHT_S(RESOLUTION));
-                            gen << CodeGen::SetInput("saliency",0);
                             break;
                         case generated::Pipeline_Node_Type_ADTFGrayscaleImageWriter:
                             gen << CodeGen::SetHeader("adtf/io/ImageWriter");
@@ -938,7 +934,6 @@ namespace saliency_sandbox {
                         case generated::Pipeline_Node_Type_ADTFTrackedObjectReader:
                             gen << CodeGen::SetHeader("adtf/io/TrackedObjectReader");
                             gen << CodeGen::SetClass("saliency_sandbox::adtf::TrackedObjectReader");
-                            gen << CodeGen::SetInput("tracklets",0);
                             break;
                         case generated::Pipeline_Node_Type_ADTFTrackedObjectSaliencyWriter:
                             gen << CodeGen::SetHeader("adtf/io/TrackedObjectSaliencyWriter");

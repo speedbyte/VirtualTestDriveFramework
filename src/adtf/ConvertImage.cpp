@@ -10,7 +10,10 @@ namespace saliency_sandbox {
         template <typename _type>
         void ConvertImage<_type>::convert(salbox::Image<_type> *in, saliency_sandbox::utils::IMatrix *out) {
             if(in->width != out->width() || in->height != out->height() || in->size()*sizeof(_type) != out->bytes())
-                return; //TODO: error handling
+                sserr << "image resolution mismatch."
+                      << "\n\t\texpected resolution: " << out->width() << "x" << out->height()
+                      << "\n\t\tactual resolution:   " << in->width    << "x" << in->height
+                      << ssthrow;
 
             memcpy(out->data(),in->buffer,out->bytes());
         };
@@ -18,7 +21,10 @@ namespace saliency_sandbox {
         template <typename _type>
         void ConvertImage<_type>::convert(saliency_sandbox::utils::IMatrix *in,salbox::Image<_type> *out) {
             if(out->width != in->width() || out->height != in->height() || out->size()*sizeof(_type) != in->bytes())
-                return; //TODO: error handling
+                sserr << "image resolution mismatch."
+                      << "\n\t\texpected resolution: " << in->width() << "x" << in->height()
+                      << "\n\t\tactual resolution:   " << out->width  << "x" << out->height
+                      << ssthrow;
 
             memcpy(out->buffer,in->data(),in->bytes());
         };

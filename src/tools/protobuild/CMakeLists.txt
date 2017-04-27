@@ -1,6 +1,6 @@
 MESSAGE("-- create protobuild tool target")
 
-list(APPEND SaliencySandbox_LIBS core io kitti plot saliency utils gaze)
+list(APPEND SaliencySandbox_LIBS core io kitti plot saliency utils gaze adtf tracking)
 
 foreach(SaliencySandbox_LIB ${SaliencySandbox_LIBS})
     list(APPEND PROTOBUILD_JITC_THIRD_DEP /lib${SaliencySandbox_LIB}.so)
