@@ -87,6 +87,7 @@ namespace saliency_sandbox {
                 R.convertTo(tmp_R[2],CV_64FC1);
                 T.convertTo(tmp_T,CV_64FC1);
 
+                cv::Rect r0, r1;
                 cv::stereoRectify(
                         tmp_M[0],
                         tmp_D[0],
@@ -99,7 +100,10 @@ namespace saliency_sandbox {
                         tmp_R[1],
                         tmp_P[0],
                         tmp_P[1],
-                        tmp_Q);
+                        tmp_Q,
+                        0,-1.0,cv::Size(),&r0,&r1);
+
+                tmp_P[1].template at<double>(7) = -40.0*1941.3335; //TODO: BAD FIX
 
                 tmp_R[0].convertTo(this->m_R[0],CV_32FC1);
                 tmp_R[1].convertTo(this->m_R[1],CV_32FC1);

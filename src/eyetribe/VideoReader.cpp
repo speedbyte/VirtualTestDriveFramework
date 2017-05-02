@@ -47,11 +47,11 @@ namespace saliency_sandbox {
                 cv::flip(this->m_output,this->m_output,1);
             }
 
-            mean_a = this->properties()->template get<float>("mean",50);
+            mean_a = this->properties()->template get<float>("mean",70);
             mean_b = float(cv::mean(this->m_output).val[0]);
             mean_d = mean_a - mean_b;
 
-            if(mean_d < -3.0f) {
+            if(mean_d < -2.0f) {
                 uvc_get_exposure_abs(this->m_uvc_device_handle,&this->m_cur_exposure,UVC_GET_CUR);
                 if(this->m_cur_exposure > this->m_min_exposure) {
                     this->m_cur_exposure--;
@@ -63,7 +63,7 @@ namespace saliency_sandbox {
                         uvc_set_gain(this->m_uvc_device_handle, this->m_cur_gain);
                     }
                 }
-            } else if(mean_d > 3.0f) {
+            } else if(mean_d > 2.0f) {
                 uvc_get_gain(this->m_uvc_device_handle,&this->m_cur_gain,UVC_GET_CUR);
                 if(this->m_cur_gain < this->m_max_gain) {
                     this->m_cur_gain++;

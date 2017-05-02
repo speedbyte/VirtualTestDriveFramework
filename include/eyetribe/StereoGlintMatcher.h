@@ -7,180 +7,57 @@
 
 #include <eyetribe/GlintDetector.h>
 #include <eyetribe/StereoRectification.h>
-#include <boost/lexical_cast.hpp>
 
 namespace saliency_sandbox {
     namespace eyetribe {
 
         typedef std::pair<int,Glint> GlintSort;
-        typedef std::vector<GlintSort> GlintSortList;
 
         typedef struct {
             Glint left;
             Glint right;
-            size_t left_id;
-            size_t right_id;
             cv::Point3f world;
+            float confidence;
         } StereoGlint;
         typedef std::vector<StereoGlint> StereoGlintList;
 
-        bool glint_comp(GlintSort i , GlintSort j) {
-            return i.second.first.x < j.second.first.x;
-        }
-
-        template<uint32_t _format>
         class StereoGlintMatcher : public saliency_sandbox::core::Node::
         template Input<
-                typename Format<_format>::Image,
-                typename Format<_format>::Image,
                 GlintList,
+                cv::Rect,
                 GlintList,
+                cv::Rect,
                 RectificationProjection,
-                RectificationProjection,
-                RectificationDisparity
+                RectificationProjection
         >::template Output<
-                GlintList,
-                GlintList
+                StereoGlint,
+                StereoGlint
         > {
         private:
-            GlintList m_glints[2];
+            StereoGlint m_glints[2];
+
         public:
             StereoGlintMatcher() {
-                this->template input<0>()->name("image0");
-                this->template input<1>()->name("image1");
-                this->template input<2>()->name("glints0");
-                this->template input<3>()->name("glints1");
-                this->template input<4>()->name("P0");
-                this->template input<5>()->name("P1");
+                this->template input<0>()->name("glints0");
+                this->template input<1>()->name("glints1");
+                this->template input<2>()->name("P0");
+                this->template input<3>()->name("P1");
 
                 this->template output<0>()->name("glints0");
                 this->template output<0>()->value(&this->m_glints[0]);
                 this->template output<1>()->name("glints1");
                 this->template output<1>()->value(&this->m_glints[1]);
-            }
 
-            float mad(const Glint& glint0, const Glint& glint1, const cv::Mat1b& in0, const cv::Mat1b& in1) {
-                int o = 25;
-                float mad;
-
-                cv::Rect ir0(0,0,in0.cols,in0.rows);
-                cv::Rect ir1(0,0,in0.cols,in0.rows);
-                cv::Rect r0(glint0.first.x-o,glint0.first.y-0,o*2,o*2);
-                cv::Rect r1(glint1.first.x-o,glint1.first.y-0,o*2,o*2);
-
-                cv::Mat1b patch0 = in0(ir0 & r0);
-                cv::Mat1b patch1 = in1(ir1 & r1);
-
-                for(int i = 0; i < patch0.cols*patch0.rows;i++)
-                    for(int j = 0; j < patch1.cols*patch1.rows;j++)
-                        mad += fabsf(patch0.template at<uchar>(i)-patch1.template at<uchar>(j));
-
-                mad /= float(patch0.rows*patch0.cols*patch1.rows*patch1.cols);
-
-                if(isnanf(mad))
-                    return FLT_MIN;
-
-                return mad;
-            }
-
-            float brd(const Glint& glint0, const Glint& glint1, const cv::Mat1b& in0, const cv::Mat1b& in1) {
-                int o = 11;
-                float mad;
-
-                cv::Rect ir0(0,0,in0.cols,in0.rows);
-                cv::Rect ir1(0,0,in1.cols,in1.rows);
-                cv::Rect r0(glint0.first.x-o,glint0.first.y-0,o*2+1,o*2+1);
-                cv::Rect r1(glint1.first.x-o,glint1.first.y-0,o*2+1,o*2+1);
-
-                r0 &= ir0;
-                r1 &= ir1;
-
-                if(r0.width != r1.width || r0.height != r1.height)
-                    return 1000000;
-
-                cv::Mat1b patch0 = in0(r0);
-                cv::Mat1b patch1 = in1(r1);
-
-                cv::Mat1b d[2][2], diff[2];
-
-                cv::reduce(patch0,d[0][0],0,CV_REDUCE_AVG);
-                cv::reduce(patch0,d[0][1],1,CV_REDUCE_AVG);
-                cv::reduce(patch1,d[1][0],0,CV_REDUCE_AVG);
-                cv::reduce(patch1,d[1][1],1,CV_REDUCE_AVG);
-
-                cv::absdiff(d[0][0],d[1][0],diff[0]);
-                cv::absdiff(d[0][1],d[1][1],diff[1]);
-
-                return float((cv::sum(diff[0])+cv::sum(diff[1])).val[0]/o);
-            }
-
-            float dist(const Glint& glint0, const Glint& glint1, const cv::Mat1b& in0, const cv::Mat1b& in1) {
-                std::vector<float> dists;
-                float dist;
-
-                dist = 0;
-
-                cv::Point center(Format<_format>::WIDTH/2,Format<_format>::HEIGHT/2);
-
-                //dists.push_back(glint0.second - glint1.second);
-
-                dists.push_back(cv::norm((glint0.first-center)-(glint1.first-center)));
-                //dists.push_back(this->mad(glint0,glint1,in0,in1));
-                dists.push_back(this->brd(glint0,glint1,in0,in1));
-
-                for(int i = 0; i < dists.size(); i++)
-                    dist += dists[i]*dists[i];
-
-                return sqrtf(dist);
-            }
-
-            cv::Mat1f dist(const GlintList &glints0, const GlintList &glints1, const cv::Mat1b& in0, const cv::Mat1b& in1) {
-                cv::Mat1f dist;
-
-                dist = cv::Mat1f(int(glints0.size()),int(glints1.size()));
-                for(int i0 = 0; i0 < glints0.size(); i0++)
-                    for(int i1 = 0; i1 < glints1.size(); i1++)
-                        dist.template at<float>(i0,i1) = this->dist(glints0[i0],glints1[i1],in0,in1);
-
-
-                /*cv::normalize(dist,dist,0,1,cv::NORM_MINMAX);
-                cv::resize(dist,dist,cv::Size(),10,10,cv::INTER_NEAREST);
-                cv::namedWindow("DEBUG GLINT DIST");
-                cv::imshow("DEBUG GLINT DIST",dist);*/
-
-                return dist;
-            }
-
-            void sort() {
-                GlintSortList v;
-                size_t sz;
-                GlintList glints[2];
-
-                glints[0] = this->m_glints[0];
-                glints[1] = this->m_glints[1];
-
-                sz = this->m_glints[0].size();
-
-                for(int i = 0; i < sz; i++)
-                    v.push_back(GlintSort(i,glints[0][i]));
-
-                std::sort(v.begin(),v.end(),glint_comp);
-
-                for(int i = 0; i < sz; i++) {
-                    this->m_glints[0][i] = glints[0][v[i].first];
-                    this->m_glints[1][i] = glints[1][v[i].first];
-                }
+                this->reset();
             }
 
             void triangulatePoints(StereoGlintList &glints) {
                 const RectificationProjection& p0 = *this->template input<4>()->value();
                 const RectificationProjection& p1 = *this->template input<5>()->value();
-                const RectificationDisparity& Q = *this->template input<6>()->value();
                 const size_t glints_size = glints.size();
                 cv::Mat1f left, right;
                 cv::Mat1f world;
                 float scale;
-                cv::Vec4f h, hq;
 
                 left = cv::Mat1f(2,int(glints_size));
                 right = cv::Mat1f(2,int(glints_size));
@@ -198,133 +75,208 @@ namespace saliency_sandbox {
                 for(int i = 0; i < glints_size; i++) {
                     scale = world.template at<float>(3,i);
                     glints[i].world.x = world.template at<float>(0,i) / scale;
-                    glints[i].world.y = world.template at<float>(1,i) / (scale*2);
+                    glints[i].world.y = world.template at<float>(1,i) / scale;
                     glints[i].world.z = world.template at<float>(2,i) / scale;
                 }
             }
 
-            void triangulatePoints(const GlintList &left, const GlintList &right, StereoGlintList& glints) {
+            void triangulatePoints(GlintList &left, GlintList &right, StereoGlintList& glints) {
                 const size_t left_size = left.size();
                 const size_t right_size = right.size();
                 StereoGlint tmp;
 
-                for(size_t i = 0; i < left_size; i++)
-                    for(size_t j = 0; j < left_size; j++) {
-                        tmp.left = left[i];
-                        tmp.right = right[j];
-                        tmp.left_id = i;
-                        tmp.right_id = j;
-                        tmp.world = cv::Point3f();
-                        glints.push_back(tmp);
-                    }
+                for(GlintList::iterator i = left.begin(); i != left.end(); ++i)
+                    for(GlintList::iterator j = right.begin(); j != right.end(); ++j)
+                        glints.push_back(StereoGlint {*i,*j,cv::Point3f(),0.0f});
 
                 this->triangulatePoints(glints);
             }
 
-            void calc() override {
-                cv::Mat1b in0 = this->template input<0>()->value()->mat();
-                cv::Mat1b in1 = this->template input<1>()->value()->mat();
-                const GlintList& glints0 = *this->template input<2>()->value();
-                const GlintList& glints1 = *this->template input<3>()->value();
+            float pdf(float d, float mean, float sigma) {
+                const float s = 1.0f/sqrtf(2.0f*float(M_PI)*sigma*sigma);
+                const float ee = (d-mean)*(d-mean)/(2.0f*sigma*sigma);
+                return s*expf(-ee);
+            }
+
+            float pdf(float d, float mean, float sigma, float confidence) {
+                const float lb = (1.0f-confidence)/2.0f;
+                const float ub = 1.0f-lb;
+                const float pdf = this->pdf(d,mean,sigma)/this->pdf(mean,mean,sigma);
+                if(confidence < pdf)
+                    return pdf;
+                else
+                    return 0.0f;
+            }
+
+            float pdfTrack(cv::Point3f world[2], float mean, float sigma, float confidence) {
+                float d, p, c;
+                cv::Point3f m[2];
+
+                m[0] = (world[0]-world[1]) * 0.5f;
+                m[1] = (this->m_glints[0].world-this->m_glints[1].world) * 0.5f;
+                d = float(cv::norm(m[0]-m[1]));
+                p = this->pdf(d,0,sigma,confidence);
+                c = this->m_glints[0].confidence;
+
+                return (1.0f-c)+(c*p);
+            }
+
+            cv::Mat1f pdist(StereoGlintList glints) {
+                const float sigma = this->properties()->template get<float>("sigma",20.0f);
+                const float mean = this->properties()->template get<float>("mean",64.0f);
+                const float confidence = this->properties()->template get<float>("confidence",0.10f);
                 cv::Mat1f dist;
-                size_t minsz;
-                cv::Point min;
-                double maxv, minv;
+                size_t sz;
+                float p, d;
+                cv::Point3f w[2];
 
-                StereoGlintList stereoGlints;
+                dist = cv::Mat1f((int)glints.size(),(int)glints.size());
+                sz = glints.size();
+                dist.setTo(0.0f);
 
-                if(glints0.empty())
-                    return;
+                for(int i = 0; i < sz; i++)
+                    for(int j = i+1; j < sz; j++) {
+                        w[0] = glints[i].world;
+                        w[1] = glints[j].world;
+                        d = float(cv::norm(w[0]-w[1]));
+                        p = 1.0f;
+                        p *= this->pdf(fabsf(w[0].x-w[1].x),mean,sigma*2.0f,confidence);
+                        p *= this->pdf(fabsf(w[0].y-w[1].y),0.0f,sigma*2.0f,confidence);
+                        p *= this->pdf(fabsf(w[0].z-w[1].z),0.0f,sigma*2.0f,confidence);
+                        p *= this->pdfTrack(w,0.0f,sigma*2.0f,confidence);
+                        p *= this->pdf(d,mean,sigma,confidence);
+                        if(confidence < p)
+                            dist.template at<float>(i,j) = p;
+                        else
+                            dist.template at<float>(i,j) = 0.0f;
 
-                if(glints1.empty())
-                    return;
-
-                this->triangulatePoints(glints0,glints1,stereoGlints);
-/*
-                for(int i = 0; i < stereoGlints.size(); i++) {
-                    if(stereoGlints[i].left_id != stereoGlints[i].right_id)
-                        continue;
-                    //if(stereoGlints[i].world.z > 50 && stereoGlints[i].world.z < 300)
-                        std::cout << "i: " << i << "    " << stereoGlints[i].world << std::endl;
-                }
-                std::cout << std::endl;
-
-                std::cout << "dist x: " << fabsf(stereoGlints[0].world.x-stereoGlints[3].world.x) << std::endl;
-                std::cout << "dist y: " << fabsf(stereoGlints[0].world.y-stereoGlints[3].world.y) << std::endl;
-                std::cout << "dist z: " << fabsf(stereoGlints[0].world.z-stereoGlints[3].world.z) << std::endl;
-                std::cout << "dist xyz: " << cv::norm(stereoGlints[0].world-stereoGlints[3].world) << std::endl << std::endl;
-                return;
-                std::vector<cv::Vec2d> g0, g1;
-                std::vector<cv::Vec4d> g01;
-
-                cv::Mat1f mglints0, mglints1, mglints01;
-                size_t sz, k;
-                cv::Matx34f mp0, mp1;
-
-                sz = glints0.size()*glints1.size();
-                k = 0;
-                mglints0 = cv::Mat1f(2,sz);
-                mglints1 = cv::Mat1f(2,sz);
-                mglints01 = cv::Mat1f(4,sz);
-
-                for(int i = 0; i < glints0.size(); i++)
-                    for(int j = 0; j < glints1.size(); j++) {
-                        mglints0.template at<float>(0,k) = glints0[i].first.x;
-                        mglints0.template at<float>(1,k) = glints0[i].first.y;
-                        mglints1.template at<float>(0,k) = glints1[j].first.x;
-                        mglints1.template at<float>(1,k) = glints1[j].first.y;
-                        k++;
                     }
 
-                cv::triangulatePoints(mp0,mp1,mglints0,mglints1,mglints01);
-                mglints01 = mglints01.t();
+                return dist;
+            }
 
-                cv::Mat3f mglints013D(sz,1);
-                cv::convertPointsFromHomogeneous(cv::Mat4f(1,sz,(cv::Vec4f*)mglints01.data),mglints013D);
+            StereoGlintList checkRange(StereoGlintList in) {
+                StereoGlintList out;
+                float dist;
+                const float min_dist = this->properties()->template get<float>("min_dist",300.0f);
+                const float max_dist = this->properties()->template get<float>("max_dist",1500.0f);
+                cv::Point3f p;
 
-                std::cout << std::endl << mglints013D << std::endl;
+                for(StereoGlintList::iterator i = in.begin(); i != in.end(); i++) {
+                    p = i->world;
+                    dist = float(cv::norm(p));
 
-
-                minsz = MIN(glints0.size(),glints1.size());
-                dist = this->dist(glints0,glints1,in0,in1);
-
-                this->m_glints[0].clear();
-                this->m_glints[1].clear();
-
-                for(int i = 0; i < minsz; i++) {
-                    cv::minMaxLoc(dist, &minv, &maxv, &min, nullptr);
-                    this->m_glints[0].push_back(glints0[min.y]);
-                    this->m_glints[1].push_back(glints1[min.x]);
-                    dist.row(min.y) = maxv*2;
-                    dist.col(min.x) = maxv*2;
+                    if(p.z > 0.0f && dist > min_dist && max_dist > dist)
+                        out.push_back(*i);
                 }
 
-                this->sort();
+                return out;
+            }
 
-*/
-                cv::Mat1b I[2];
+            float nCr(size_t n, size_t r) {
+                float a;
 
-                in0.copyTo(I[0]);
-                in1.copyTo(I[1]);
+                a = 1.0f;
 
-                for(int i = 0; i < glints0.size(); i++)
-                    cv::circle(I[0],glints0[i].first,10,cv::Scalar::all(255));
-                for(int i = 0; i < glints1.size(); i++)
-                    cv::circle(I[1],glints1[i].first,10,cv::Scalar::all(255));
-/*
-                for(int i = 0; i < minsz; i++) {
-                    cv::putText(I[0],boost::lexical_cast<std::string>(i),this->m_glints[0][i].first,CV_FONT_HERSHEY_SIMPLEX,1,cv::Scalar::all(255));
-                    cv::putText(I[1],boost::lexical_cast<std::string>(i),this->m_glints[1][i].first,CV_FONT_HERSHEY_SIMPLEX,1,cv::Scalar::all(255));
+                if(n>r)
+                    for(int j = 1; j <= r; j++)
+                        a *= float(n+1-j)/float(j);
+            }
+
+            void updateRoi(cv::Rect &roi, const cv::Point& p0, const cv::Point& p1, const float& confidence) {
+                cv::Size sz;
+                float s;
+
+                if(confidence > 0.0f) {
+                    roi = cv::Rect(MIN(p0.x, p1.x),MIN(p0.y,p1.y),abs(p0.x-p1.x),abs(p0.y-p1.y));
+                    s = 100.0f/sqrtf(confidence);
+                    roi.x -= s;
+                    roi.y -= s;
+                    roi.width += 2.0f*s;
+                    roi.height += 2.0f*s;
+                } else
+                    roi = cv::Rect(0,0,-1,-1);
+            }
+
+            void updateRoi() {
+                cv::Rect& roi0 = *this->template input<1>()->value();
+                cv::Rect& roi1 = *this->template input<3>()->value();
+
+                this->updateRoi(
+                        roi0,
+                        this->m_glints[0].left.first,
+                        this->m_glints[1].left.first,
+                        this->m_glints[0].confidence);
+                this->updateRoi(
+                        roi1,
+                        this->m_glints[0].right.first,
+                        this->m_glints[1].right.first,
+                        this->m_glints[1].confidence);
+            }
+
+            void calc() override {
+                GlintList& glints0 = *this->template input<0>()->value();
+                GlintList& glints1 = *this->template input<2>()->value();
+                cv::Mat1f dist;
+                cv::Point max;
+                double maxVal;
+                StereoGlintList stereoGlints;
+                // stop if not enough glints were detected
+                if(glints0.size() < 2 || glints1.size() < 2) {
+
+                    // reset confidence to zero
+                    this->m_glints[0].confidence = 0.0f;
+                    this->m_glints[1].confidence = 0.0f;
+
+                    this->updateRoi();
+                    return;
                 }
-                */
 
-                dshow(AA,I[0]);
-                dshow(BB,I[1]);
+                // triangulate glints
+                this->triangulatePoints(glints0,glints1,stereoGlints);
 
+                // dismiss glints outside the headbox
+                stereoGlints = this->checkRange(stereoGlints);
+
+                // calculate probabilistic distance metric
+                dist = this->pdist(stereoGlints);
+
+                // select most probable glint pair
+                maxVal = -1.0; max = cv::Point(-1,-1);
+                cv::minMaxLoc(dist, nullptr, &maxVal, nullptr, &max);
+                if(maxVal < 0.0 || max.x < 0.0 || max.y < 0.0) {
+
+                    // reset confidence to zero
+                    this->m_glints[0].confidence = 0.0f;
+                    this->m_glints[1].confidence = 0.0f;
+
+                    this->updateRoi();
+                    return;
+                }
+
+                // order glints align x axis
+                if(stereoGlints[max.x].world.x > stereoGlints[max.y].world.x)
+                    std::swap(max.x,max.y);
+
+                this->m_glints[0] = stereoGlints[max.x];
+                this->m_glints[1] = stereoGlints[max.y];
+
+                // a-priori to select the right glints as confidence
+                this->m_glints[0].confidence = 1.0f/this->nCr(stereoGlints.size(),4);
+                // probability from the gaussian model
+                this->m_glints[0].confidence *= float(maxVal);
+                this->m_glints[1].confidence = this->m_glints[0].confidence;
+
+                //std::cout << "stereo glints: " << stereoGlints.size() << std::endl;
+                std::cout << "confidence: " << this->m_glints[0].confidence << std::endl;
+
+                this->updateRoi();
+
+                //std::cout << "left glint: " << this->m_glints[0].world << std::endl;
+                //std::cout << "right glint: " << this->m_glints[1].world << std::endl;
             }
 
             void reset() override {
-
             }
         };
     }

@@ -11,6 +11,8 @@
 #include <eyetribe/StereoRectification.h>
 #include <eyetribe/GlintDetector.h>
 #include <eyetribe/StereoGlintMatcher.h>
+#include <eyetribe/EyeballEstimation.h>
+#include <eyetribe/StereoGlintFilter.h>
 
 #define FORMAT 1
 
@@ -38,7 +40,11 @@ saliency_sandbox::io::ImageShow is1("EyeTribe 1");
 saliency_sandbox::eyetribe::GlintDetector<FORMAT> gd0;
 saliency_sandbox::eyetribe::GlintDetector<FORMAT> gd1;
 
-saliency_sandbox::eyetribe::StereoGlintMatcher<FORMAT> sgm;
+saliency_sandbox::eyetribe::StereoGlintMatcher sgm;
+
+saliency_sandbox::eyetribe::StereoGlintFilter sgf;
+
+saliency_sandbox::eyetribe::EyeballEstimation<FORMAT> ee;
 
 
 int main(int argc, char** argv) {
@@ -93,16 +99,25 @@ int main(int argc, char** argv) {
     gd0.template input<0>()->connect(vr0.template output<0>());
     gd1.template input<0>()->connect(vr1.template output<0>());
 
-    sgm.template input<0>()->connect(vr0.template output<0>());
-    sgm.template input<1>()->connect(vr1.template output<0>());
-    sgm.template input<2>()->connect(gd0.template output<0>());
-    sgm.template input<3>()->connect(gd1.template output<0>());
+    sgm.template input<0>()->connect(gd0.template output<0>());
+    sgm.template input<1>()->connect(gd0.template output<1>());
+    sgm.template input<2>()->connect(gd1.template output<0>());
+    sgm.template input<3>()->connect(gd1.template output<1>());
     sgm.template input<4>()->connect(sr.template output<2>());
     sgm.template input<5>()->connect(sr.template output<3>());
-    sgm.template input<6>()->connect(sr.template output<4>());
+
+    sgf.template input<0>()->connect(sgm.template output<0>());
+    sgf.template input<1>()->connect(sgm.template output<1>());
+
+    ee.template input<0>()->connect(vr0.template output<0>());
+    ee.template input<1>()->connect(vr1.template output<0>());
+    ee.template input<2>()->connect(sgf.template output<0>());
+    ee.template input<3>()->connect(sgf.template output<1>());
+    ee.template input<4>()->connect(sr.template output<2>());
+    ee.template input<5>()->connect(sr.template output<3>());
 
     for(time_t t = 0; true; t++) {
-        sgm.process(t);
+        ee.process(t);
         is0.process(t);
         is1.process(t);
     }
