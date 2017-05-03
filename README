@@ -10,7 +10,7 @@ INSTALL DEPENDENCIES
 
     
 CONFIGURE PROJECT
-    $ cmake -DCMAKE_INSTALL_PREFIX=<path to install> <path to project
+    $ cmake -DCMAKE_INSTALL_PREFIX=<path to install> <path to project>
 BUILD & INSTALL PROJECT
     $ make install
     
