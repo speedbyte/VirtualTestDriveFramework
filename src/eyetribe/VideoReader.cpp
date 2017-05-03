@@ -27,7 +27,7 @@ namespace saliency_sandbox {
 
         template<uint32_t _format>
         void VideoReader<_format>::calc() {
-            float mean_a, mean_b, mean_d;
+            double mean_a, mean_b, mean_d;
             uvc_frame* frame;
 
             this->m_uvc_error = uvc_stream_get_frame(this->m_uvc_stream_handle,&frame,-1);
@@ -47,9 +47,17 @@ namespace saliency_sandbox {
                 cv::flip(this->m_output,this->m_output,1);
             }
 
-            mean_a = this->properties()->template get<float>("mean",70);
-            mean_b = float(cv::mean(this->m_output).val[0]);
+            cv::Mat1b blur;
+            cv::blur(this->m_output,blur,cv::Size(51,51));
+
+            mean_a = this->properties()->template get<float>("mean",128);
+            cv::minMaxLoc(blur, nullptr,&mean_b);
+            //mean_b = cv::mean(this->m_output).val[0];
             mean_d = mean_a - mean_b;
+
+            cv::scaleAdd(blur,-0.5,this->m_output,this->m_output);
+
+            std::cout << "mean(" << m_device << "): " << mean_d << std::endl;
 
             if(mean_d < -2.0f) {
                 uvc_get_exposure_abs(this->m_uvc_device_handle,&this->m_cur_exposure,UVC_GET_CUR);
