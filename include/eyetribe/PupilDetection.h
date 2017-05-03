@@ -161,6 +161,10 @@ namespace saliency_sandbox {
 
                 this->m_confidence = 0;
 
+                this->
+
+                return;
+
                 if(eb.glint.confidence < FLT_EPSILON)
                     return;
 
