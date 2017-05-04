@@ -28,6 +28,9 @@ namespace saliency_sandbox {
         private:
             gaze::Gaze m_gaze;
             float m_confidence;
+            cv::Mat1f m_theta;
+            cv::Mat1f m_phi;
+            cv::Mat1f m_p;
 
         public:
             PupilDetection() : m_gaze(0.0f,0.0f,0.0f,0.0f,0.0f), m_confidence(0.0f) {
@@ -146,69 +149,152 @@ namespace saliency_sandbox {
                 pupil.z = world.template at<float>(2,0) / scale;
             }
 
+            void spherePoints(const Eyeball &eb, cv::Mat3f &points) {
+                cv::Vec3f* t;
+                float sintheta, costheta, sinphi, cosphi;
+
+                points.create(this->m_theta.rows,this->m_phi.cols);
+
+                for (int x = 0; x < this->m_phi.cols; x++) {
+                    for(int y = 0; y < this->m_theta.rows; y++) {
+                        sinphi = sinf(this->m_phi.template at<float>(y, x));
+                        cosphi = cosf(this->m_phi.template at<float>(y, x));
+                        sintheta = sinf(this->m_theta.template at<float>(y, x));
+                        costheta = cosf(this->m_theta.template at<float>(y, x));
+
+                        t = &points.template at<cv::Vec3f>(y, x);
+                        t->val[0] = eb.center.x + eb.radius * sintheta * cosphi;
+                        t->val[1] = eb.center.y + eb.radius * sintheta * sinphi;
+                        t->val[2] = eb.center.z + eb.radius * costheta;
+                    }
+                }
+
+            }
+
+            void projectPoints(const RectificationProjection &P, const cv::Mat3f& xyz, cv::Mat2f& xy) {
+                const cv::Vec3f* t;
+                cv::Vec3f h;
+
+                xy.create(xyz.rows,xyz.cols);
+                for(int y = 0; y < xyz.rows; y++) {
+                    for(int x = 0; x < xyz.cols; x++) {
+                        t = &xyz.template at<cv::Vec3f>(y, x);
+                        h = cv::Matx34f(P) * cv::Vec4f(t->val[0],t->val[1],t->val[2],1.0f);
+                        xy.template at<cv::Vec2f>(y,x) =cv::Vec2f(h.val[0]/h.val[2],h.val[1]/h.val[2]);
+                    }
+                }
+            }
+
+            void angleP(const float &theta, const float &phi, const cv::Vec2f &xy, const cv::Mat1b &img, float &p) {
+                float tp;
+                if(xy.val[0] < 0 || xy.val[0] >= Format<_format>::WIDTH)
+                    return;
+                if(xy.val[1] < 0 || xy.val[1] >= Format<_format>::HEIGHT)
+                    return;
+
+                tp = 1.0f/float(img.template at<uchar>(xy.val[1],xy.val[0]));
+
+                if(p != 0.0f)
+                    p = 0.5f*p + 0.5f*tp;
+                else
+                    p = tp;
+            }
+
+            void angleP(const cv::Mat1b &mat, const RectificationProjection &P, const Eyeball &eb, cv::Mat1f &p) {
+                cv::Mat3f xyz;
+                cv::Mat2f xy;
+
+                this->spherePoints(eb,xyz);
+                this->projectPoints(P,xyz,xy);
+
+                p.create(this->m_theta.rows,this->m_phi.cols);
+                p.setTo(0.0f);
+                for(int y = 0; y < this->m_theta.rows; y++) {
+                    for (int x = 0; x < this->m_phi.cols; x++) {
+                        this->angleP(
+                                this->m_theta.template at<float>(y,x),
+                                this->m_phi.template at<float>(y,x),
+                                xy.template at<cv::Vec2f>(y,x),
+                                mat,
+                                p.template at<float>(y,x));
+                    }
+                }
+            }
+
+            void angleFP(const cv::Mat1f& raw, cv::Mat1f& f) {
+                cv::Mat1f raw01;
+                const int ksize = 21;
+                const float sigma = 0.3f*((ksize-1.0f)*0.5f-1.0f)+0.8f;
+
+                cv::flip(raw,raw01,0);
+                cv::hconcat(raw01,raw,f);
+                cv::hconcat(f,raw01,f);
+                cv::flip(f,raw01,0);
+                cv::vconcat(raw01,f,f);
+                cv::vconcat(f,raw01,f);
+
+                cv::GaussianBlur(f,f,cv::Size(ksize,ksize),sigma,sigma,cv::BORDER_CONSTANT);
+
+                f = f(cv::Rect(raw.cols,raw.rows,raw.cols,raw.rows));
+            }
+
             void calc() override {
                 const cv::Mat1b& limg = *this->template input<0>()->value();
                 const cv::Mat1b& rimg = *this->template input<1>()->value();
                 const RectificationProjection& lp = *this->template input<2>()->value();
                 const RectificationProjection& rp = *this->template input<3>()->value();
                 const Eyeball& eb = *this->template input<4>()->value();
-
-                cv::Point3f ebbb[2], pupil, dir;
-                cv::Rect ebbr[2];
-                cv::Mat1b eye[2], eyers[2];
-                cv::Point2f p[2];
+                cv::Point angle;
                 float n;
+                double confidence;
+
+                cv::Mat1f leftp, rightp, leftfp, rightfp, combp;
 
                 this->m_confidence = 0;
-
-                this->
-
-                return;
-
-                if(eb.glint.confidence < FLT_EPSILON)
+                if(eb.glint.confidence <= 0)
                     return;
 
-                this->getEyeballBoundingBox(eb,ebbb);
-                this->getEyeballBoundingRect(ebbb,lp,ebbr[0]);
-                this->getEyeballBoundingRect(ebbb,rp,ebbr[1]);
+                this->angleP(limg,lp,eb,leftp);
+                this->angleP(rimg,rp,eb,rightp);
 
-                ebbr[0] &= cv::Rect(0,0,limg.cols,limg.rows);
-                ebbr[1] &= cv::Rect(0,0,rimg.cols,rimg.rows);
+                this->angleFP(leftp,leftfp);
+                this->angleFP(rightp,rightfp);
 
-                if (ebbr[0].area() <= 0)
-                    return;
-                if (ebbr[1].area() <= 0)
-                    return;
+                cv::multiply(leftfp,leftfp,combp);
+                cv::divide(combp,cv::sum(combp),combp);
 
-                eye[0] = limg(ebbr[0]);
-                eye[1] = rimg(ebbr[1]);
+                cv::minMaxLoc(combp, nullptr, &confidence, nullptr, &angle);
 
-                for(int i = 0; i < 2; i++) {
-                    cv::resize(eye[i], eyers[i], cv::Size(100, 100));
-                    p[i] = this->detectPupil(eyers[i]);
+                cv::addWeighted(this->m_p,0.75,combp,0.25,0.0,this->m_p);
 
-                    if(p[i].x < 0.0f || p[i].y < 0.0f)
-                        return;
+                cv::minMaxLoc(this->m_p, nullptr, &confidence, nullptr, &angle);
 
-                    p[i].x *= float(eye[i].cols) / float(eyers[i].cols);
-                    p[i].y *= float(eye[i].rows) / float(eyers[i].rows);
-                    p[i].x += ebbr[i].x;
-                    p[i].y += ebbr[i].y;
-                }
-
-                this->triangulatePoints(p,pupil,lp,rp);
-
-                dir = pupil-eb.center;
-                n = float(cv::norm(dir));
-                std::cout << "n: " << n << std::endl;
-                dir.x /= n;
-                dir.y /= n;
-                dir.z /= n;
-
-                this->m_gaze = gaze::Gaze(eb.center,dir);
+                this->m_confidence = float(confidence);
+                this->m_gaze = gaze::Gaze(eb.center,cv::Vec2f(
+                        this->m_theta.template at<float>(angle),
+                        this->m_phi.template at<float>(angle)));
             }
 
-            void reset() override {}
+            void reset() override {
+                const int n_theta = 100;
+                const int n_phi = 100;
+                float theta, phi;
+
+                this->m_theta.create(n_theta,1);
+                this->m_phi.create(1,n_phi);
+
+                for(int i = 0; i < n_theta; i++)
+                    this->m_theta.template at<float>(i) = (float(i+1)/float(n_theta)) * float(M_PI) + float(M_PI_2);
+
+                for(int i = 0; i < n_phi; i++)
+                    this->m_phi.template at<float>(i) = (float(i+1)/float(n_phi)) * float(M_PI);
+
+                cv::repeat(this->m_theta,1,n_phi,this->m_theta);
+                cv::repeat(this->m_phi,n_theta,1,this->m_phi);
+
+                this->m_p = cv::Mat1f::ones(n_theta,n_phi);
+                cv::divide(this->m_p,cv::sum(this->m_p),this->m_p);
+            }
         };
     }
 }

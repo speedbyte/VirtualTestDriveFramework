@@ -27,7 +27,7 @@ namespace saliency_sandbox {
                 const uint32_t _row = _index / _cols;
                 const uint32_t _col = _index - _row * _cols;
                 cv::Rect rect;
-                cv::Mat3b subfig;
+                cv::Mat3b subfig, tmp;
                 Figure* in;
 
                 rect = cv::Rect(_col*_width,_row*_height,_width,_height);
@@ -35,7 +35,12 @@ namespace saliency_sandbox {
                 subfig = subfig(rect);
                 in = this->template input<_index>()->value();
 
-                cv::resize(in->mat(),subfig,subfig.size());
+                if(in->mat().channels() == 1)
+                    cv::cvtColor(in->mat(),tmp,cv::COLOR_GRAY2BGR);
+                else
+                    tmp = in->mat();
+
+                cv::resize(tmp,subfig,subfig.size());
 
                 this->_base::template subplot<_width,_height,_cols,_rows>(out);
             }

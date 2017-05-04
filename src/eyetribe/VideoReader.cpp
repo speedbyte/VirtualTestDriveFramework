@@ -50,12 +50,11 @@ namespace saliency_sandbox {
             cv::Mat1b blur;
             cv::blur(this->m_output,blur,cv::Size(51,51));
 
-            mean_a = this->properties()->template get<float>("mean",128);
+            mean_a = this->properties()->template get<float>("mean",200);
             cv::minMaxLoc(blur, nullptr,&mean_b);
             //mean_b = cv::mean(this->m_output).val[0];
             mean_d = mean_a - mean_b;
 
-            cv::scaleAdd(blur,-0.5,this->m_output,this->m_output);
 
             std::cout << "mean(" << m_device << "): " << mean_d << std::endl;
 

@@ -41,7 +41,7 @@ namespace saliency_sandbox {
             cv::Mat1f name##_tmp_d; \
             cv::normalize(I,name##_tmp_d,0.0f,1.0f,cv::NORM_MINMAX,CV_32FC1); \
             cv::namedWindow(#name); \
-            cv::imshow(#name,I); \
+            cv::imshow(#name,name##_tmp_d); \
             } while(false);
 
             float calcSigma(int ksize) {

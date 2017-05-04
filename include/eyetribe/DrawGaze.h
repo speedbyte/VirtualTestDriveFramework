@@ -11,6 +11,20 @@
 namespace saliency_sandbox {
     namespace eyetribe {
 
+        static void arrowedLine(CV_IN_OUT cv::Mat& img, cv::Point pt1, cv::Point pt2, const cv::Scalar& color,
+                                int thickness=1, int line_type=8, int shift=0, double tipLength=0.1)
+        {
+            const double tipSize = norm(pt1-pt2)*tipLength; // Factor to normalize the size of the tip depending on the length of the arrow
+            cv::line(img, pt1, pt2, color, thickness, line_type, shift);
+            const double angle = atan2( (double) pt1.y - pt2.y, (double) pt1.x - pt2.x );
+            cv::Point p(cvRound(pt2.x + tipSize * cos(angle + CV_PI / 4)),
+                    cvRound(pt2.y + tipSize * sin(angle + CV_PI / 4)));
+            cv::line(img, p, pt2, color, thickness, line_type, shift);
+            p.x = cvRound(pt2.x + tipSize * cos(angle - CV_PI / 4));
+            p.y = cvRound(pt2.y + tipSize * sin(angle - CV_PI / 4));
+            cv::line(img, p, pt2, color, thickness, line_type, shift);
+        }
+
         template<uint32_t _format>
         class DrawGaze : public saliency_sandbox::core::Node::
         template Input<
@@ -64,7 +78,7 @@ namespace saliency_sandbox {
 
                 o = g.origin();
                 d = g.dir();
-                e = o - (d * 100);
+                e = o + (d * 100);
 
                 a = p*cv::Vec4f(o.val[0],o.val[1],o.val[2],1.0f);
                 v2d[0].x = a.x/a.z;
@@ -101,12 +115,12 @@ namespace saliency_sandbox {
                 this->m_image[0].mat(in0);
                 this->m_image[1].mat(in1);
 
-                cv::line(this->m_image[0],leftImageLeftGaze[0],leftImageLeftGaze[1],cv::Scalar(255.0));
-                cv::line(this->m_image[0],leftImageRightGaze[0],leftImageRightGaze[1],cv::Scalar(255.0));
-                cv::line(this->m_image[1],rightImageLeftGaze[0],rightImageLeftGaze[1],cv::Scalar(255.0));
-                cv::line(this->m_image[1],rightImageRightGaze[0],rightImageRightGaze[1],cv::Scalar(255.0));
-                cv::line(this->m_image[0],leftImageCenterGaze[0],leftImageCenterGaze[1],cv::Scalar(255.0));
-                cv::line(this->m_image[1],rightImageCenterGaze[0],rightImageCenterGaze[1],cv::Scalar(255.0));
+                arrowedLine(this->m_image[0],leftImageLeftGaze[0],leftImageLeftGaze[1],cv::Scalar(255.0));
+                arrowedLine(this->m_image[0],leftImageRightGaze[0],leftImageRightGaze[1],cv::Scalar(255.0));
+                arrowedLine(this->m_image[1],rightImageLeftGaze[0],rightImageLeftGaze[1],cv::Scalar(255.0));
+                arrowedLine(this->m_image[1],rightImageRightGaze[0],rightImageRightGaze[1],cv::Scalar(255.0));
+                arrowedLine(this->m_image[0],leftImageCenterGaze[0],leftImageCenterGaze[1],cv::Scalar(255.0));
+                arrowedLine(this->m_image[1],rightImageCenterGaze[0],rightImageCenterGaze[1],cv::Scalar(255.0));
 
                 cv::namedWindow("LEFT");
                 cv::imshow("LEFT",this->m_image[0]);

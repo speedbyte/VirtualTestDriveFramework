@@ -16,6 +16,9 @@
 #include <eyetribe/DrawEyeball.h>
 #include <eyetribe/PupilDetection.h>
 #include <eyetribe/DrawGaze.h>
+#include <plot/GridLayout.h>
+#include <plot/Plot.h>
+#include <io/VideoWriter.h>
 
 #define FORMAT 1
 
@@ -55,6 +58,24 @@ saliency_sandbox::eyetribe::PupilDetection<FORMAT> pd0;
 saliency_sandbox::eyetribe::PupilDetection<FORMAT> pd1;
 
 saliency_sandbox::eyetribe::DrawGaze<FORMAT> dg;
+
+saliency_sandbox::plot::GridLayout<4,2> gl;
+saliency_sandbox::io::ImageShow is("GridLayout");
+saliency_sandbox::gaze::Gaze::Selector<saliency_sandbox::gaze::Gaze::ORIGIN_X> lgsx;
+saliency_sandbox::gaze::Gaze::Selector<saliency_sandbox::gaze::Gaze::ORIGIN_Y> lgsy;
+saliency_sandbox::gaze::Gaze::Selector<saliency_sandbox::gaze::Gaze::ORIGIN_Z> lgsz;
+saliency_sandbox::gaze::Gaze::Selector<saliency_sandbox::gaze::Gaze::ANGLE_INCLINATION> lgsi;
+saliency_sandbox::gaze::Gaze::Selector<saliency_sandbox::gaze::Gaze::ANGLE_AZIMUTH> lgsa;
+saliency_sandbox::gaze::Gaze::Selector<saliency_sandbox::gaze::Gaze::ORIGIN_X> rgsx;
+saliency_sandbox::gaze::Gaze::Selector<saliency_sandbox::gaze::Gaze::ORIGIN_Y> rgsy;
+saliency_sandbox::gaze::Gaze::Selector<saliency_sandbox::gaze::Gaze::ORIGIN_Z> rgsz;
+saliency_sandbox::gaze::Gaze::Selector<saliency_sandbox::gaze::Gaze::ANGLE_INCLINATION> rgsi;
+saliency_sandbox::gaze::Gaze::Selector<saliency_sandbox::gaze::Gaze::ANGLE_AZIMUTH> rgsa;
+
+saliency_sandbox::plot::Plot pcart("left x","left y","left z","right x","right y","right z");
+saliency_sandbox::plot::Plot pangle("left inclination","right azimuth","right inclination","right azimuth");
+
+saliency_sandbox::io::VideoWriter vw("/home/geislerd/enkelejda_remote_tracking_eyetribe_2.avi");
 
 
 int main(int argc, char** argv) {
@@ -139,16 +160,53 @@ int main(int argc, char** argv) {
     pd1.template input<3>()->connect(sr.template output<3>());
     pd1.template input<4>()->connect(ee.template output<1>());
 
-    dg.template input<0>()->connect(de.template output<0>());
-    dg.template input<1>()->connect(de.template output<1>());
+    //dg.template input<0>()->connect(de.template output<0>());
+    //dg.template input<1>()->connect(de.template output<1>());
+    dg.template input<0>()->connect(vr0.template output<0>());
+    dg.template input<1>()->connect(vr1.template output<0>());
     dg.template input<2>()->connect(sr.template output<2>());
     dg.template input<3>()->connect(sr.template output<3>());
     dg.template input<4>()->connect(pd0.template output<0>());
     dg.template input<5>()->connect(pd1.template output<0>());
 
+    lgsx.template input<0>()->connect(pd0.template output<0>());
+    lgsy.template input<0>()->connect(pd0.template output<0>());
+    lgsz.template input<0>()->connect(pd0.template output<0>());
+    lgsi.template input<0>()->connect(pd0.template output<0>());
+    lgsa.template input<0>()->connect(pd0.template output<0>());
+    rgsx.template input<0>()->connect(pd1.template output<0>());
+    rgsy.template input<0>()->connect(pd1.template output<0>());
+    rgsz.template input<0>()->connect(pd1.template output<0>());
+    rgsi.template input<0>()->connect(pd1.template output<0>());
+    rgsa.template input<0>()->connect(pd1.template output<0>());
+    pcart.template input<0>()->connect(lgsx.template output<0>());
+    pcart.template input<1>()->connect(lgsy.template output<0>());
+    pcart.template input<2>()->connect(lgsz.template output<0>());
+    pcart.template input<3>()->connect(rgsx.template output<0>());
+    pcart.template input<4>()->connect(rgsy.template output<0>());
+    pcart.template input<5>()->connect(rgsz.template output<0>());
+    pangle.template input<0>()->connect(lgsi.template output<0>());
+    pangle.template input<1>()->connect(lgsa.template output<0>());
+    pangle.template input<2>()->connect(rgsi.template output<0>());
+    pangle.template input<3>()->connect(rgsa.template output<0>());
+
+    gl.template input<0>()->connect(drcc0.template output<0>());
+    gl.template input<1>()->connect(drcc1.template output<0>());
+    gl.template input<2>()->connect(pcart.template output<0>());
+    gl.template input<3>()->connect(pangle.template output<0>());
+    gl.template input<4>()->connect(de.template output<0>());
+    gl.template input<5>()->connect(de.template output<1>());
+    gl.template input<6>()->connect(dg.template output<0>());
+    gl.template input<7>()->connect(dg.template output<1>());
+
+    is.template input<0>()->connect(gl.template output<0>());
+    vw.template input<0>()->connect(gl.template output<0>());
+
     for(time_t t = 0; true; t++) {
+        is.process(t);
         dg.process(t);
         is0.process(t);
         is1.process(t);
+        vw.process(t);
     }
 }
