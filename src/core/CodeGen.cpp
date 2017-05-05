@@ -575,7 +575,7 @@ namespace saliency_sandbox {
                             gen << CodeGen::SetHeader("kitti/OXTSReader");
                             gen << CodeGen::SetTemplateArgument("channel",generated::Pipeline_Node_Argument_Type::Pipeline_Node_Argument_Type_pb_uint32);
                             gen << CodeGen::SetClass("saliency_sandbox::kitti::OXTSRow::Selector");
-                            gen << CodeGen::SetInput("velodyne",0);
+                            gen << CodeGen::SetInput("oxts",0);
                             break;
                         case generated::Pipeline_Node_Type_KittiTrackletReader:
                             gen << CodeGen::SetHeader("kitti/TrackletReader");
