@@ -203,10 +203,12 @@ int main(int argc, char** argv) {
     vw.template input<0>()->connect(gl.template output<0>());
 
     for(time_t t = 0; true; t++) {
-        is.process(t);
-        dg.process(t);
-        is0.process(t);
-        is1.process(t);
-        vw.process(t);
+        dcc0.process(t);
+        dcc0.process(t);
+        //is.process(t);
+        //dg.process(t);
+        //is0.process(t);
+        //is1.process(t);
+        //vw.process(t);
     }
 }
