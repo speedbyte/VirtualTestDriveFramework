@@ -8,6 +8,7 @@
 #include <libuvc/libuvc.h>
 #include <core/Node.h>
 #include <utils/Image.h>
+#include <queue>
 
 #define EYETRIBE_VENDOR_ID 10667
 #define EYETRIBE_PRODUCT_ID 251
@@ -42,7 +43,8 @@ namespace saliency_sandbox {
         template<uint32_t _format>
         class VideoReader : public saliency_sandbox::core::Node::
             template Input<>::
-            template Output<typename Format<_format>::Image> {
+            template Output<
+                typename Format<_format>::Image> {
         public:
             static const uint32_t WIDTH  = Format<_format>::WIDTH;
             static const uint32_t HEIGHT = Format<_format>::HEIGHT;
@@ -59,7 +61,10 @@ namespace saliency_sandbox {
             uvc_error_t m_uvc_error;
 
             uint32_t m_device;
-            Image m_output;
+
+
+            std::mutex m_mutex;
+            std::queue<Image*> m_queue;
 
             uint16_t m_min_gain;
             uint16_t m_max_gain;
@@ -75,6 +80,14 @@ namespace saliency_sandbox {
             virtual ~VideoReader();
             void calc() override;
             void reset() override;
+
+            void grab(struct uvc_frame *frame);
+
+            void push(Image *pImage);
+
+            void pop(Image **img);
+
+            void peek(Image **img);
         };
     }
 }

@@ -7,13 +7,78 @@
 namespace saliency_sandbox {
     namespace eyetribe {
 
-        template<uint32_t _format>
-        void cb(uvc_frame_t *frame, void *data);
+        class Hanshsake {
+        public:
+            typedef std::vector<void*> list_t;
+        private:
+            std::mutex m_mutex;
+            list_t m_o;
+            int m_i;
+
+            void lck() {
+                this->m_mutex.lock();
+            }
+
+            void ulck() {
+                this->m_mutex.unlock();
+            }
+
+            template<typename T>
+            T ulck(T v) {
+                this->ulck();
+                return v;
+            }
+
+            bool has(void* o) {
+                for(list_t::iterator i = this->m_o.begin(); i != this->m_o.end(); i++)
+                    if(*i == o)
+                        return true;
+                return false;
+            }
+
+            void *wtf() {
+                if(this->m_i >= this->m_o.size())
+                    this->m_i = 0;
+                if(this->m_i >= this->m_o.size())
+                    return nullptr;
+                return this->m_o[this->m_i];
+            }
+
+
+        public:
+            Hanshsake() : m_i(0) { }
+
+            void reg(void* o) {
+                this->lck();
+                if(!this->has(o))
+                    this->m_o.push_back(o);
+                this->ulck();
+            }
+
+            void shk(void* o) {
+                void* e;
+                while(true) {
+                    this->lck();
+                    e = this->wtf();
+                    if(e == o) {
+                        this->m_i++;
+                        this->ulck();
+                        return;
+                    }
+                    this->ulck();
+                    usleep(1);
+                }
+            }
+
+        } handshake;
 
         template<uint32_t _format>
         VideoReader<_format>::VideoReader(uint32_t device) : m_device(device), m_led_code(0x000f) {
-            this->output()->name("image");
-            this->template output<0>()->value(&this->m_output);
+            handshake.reg(this);
+
+
+            this->template output<0>()->name("image");
+            this->template output<0>()->value(nullptr);
 
             this->reset();
         }
@@ -26,27 +91,81 @@ namespace saliency_sandbox {
         }
 
         template<uint32_t _format>
-        void VideoReader<_format>::calc() {
-            double mean_a, mean_b, mean_d;
-            uvc_frame* frame;
+        void VideoReader<_format>::peek(VideoReader::Image **img) {
+            *img = nullptr;
+            this->m_mutex.lock();
+            if(!this->m_queue.empty())
+                *img = this->m_queue.front();
+            this->m_mutex.unlock();
+        }
 
-            this->m_uvc_error = uvc_stream_get_frame(this->m_uvc_stream_handle,&frame,-1);
-            sserr << sscond(this->m_uvc_error < 0) << "error while grabbing frame: " << uvc_strerror(this->m_uvc_error) << ssthrow;
+        template<uint32_t _format>
+        void VideoReader<_format>::push(Image *img) {
+            this->m_mutex.lock();
+            this->m_queue.push(img);
+            this->m_mutex.unlock();
+        }
 
-            if(frame == nullptr)
+        template<uint32_t _format>
+        void VideoReader<_format>::pop(VideoReader::Image **img) {
+            this->peek(img);
+            if(*img != nullptr) {
+                this->m_mutex.lock();
+                this->m_queue.pop();
+                this->m_mutex.unlock();
+            }
+        }
+
+        template<uint32_t _format>
+        void VideoReader<_format>::grab(struct uvc_frame *frame) {
+            const cv::Mat2b mat(HEIGHT,WIDTH,(cv::Vec2b*)frame->data);
+            Image* img;
+
+            if(frame->data_bytes != WIDTH*HEIGHT*sizeof(cv::Vec2b)) {
+                sserr << sscond(this->m_uvc_error < 0) << "error while grabbing frame: "
+                      << uvc_strerror(this->m_uvc_error) << ssthrow;
                 return;
-
-            if(frame->data_bytes == WIDTH*HEIGHT*sizeof(cv::Vec2b)) {
-                cv::cvtColor(
-                        cv::Mat2b(
-                                HEIGHT, WIDTH,
-                                (cv::Vec2b *) frame->data),
-                        this->m_output.mat(),
-                        CV_YUV2GRAY_YUYV,
-                        CV_8UC1);
-                cv::flip(this->m_output,this->m_output,1);
             }
 
+            img = new Image();
+            cv::cvtColor(mat,*img,CV_YUV2GRAY_YUYV,CV_8UC1);
+            cv::flip(*img,*img,1);
+            this->push(img);
+        }
+
+        template<uint32_t _format>
+        void uvcstreamcallback(struct uvc_frame *frame, void *user_ptr) {
+            ((VideoReader<_format>*)user_ptr)->grab(frame);
+            handshake.shk(user_ptr);
+        }
+
+        template<uint32_t _format>
+        void VideoReader<_format>::calc() {
+            double mean_a, mean_b, mean_d;
+            Image *imgs[2], *t;
+            int i = 0;
+
+            imgs[0] = this->template output<0>()->value();
+
+            while(true) {
+                this->pop(&imgs[1]);
+                if(imgs[1] == nullptr)
+                    usleep(1);
+                else
+                    break;
+            }
+
+            this->m_mutex.lock();
+            std::cout << "queue: " << this->m_queue.size() << std::endl;
+            this->m_mutex.unlock();
+
+            if(imgs[0] != nullptr && imgs[0] != imgs[1])
+                delete(imgs[0]);
+
+            this->template output<0>()->value(imgs[1]);
+
+return;
+            /*
             cv::Mat1b blur;
             cv::blur(this->m_output,blur,cv::Size(51,51));
 
@@ -83,6 +202,7 @@ namespace saliency_sandbox {
                     }
                 }
             }
+             */
         }
 
         template<uint32_t _format>
@@ -140,7 +260,7 @@ namespace saliency_sandbox {
                   << "cannot open stream for device (" << this->m_device << "): "
                   << uvc_strerror(this->m_uvc_error) << ssthrow;
 
-            this->m_uvc_error = uvc_stream_start(this->m_uvc_stream_handle, nullptr, nullptr,0);
+            this->m_uvc_error = uvc_stream_start(this->m_uvc_stream_handle, uvcstreamcallback<_format>,this,0);
             sserr << sscond(this->m_uvc_error < 0)
                   << "cannot start stream for device (" << this->m_device << "): "
                   << uvc_strerror(this->m_uvc_error) << ssthrow;
@@ -159,6 +279,8 @@ namespace saliency_sandbox {
             uvc_set_gain(this->m_uvc_device_handle, 50);
             uvc_set_exposure_abs(this->m_uvc_device_handle, 80);
             uvc_set_ctrl(this->m_uvc_device_handle,3,3,&this->m_led_code,2);
+
+            //uvc_stream_start(this->m_uvc_stream_handle,uvcstreamcallback<_format>,this,0);
         }
 
         template class VideoReader<0>;

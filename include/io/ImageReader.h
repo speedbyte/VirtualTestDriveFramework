@@ -10,7 +10,7 @@
 #include <config.h>
 #include <core/Node.h>
 #include <utils/Image.h>
-#include "DirectoryScanner.h"
+#include <io/DirectoryScanner.h>
 
 namespace saliency_sandbox {
     namespace io {
