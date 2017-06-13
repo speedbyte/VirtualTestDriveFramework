@@ -4,6 +4,7 @@
 
 #include <utils/GraphViz.h>
 #include <highgui.h>
+#include <opencv2/imgcodecs.hpp>
 
 namespace saliency_sandbox {
     namespace utils {

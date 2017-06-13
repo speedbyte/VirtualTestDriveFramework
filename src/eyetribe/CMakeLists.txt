@@ -4,6 +4,6 @@ aux_source_directory(. CORE_SOURCE)
 MESSAGE("   source files: ${CORE_SOURCE}")
 
 add_library(eyetribe SHARED EXCLUDE_FROM_ALL ${CORE_SOURCE})
-target_link_libraries(eyetribe core gaze plot uvc ${OpenCV_LIBS} ${Boost_LIBRARIES})
+target_link_libraries(eyetribe core gaze plot uvc ${OpenCV_LIBS} ${Boost_LIBRARIES} ${EXTERNAL_LIBS})
 
 install(TARGETS eyetribe DESTINATION lib OPTIONAL)

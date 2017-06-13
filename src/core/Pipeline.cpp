@@ -4,7 +4,7 @@
 
 #include <core/Pipeline.h>
 #include <graphviz/gvc.h>
-#include <highgui.h>
+#include <opencv2/highgui.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/unordered_set.hpp>
 #include <utils/GraphViz.h>

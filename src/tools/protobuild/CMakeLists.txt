@@ -46,6 +46,6 @@ configure_file(build.h.in build.h)
 aux_source_directory(. CORE_SOURCE)
 
 add_executable(protobuild ${CORE_SOURCE} ${PROTO_SRCS} ${PROTO_HDRS})
-target_link_libraries(protobuild ${SaliencySandbox_LIBS} ${OpenCV_LIBS} ${Boost_LIBRARIES} ${PROTOBUF_LIBRARIES} ${GRAPHVIZ_LIBRARY} dl )
+target_link_libraries(protobuild ${SaliencySandbox_LIBS} ${OpenCV_LIBS} ${Boost_LIBRARIES} ${EXTERNAL_LIBS} ${PROTOBUF_LIBRARIES} ${GRAPHVIZ_LIBRARY} dl )
 
 install(TARGETS protobuild DESTINATION bin)
