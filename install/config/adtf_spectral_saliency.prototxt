@@ -1,0 +1,449 @@
+name: "Spectral Whitening Saliency";
+
+##
+## Read video
+##
+
+node {
+    name: "Video Reader";
+    type: ADTFRGBImageReader;
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "1242";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "375";
+    }
+}
+
+
+##
+## Extract RGB color features
+##
+
+node {
+    name: "RGB feature Map";
+    type: UtilsMatrixSplit;
+    argument {
+        name: "type";
+        type: pb_complex;
+        value: "cv::Vec3b";
+    }
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "1242";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "375";
+    }
+    input {
+        node: "Video Reader";
+        port: 0;
+    }
+}
+
+node {
+    name: "Convert channel R to Heatmap";
+    type: UtilsImageConverter;
+    argument {
+        name: "input";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_IntensityImage";
+    }
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_HeatmapImage";
+    }
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "1242";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "375";
+    }
+    input {
+        node: "RGB feature Map";
+        port: 0;
+    }
+}
+
+node {
+    name: "Convert channel G to Heatmap";
+    type: UtilsImageConverter;
+    argument {
+        name: "input";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_IntensityImage";
+    }
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_HeatmapImage";
+    }
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "1242";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "375";
+    }
+    input {
+        node: "RGB feature Map";
+        port: 1;
+    }
+}
+
+node {
+    name: "Convert channel B to Heatmap";
+    type: UtilsImageConverter;
+    argument {
+        name: "input";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_IntensityImage";
+    }
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_HeatmapImage";
+    }
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "1242";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "375";
+    }
+    input {
+        node: "RGB feature Map";
+        port: 2;
+    }
+}
+
+##
+## Calculate Spectral Whitening Activation
+## on each RGB channel
+##
+
+node {
+    name: "Red Spectral Whitening";
+    type: SaliencySpectralWhitening;
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "1242";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "375";
+    }
+    input {
+        node: "Convert channel R to Heatmap";
+        port: 0;
+    }
+}
+
+node {
+    name: "Green Spectral Whitening";
+    type: SaliencySpectralWhitening;
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "1242";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "375";
+    }
+    input {
+        node: "Convert channel G to Heatmap";
+        port: 0;
+    }
+}
+
+node {
+    name: "Blue Spectral Whitening";
+    type: SaliencySpectralWhitening;
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "1242";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "375";
+    }
+    input {
+        node: "Convert channel B to Heatmap";
+        port: 0;
+    }
+}
+
+##
+## Sum up Spectral Whitening Activation
+##
+
+node {
+    name: "Merge Spectral Whitening Activations";
+    type: UtilsMatrixMerge;
+    argument {
+        name: "type";
+        type: pb_complex;
+        value: "cv::Vec3f";
+    }
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "1242";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "375";
+    }
+    input {
+        node: "Red Spectral Whitening";
+        port: 0;
+    }
+    input {
+        node: "Green Spectral Whitening";
+        port: 0;
+    }
+    input {
+        node: "Blue Spectral Whitening";
+        port: 0;
+    }
+}
+
+node {
+    name: "Spectral Whitening";
+    type: UtilsMatrixSum;
+    argument {
+        name: "type";
+        type: pb_complex;
+        value: "cv::Vec3f";
+    }
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "1242";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "375";
+    }
+    input {
+        node: "Merge Spectral Whitening Activations";
+        port: 0;
+    }
+}
+
+
+
+##
+## Time measurements
+##
+
+#node {
+#    name: "Video Reader FPS Counter";
+#    type: UtilsFPSCounter;
+#    input {
+#        node: "Video Reader";
+#        port: 0;
+#    }
+#}
+
+#node {
+#    name: "Red Spectral Whitening FPS Counter";
+#    type: UtilsFPSCounter;
+#    input {
+#        node: "Red Spectral Whitening";
+#        port: 0;
+#    }
+#}
+
+#node {
+#    name: "Green Spectral Whitening FPS Counter";
+#    type: UtilsFPSCounter;
+#    input {
+#        node: "Green Spectral Whitening";
+#        port: 0;
+#    }
+#}
+
+#node {
+#    name: "Blue Spectral Whitening FPS Counter";
+#    type: UtilsFPSCounter;
+#    input {
+#        node: "Blue Spectral Whitening";
+#        port: 0;
+#    }
+#}
+
+##
+## Plot time measurements
+##
+
+#node {
+#    name: "FPS Plot";
+#    type: Plot;
+#    argument {
+#        name: "line0";
+#        type: pb_string;
+#        value: "Video Reader";
+#    }
+#    argument {
+#        name: "line1";
+#        type: pb_string;
+#        value: "Red Spectral Whitening";
+#    }
+#    argument {
+#        name: "line2";
+#        type: pb_string;
+#        value: "Green Spectral Whitening";
+#    }
+#    argument {
+#        name: "line3";
+#        type: pb_string;
+#        value: "Blue Spectral Whitening";
+#    }
+#    input {
+#        node: "Video Reader FPS Counter";
+#        port: 0;
+#    }
+#    input {
+#        node: "Red Spectral Whitening FPS Counter";
+#        port: 0;
+#    }
+#    input {
+#        node: "Green Spectral Whitening FPS Counter";
+#        port: 0;
+#    }
+#    input {
+#        node: "Blue Spectral Whitening FPS Counter";
+#        port: 0;
+#    }
+#}
+
+#node {
+#    name: "Show FPS Plot";
+#    type: IOImageShow;
+#    argument {
+#        name: "window";
+#        type: pb_string;
+#        value: "FPS";
+#    }
+#    input {
+#        node: "FPS Plot";
+#        port: 0;
+#    }
+#}
+
+
+
+##
+## Plot Spectral Whitening
+##
+
+node {
+    name: "Spectral Whitening Heatmap";
+    type: UtilsImageConverter;
+    argument {
+        name: "input";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_HeatmapImage";
+    }
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_RGBImage";
+    }
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "1242";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "375";
+    }
+    input {
+        node: "Spectral Whitening";
+        port: 0;
+    }
+}
+
+#node {
+#    name: "Show Spectral Whitening Heatmap";
+#    type: IOImageShow;
+#    argument {
+#        name: "window";
+#        type: pb_string;
+#        value: "Spectral Whitening";
+#    }
+#    input {
+#        node: "Spectral Whitening Heatmap";
+#        port: 0;
+#    }
+#}
+
+##
+## Write Spectral Whitening
+##
+
+node {
+    name: "Video Writer";
+    type: ADTFRGBImageWriter;
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "1242";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "375";
+    }
+    input {
+        node: "Spectral Whitening Heatmap";
+        port: 0;
+    }
+}
+
+##
+## Show input image
+##
+
+#node {
+#    name: "Show Image";
+#    type: IOImageShow;
+#    argument {
+#        name: "window";
+#        type: pb_string;
+#        value: "Raw Image";
+#    }
+#    input {
+#        node: "Video Reader";
+#        port: 0;
+#    }
+#}

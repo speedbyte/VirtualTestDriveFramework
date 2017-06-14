@@ -27,7 +27,7 @@ foreach(Boost_LIB ${pkg_boost_LIBRARIES})
 # we take the files directly from our own build
     #install(FILES ${Boost_LIB_P} DESTINATION lib/third/boost)
     get_filename_component(Boost_LIB_N ${Boost_LIB_P} NAME)
-    list(APPEND PROTOBUILD_JITC_THIRD_DEP ../../../../libs/boost-install/lib/lib${Boost_LIB_N}.so.1.64.0)
+    list(APPEND PROTOBUILD_JITC_THIRD_DEP ../../../../libs/boost-install/lib/lib${Boost_LIB_N}.so)
 endforeach()
 message("installing Boost ${pkg_boost_LIBRARIES} --output--  ${Boost_LIB_N} ${Boost_LIB_P}  ")
 
@@ -38,7 +38,7 @@ foreach(OpenCV_LIB ${pkg_opencv_LIBRARIES})
 # we take the files directly from our own build
 #install(FILES ${OpenCV_LIB_P} DESTINATION lib/third/opencv)
     get_filename_component(OpenCV_LIB_N ${OpenCV_LIB_P} NAME)
-    list(APPEND PROTOBUILD_JITC_THIRD_DEP ../../../../libs/opencv-install/lib/lib${OpenCV_LIB_N}.so.3.2.0)
+    list(APPEND PROTOBUILD_JITC_THIRD_DEP ../../../../libs/opencv-install/lib/lib${OpenCV_LIB_N}.so)
 endforeach()
 
 foreach(PROTOBUF_LIB ${PROTOBUF_LIBRARIES})

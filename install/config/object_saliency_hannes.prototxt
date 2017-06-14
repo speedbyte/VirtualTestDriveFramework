@@ -1,0 +1,816 @@
+name: "Object Saliency";
+
+##
+## Read Kitti Dataset
+##
+
+node {
+    name: "Kitti Reader";
+    type: KittiReader;
+    argument {
+        name: "path";
+        type: pb_string;
+        value: "${DIR_DATA}/kitti/2011_09_26/2011_09_26_drive_0001_sync/";
+    }
+}
+
+##
+## Show raw Kitti data
+##
+
+node {
+    name: "Show Camera 0";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "Kitti Cam 0";
+    }
+    input {
+        node: "Kitti Reader";
+        port: 0;
+    }
+}
+
+node {
+    name: "Show Camera 1";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "Kitti Cam 1";
+    }
+    input {
+        node: "Kitti Reader";
+        port: 1;
+    }
+}
+
+node {
+    name: "Show Camera 2";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "Kitti Cam 2";
+    }
+    input {
+        node: "Kitti Reader";
+        port: 2;
+    }
+}
+
+node {
+    name: "Show Camera 3";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "Kitti Cam 3";
+    }
+    input {
+        node: "Kitti Reader";
+        port: 3;
+    }
+}
+
+##
+## Show velodyne points
+##
+
+node {
+    name: "Velodyne polar image";
+    type: KittiVelodynePolar;
+    input {
+        node: "Kitti Reader";
+        port: 4;
+    }
+}
+
+node {
+    name: "Velodyne polar distance Heatmap";
+    type: UtilsImageConverter;
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "360";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "180";
+    }
+    argument {
+        name: "input";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_HeatmapImage";
+    }
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_RGBImage";
+    }
+    input {
+        node: "Velodyne polar image";
+        port: 0;
+    }
+}
+
+node {
+    name: "Velodyne polar reflection Heatmap";
+    type: UtilsImageConverter;
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "360";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "180";
+    }
+    argument {
+        name: "input";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_HeatmapImage";
+    }
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_RGBImage";
+    }
+    input {
+        node: "Velodyne polar image";
+        port: 1;
+    }
+}
+
+node {
+    name: "Show Velodyne Distance";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "Velodyne Distance";
+    }
+    input {
+        node: "Velodyne polar distance Heatmap";
+        port: 0;
+    }
+}
+
+node {
+    name: "Show Velodyne Reflection";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "Velodyne Reflection";
+    }
+    input {
+        node: "Velodyne polar reflection Heatmap";
+        port: 0;
+    }
+}
+
+##
+## Show Velocity Plots
+##
+
+node {
+    name: "OXTS Latitude";
+    type: KittiOXTSSelector;
+    argument {
+        name: "channel";
+        type: pb_uint32;
+        value: "0";
+    }
+    input {
+        node: "Kitti Reader";
+        port: 5;
+    }
+}
+
+node {
+    name: "OXTS Longitude";
+    type: KittiOXTSSelector;
+    argument {
+        name: "channel";
+        type: pb_uint32;
+        value: "1";
+    }
+    input {
+        node: "Kitti Reader";
+        port: 5;
+    }
+}
+
+node {
+    name: "OXTS Altitude";
+    type: KittiOXTSSelector;
+    argument {
+        name: "channel";
+        type: pb_uint32;
+        value: "2";
+    }
+    input {
+        node: "Kitti Reader";
+        port: 5;
+    }
+}
+
+node {
+    name: "OXTS Roll";
+    type: KittiOXTSSelector;
+    argument {
+        name: "channel";
+        type: pb_uint32;
+        value: "3";
+    }
+    input {
+        node: "Kitti Reader";
+        port: 5;
+    }
+}
+
+node {
+    name: "OXTS Pitch";
+    type: KittiOXTSSelector;
+    argument {
+        name: "channel";
+        type: pb_uint32;
+        value: "4";
+    }
+    input {
+        node: "Kitti Reader";
+        port: 5;
+    }
+}
+
+node {
+    name: "OXTS Heading";
+    type: KittiOXTSSelector;
+    argument {
+        name: "channel";
+        type: pb_uint32;
+        value: "5";
+    }
+    input {
+        node: "Kitti Reader";
+        port: 5;
+    }
+}
+
+node {
+    name: "OXTS Forward Velocity";
+    type: KittiOXTSSelector;
+    argument {
+        name: "channel";
+        type: pb_uint32;
+        value: "6";
+    }
+    input {
+        node: "Kitti Reader";
+        port: 5;
+    }
+}
+
+node {
+    name: "OXTS Leftward Velocity";
+    type: KittiOXTSSelector;
+    argument {
+        name: "channel";
+        type: pb_uint32;
+        value: "7";
+    }
+    input {
+        node: "Kitti Reader";
+        port: 5;
+    }
+}
+
+node {
+    name: "OXTS Upward Velocity";
+    type: KittiOXTSSelector;
+    argument {
+        name: "channel";
+        type: pb_uint32;
+        value: "8";
+    }
+    input {
+        node: "Kitti Reader";
+        port: 5;
+    }
+}
+
+node {
+    name: "OXTS Location Plot";
+    type: Plot;
+    argument {
+        name: "line0";
+        type: pb_string;
+        value: "Latitude";
+    }
+    argument {
+        name: "line1";
+        type: pb_string;
+        value: "Longitude";
+    }
+    argument {
+        name: "line2";
+        type: pb_string;
+        value: "Altitude";
+    }
+    input {
+        node: "OXTS Latitude";
+        port: 0;
+    }
+    input {
+        node: "OXTS Longitude";
+        port: 0;
+    }
+    input {
+        node: "OXTS Altitude";
+        port: 0;
+    }
+}
+
+node {
+    name: "OXTS Rotation Plot";
+    type: Plot;
+    argument {
+        name: "line0";
+        type: pb_string;
+        value: "Roll";
+    }
+    argument {
+        name: "line1";
+        type: pb_string;
+        value: "Pitch";
+    }
+    argument {
+        name: "line2";
+        type: pb_string;
+        value: "Heading";
+    }
+    input {
+        node: "OXTS Roll";
+        port: 0;
+    }
+    input {
+        node: "OXTS Pitch";
+        port: 0;
+    }
+    input {
+        node: "OXTS Heading";
+        port: 0;
+    }
+}
+
+node {
+    name: "OXTS Velocity Plot";
+    type: Plot;
+    argument {
+        name: "line0";
+        type: pb_string;
+        value: "Forward";
+    }
+    argument {
+        name: "line1";
+        type: pb_string;
+        value: "Leftward";
+    }
+    argument {
+        name: "line2";
+        type: pb_string;
+        value: "Upward";
+    }
+    input {
+        node: "OXTS Forward Velocity";
+        port: 0;
+    }
+    input {
+        node: "OXTS Leftward Velocity";
+        port: 0;
+    }
+    input {
+        node: "OXTS Upward Velocity";
+        port: 0;
+    }
+}
+
+node {
+    name: "Show Location Plot";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "OXTS Location";
+    }
+    input {
+        node: "OXTS Location Plot";
+        port: 0;
+    }
+}
+
+node {
+    name: "Show Rotation Plot";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "OXTS Rotation";
+    }
+    input {
+        node: "OXTS Rotation Plot";
+        port: 0;
+    }
+}
+
+node {
+    name: "Show Velocity Plot";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "OXTS Velocity";
+    }
+    input {
+        node: "OXTS Velocity Plot";
+        port: 0;
+    }
+}
+
+
+
+##
+## Calculate Saliency
+##
+
+node {
+    name: "Convert to LAB";
+    type: UtilsImageConverter;
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::WIDTH";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT";
+    }
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_LABImage";
+    }
+    input {
+        node: "Kitti Reader";
+        port: 2;
+    }
+}
+
+node {
+    name: "LAB feature Map";
+    type: UtilsMatrixSplit;
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::WIDTH";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT";
+    }
+    argument {
+        name: "type";
+        type: pb_complex;
+        value: "cv::Vec3f";
+    }
+    input {
+        node: "Convert to LAB";
+        port: 0;
+    }
+}
+
+node {
+    name: "Intensity Boolean Map";
+    type: SaliencyBooleanMaps;
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::WIDTH";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT";
+    }
+    input {
+        node: "LAB feature Map";
+        port: 0;
+    }
+}
+
+node {
+    name: "Green-Red Feature Boolean Map";
+    type: SaliencyBooleanMaps;
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::WIDTH";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT";
+    }
+    input {
+        node: "LAB feature Map";
+        port: 1;
+    }
+}
+
+node {
+    name: "Blue-Yellow Feature Boolean Map";
+    type: SaliencyBooleanMaps;
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::WIDTH";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT";
+    }
+    input {
+        node: "LAB feature Map";
+        port: 2;
+    }
+}
+
+node {
+    name: "Merge Boolean Maps";
+    type: UtilsMatrixMerge;
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::WIDTH";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT";
+    }
+    argument {
+        name: "type";
+        type: pb_complex;
+        value: "cv::Vec3f";
+    }
+    input {
+        node: "Intensity Boolean Map";
+        port: 0;
+    }
+    input {
+        node: "Green-Red Feature Boolean Map";
+        port: 0;
+    }
+    input {
+        node: "Blue-Yellow Feature Boolean Map";
+        port: 0;
+    }
+}
+
+node {
+    name: "Boolean Map";
+    type: UtilsMatrixSum;
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::WIDTH";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT";
+    }
+    argument {
+        name: "type";
+        type: pb_complex;
+        value: "cv::Vec3f";
+    }
+    input {
+        node: "Merge Boolean Maps";
+        port: 0;
+    }
+}
+
+node {
+    name: "Boolean Map Heatmap";
+    type: UtilsImageConverter;
+    argument {
+        name: "width";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::WIDTH";
+    }
+    argument {
+        name: "height";
+        type: pb_uint32;
+        value: "saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT";
+    }
+    argument {
+        name: "input";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_HeatmapImage";
+    }
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_RGBImage";
+    }
+    input {
+        node: "Boolean Map";
+        port: 0;
+    }
+}
+
+node {
+    name: "Show Boolean Map";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "Boolean Map";
+    }
+    input {
+        node: "Boolean Map Heatmap";
+        port: 0;
+    }
+}
+
+##
+## Calculate Tracklet Saliency
+##
+
+node {
+    name: "Tracklet Saliency";
+    type: KittiTrackletSaliency;
+    argument {
+        name: "camera";
+        type: pb_complex;
+        value: "saliency_sandbox::kitti::Camera::LEFT_RGB";
+    }
+    input {
+        node: "Kitti Reader";
+        port: 6;
+    }
+    input {
+        node: "Boolean Map";
+        port: 0;
+    }
+    input {
+        node: "Kitti Reader";
+        port: 7;
+    }
+}
+
+node {
+    name: "Draw Tracklets";
+    type: KittiTrackletDraw;
+    argument {
+        name: "camera";
+        type: pb_complex;
+        value: "saliency_sandbox::kitti::Camera::LEFT_RGB";
+    }
+    input {
+        node: "Kitti Reader";
+        port: 2;
+    }
+    input {
+        node: "Tracklet Saliency";
+        port: 0;
+    }
+    input {
+        node: "Kitti Reader";
+        port: 7;
+    }
+}
+
+node {
+    name: "Show Tracklet Saliency";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "Tracklet Saliency";
+    }
+    input {
+        node: "Draw Tracklets";
+        port: 0;
+    }
+}
+
+##
+## Create Screenshots
+##
+
+node {
+    name: "Save Tracklet Saliency";
+    type: IOImageWriter;
+    argument {
+        name: "path";
+        type: pb_string;
+        value: "/home/geislerd/screen/tracklet_saliency/";
+    }
+    input {
+        node: "Draw Tracklets";
+        port: 0;
+    }
+}
+
+node {
+    name: "Save Boolean Map";
+    type: IOImageWriter;
+    argument {
+        name: "path";
+        type: pb_string;
+        value: "/home/geislerd/screen/boolean_saliency/";
+    }
+    input {
+        node: "Boolean Map Heatmap";
+        port: 0;
+    }
+}
+
+node {
+    name: "Show Location Plot";
+    type: IOImageWriter;
+    argument {
+        name: "path";
+        type: pb_string;
+        value: "/home/geislerd/screen/location/";
+    }
+    input {
+        node: "OXTS Location Plot";
+        port: 0;
+    }
+}
+
+node {
+    name: "Show Rotation Plot";
+    type: IOImageWriter;
+    argument {
+        name: "path";
+        type: pb_string;
+        value: "/home/geislerd/screen/rotation/";
+    }
+    input {
+        node: "OXTS Rotation Plot";
+        port: 0;
+    }
+}
+
+node {
+    name: "Save Velocity Plot";
+    type: IOImageWriter;
+    argument {
+        name: "path";
+        type: pb_string;
+        value: "/home/geislerd/screen/velocity/";
+    }
+    input {
+        node: "OXTS Velocity Plot";
+        port: 0;
+    }
+}
+
+node {
+    name: "Save Velodyne Distance";
+    type: IOImageWriter;
+    argument {
+        name: "path";
+        type: pb_string;
+        value: "/home/geislerd/screen/velodyne_distance/";
+    }
+    input {
+        node: "Velodyne polar distance Heatmap";
+        port: 0;
+    }
+}
+
+node {
+    name: "Save Velodyne Reflection";
+    type: IOImageWriter;
+    argument {
+        name: "path";
+        type: pb_string;
+        value: "/home/geislerd/screen/velodyne_reflection/";
+    }
+    input {
+        node: "Velodyne polar reflection Heatmap";
+        port: 0;
+    }
+}

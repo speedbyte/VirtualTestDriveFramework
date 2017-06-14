@@ -1,0 +1,2126 @@
+name: "MIT Saliency Benchmark";
+
+#
+# Dataset reader
+#
+
+node {
+    name: "Image Reader";
+    type: IOImageReader;
+    argument {
+        name: "path";
+        type: pb_string;
+        value: "/media/geislerd/Documents/repo/MIT/trainSetClean/Stimuli/";
+    }
+}
+
+node {
+    name: "Fixation Reader";
+    type: IOImageReader;
+    argument {
+        name: "path";
+        type: pb_string;
+        value: "/media/geislerd/Documents/repo/MIT/trainSetClean/FIXATIONMAPS/";
+    }
+}
+
+node {
+    name: "SotA Saliency Reader";
+    type: IOImageReader;
+    argument {
+        name: "path";
+        type: pb_string;
+        value: "/media/geislerd/Documents/repo/MIT/trainSetClean/Saliency/";
+    }
+    argument {
+        name: "image_format";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_IntensityImage";
+    }
+}
+
+#
+# Fixation Heatmap
+#
+
+node {
+    name: "Fixation Heatmap";
+    type: UtilsImageConverter;
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_HeatmapImage";
+    }
+    input {
+        node: "Fixation Reader";
+        port: 0;
+    }
+}
+
+#
+# SotA Saliency Heatmap
+#
+
+node {
+    name: "SotA Saliency Heatmap";
+    type: UtilsImageConverter;
+    argument {
+        name: "input";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_IntensityImage";
+    }
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_HeatmapImage";
+    }
+    input {
+        node: "SotA Saliency Reader";
+        port: 0;
+    }
+}
+
+#
+# Boolean Maps Saliency Calculation
+#
+
+node {
+    name: "Convert to LAB";
+    type: UtilsImageConverter;
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_LABImage";
+    }
+    input {
+        node: "Image Reader";
+        port: 0;
+    }
+}
+
+node {
+    name: "Seperate Channels";
+    type: UtilsMatrixSplit;
+    argument {
+        name: "type";
+        type: pb_complex;
+        value: "cv::Vec3f";
+    }
+    input {
+        node: "Convert to LAB";
+        port: 0;
+    }
+}
+
+node {
+    name: "Convert to Intensity L";
+    type: UtilsImageConverter;
+    argument {
+        name: "input";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_HeatmapImage";
+    }
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_IntensityImage";
+    }
+    input {
+        node: "Seperate Channels";
+        port: 0;
+    }
+}
+
+node {
+    name: "Convert to Intensity A";
+    type: UtilsImageConverter;
+    argument {
+        name: "input";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_HeatmapImage";
+    }
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_IntensityImage";
+    }
+    input {
+        node: "Seperate Channels";
+        port: 1;
+    }
+}
+
+node {
+    name: "Convert to Intensity B";
+    type: UtilsImageConverter;
+    argument {
+        name: "input";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_HeatmapImage";
+    }
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_IntensityImage";
+    }
+    input {
+        node: "Seperate Channels";
+        port: 2;
+    }
+}
+
+node {
+    name: "Boolean Map channel L";
+    type: SaliencyBooleanMaps;
+    input {
+        node: "Convert to Intensity L";
+        port: 0;
+    }
+}
+
+node {
+    name: "Boolean Map channel A";
+    type: SaliencyBooleanMaps;
+    input {
+        node: "Convert to Intensity A";
+        port: 0;
+    }
+}
+
+node {
+    name: "Boolean Map channel B";
+    type: SaliencyBooleanMaps;
+    input {
+        node: "Convert to Intensity B";
+        port: 0;
+    }
+}
+
+node {
+    name: "Merge Boolean Maps Activations";
+    type: UtilsMatrixMerge;
+    argument {
+        name: "type";
+        type: pb_complex;
+        value: "cv::Vec3f";
+    }
+    input {
+        node: "Boolean Map channel L";
+        port: 0;
+    }
+    input {
+        node: "Boolean Map channel A";
+        port: 0;
+    }
+    input {
+        node: "Boolean Map channel B";
+        port: 0;
+    }
+}
+
+node {
+    name: "Boolean Maps";
+    type: UtilsMatrixSum;
+    argument {
+        name: "type";
+        type: pb_complex;
+        value: "cv::Vec3f";
+    }
+    input {
+        node: "Merge Boolean Maps Activations";
+        port: 0;
+    }
+}
+
+#
+# Spectral Saliency
+#
+
+node {
+    name: "Convert to Heatmap";
+    type: UtilsImageConverter;
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_HeatmapImage";
+    }
+    input {
+        node: "Image Reader";
+        port: 0;
+    }
+}
+
+node {
+    name: "Spectral Whitening";
+    type: SaliencySpectralWhitening;
+    input {
+        node: "Convert to Heatmap";
+        port: 0;
+    }
+}
+
+#
+# Itti & Koch
+#
+
+node {
+    name: "Orientation 0°";
+    type: SaliencyOrientation;
+    property {
+        name: "theta";
+        type: pb_float;
+        value: "0.0f";
+    }
+    input {
+        node: "Convert to Heatmap";
+        port: 0;
+    }
+}
+
+node {
+    name: "Orientation 45°";
+    type: SaliencyOrientation;
+    property {
+        name: "theta";
+        type: pb_float;
+        value: "45.0f * (M_PI/180.0f)";
+    }
+    input {
+        node: "Convert to Heatmap";
+        port: 0;
+    }
+}
+
+node {
+    name: "Orientation 90°";
+    type: SaliencyOrientation;
+    property {
+        name: "theta";
+        type: pb_float;
+        value: "90.0f * (M_PI/180.0f)";
+    }
+    input {
+        node: "Convert to Heatmap";
+        port: 0;
+    }
+}
+
+node {
+    name: "Orientation 135°";
+    type: SaliencyOrientation;
+    property {
+        name: "theta";
+        type: pb_float;
+        value: "135.0f * (M_PI/180.0f)";
+    }
+    input {
+        node: "Convert to Heatmap";
+        port: 0;
+    }
+}
+
+node {
+    name: "Itti & Koch Orientation 0°";
+    type: SaliencyIttiKoch;
+    input {
+        node: "Orientation 0°";
+        port: 0;
+    }
+}
+
+node {
+    name: "Itti & Koch Orientation 45°";
+    type: SaliencyIttiKoch;
+    input {
+        node: "Orientation 45°";
+        port: 0;
+    }
+}
+
+node {
+    name: "Itti & Koch Orientation 90°";
+    type: SaliencyIttiKoch;
+    input {
+        node: "Orientation 90°";
+        port: 0;
+    }
+}
+
+node {
+    name: "Itti & Koch Orientation 135°";
+    type: SaliencyIttiKoch;
+    input {
+        node: "Orientation 135°";
+        port: 0;
+    }
+}
+
+node {
+    name: "Itti & Koch Channel L";
+    type: SaliencyIttiKoch;
+    input {
+        node: "Seperate Channels";
+        port: 0;
+    }
+}
+
+node {
+    name: "Itti & Koch Channel A";
+    type: SaliencyIttiKoch;
+    input {
+        node: "Seperate Channels";
+        port: 1;
+    }
+}
+
+node {
+    name: "Itti & Koch Channel B";
+    type: SaliencyIttiKoch;
+    input {
+        node: "Seperate Channels";
+        port: 2;
+    }
+}
+
+ node {
+     name: "Merge Itti & Koch Orientation Activations";
+     type: UtilsMatrixMerge;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec4f";
+     }
+     input {
+         node: "Itti & Koch Orientation 0°";
+         port: 0;
+     }
+     input {
+         node: "Itti & Koch Orientation 45°";
+         port: 0;
+     }
+     input {
+         node: "Itti & Koch Orientation 90°";
+         port: 0;
+     }
+     input {
+         node: "Itti & Koch Orientation 135°";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "Itti & Koch Orientation Activation";
+     type: UtilsMatrixSum;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec4f";
+     }
+     input {
+         node: "Merge Itti & Koch Orientation Activations";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "Merge Itti & Koch Color Activations";
+     type: UtilsMatrixMerge;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec2f";
+     }
+     input {
+         node: "Itti & Koch Channel A";
+         port: 0;
+     }
+     input {
+         node: "Itti & Koch Channel B";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "Itti & Koch Color Activation";
+     type: UtilsMatrixSum;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec2f";
+     }
+     input {
+         node: "Merge Itti & Koch Color Activations";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "Itti & Koch Normed Intensity Activation";
+     type: UtilsNormalize;
+     input {
+         node: "Itti & Koch Channel L";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "Itti & Koch Normed Orientation Activation";
+     type: UtilsNormalize;
+     input {
+         node: "Itti & Koch Orientation Activation";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "Itti & Koch Normed Color Activation";
+     type: UtilsNormalize;
+     input {
+         node: "Itti & Koch Color Activation";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "Merge Itti & Koch Activations";
+     type: UtilsMatrixMerge;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec3f";
+     }
+     input {
+         node: "Itti & Koch Normed Color Activation";
+         port: 0;
+     }
+     input {
+         node: "Itti & Koch Normed Orientation Activation";
+         port: 0;
+     }
+     input {
+         node: "Itti & Koch Normed Intensity Activation";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "Itti & Koch";
+     type: UtilsMatrixSum;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec3f";
+     }
+     input {
+         node: "Merge Itti & Koch Activations";
+         port: 0;
+     }
+ }
+
+#
+# GBVS
+#
+
+node {
+    name: "GBVS 32 Orientation 0°";
+    type: SaliencyGBVS;
+    argument {
+        name: "iwidth";
+        type: pb_uint32;
+        value: "32";
+    }
+    argument {
+        name: "iheight";
+        type: pb_uint32;
+        value: "32";
+    }
+    input {
+        node: "Orientation 0°";
+        port: 0;
+    }
+}
+
+node {
+    name: "GBVS 24 Orientation 0°";
+    type: SaliencyGBVS;
+    argument {
+        name: "iwidth";
+        type: pb_uint32;
+        value: "24";
+    }
+    argument {
+        name: "iheight";
+        type: pb_uint32;
+        value: "24";
+    }
+    input {
+        node: "Orientation 0°";
+        port: 0;
+    }
+}
+
+node {
+    name: "GBVS 16 Orientation 0°";
+    type: SaliencyGBVS;
+    argument {
+        name: "iwidth";
+        type: pb_uint32;
+        value: "16";
+    }
+    argument {
+        name: "iheight";
+        type: pb_uint32;
+        value: "16";
+    }
+    input {
+        node: "Orientation 0°";
+        port: 0;
+    }
+}
+
+node {
+    name: "GBVS 32 Orientation 45°";
+    type: SaliencyGBVS;
+    argument {
+        name: "iwidth";
+        type: pb_uint32;
+        value: "32";
+    }
+    argument {
+        name: "iheight";
+        type: pb_uint32;
+        value: "32";
+    }
+    input {
+        node: "Orientation 45°";
+        port: 0;
+    }
+}
+
+node {
+    name: "GBVS 24 Orientation 45°";
+    type: SaliencyGBVS;
+    argument {
+        name: "iwidth";
+        type: pb_uint32;
+        value: "24";
+    }
+    argument {
+        name: "iheight";
+        type: pb_uint32;
+        value: "24";
+    }
+    input {
+        node: "Orientation 45°";
+        port: 0;
+    }
+}
+
+node {
+    name: "GBVS 16 Orientation 45°";
+    type: SaliencyGBVS;
+    argument {
+        name: "iwidth";
+        type: pb_uint32;
+        value: "16";
+    }
+    argument {
+        name: "iheight";
+        type: pb_uint32;
+        value: "16";
+    }
+    input {
+        node: "Orientation 45°";
+        port: 0;
+    }
+}
+
+node {
+    name: "GBVS 32 Orientation 90°";
+    type: SaliencyGBVS;
+    argument {
+        name: "iwidth";
+        type: pb_uint32;
+        value: "32";
+    }
+    argument {
+        name: "iheight";
+        type: pb_uint32;
+        value: "32";
+    }
+    input {
+        node: "Orientation 90°";
+        port: 0;
+    }
+}
+
+node {
+    name: "GBVS 24 Orientation 90°";
+    type: SaliencyGBVS;
+    argument {
+        name: "iwidth";
+        type: pb_uint32;
+        value: "24";
+    }
+    argument {
+        name: "iheight";
+        type: pb_uint32;
+        value: "24";
+    }
+    input {
+        node: "Orientation 90°";
+        port: 0;
+    }
+}
+
+node {
+    name: "GBVS 16 Orientation 90°";
+    type: SaliencyGBVS;
+    argument {
+        name: "iwidth";
+        type: pb_uint32;
+        value: "16";
+    }
+    argument {
+        name: "iheight";
+        type: pb_uint32;
+        value: "16";
+    }
+    input {
+        node: "Orientation 90°";
+        port: 0;
+    }
+}
+
+node {
+    name: "GBVS 32 Orientation 135°";
+    type: SaliencyGBVS;
+    argument {
+        name: "iwidth";
+        type: pb_uint32;
+        value: "32";
+    }
+    argument {
+        name: "iheight";
+        type: pb_uint32;
+        value: "32";
+    }
+    input {
+        node: "Orientation 135°";
+        port: 0;
+    }
+}
+
+node {
+    name: "GBVS 24 Orientation 135°";
+    type: SaliencyGBVS;
+    argument {
+        name: "iwidth";
+        type: pb_uint32;
+        value: "24";
+    }
+    argument {
+        name: "iheight";
+        type: pb_uint32;
+        value: "24";
+    }
+    input {
+        node: "Orientation 135°";
+        port: 0;
+    }
+}
+
+node {
+    name: "GBVS 16 Orientation 135°";
+    type: SaliencyGBVS;
+    argument {
+        name: "iwidth";
+        type: pb_uint32;
+        value: "16";
+    }
+    argument {
+        name: "iheight";
+        type: pb_uint32;
+        value: "16";
+    }
+    input {
+        node: "Orientation 135°";
+        port: 0;
+    }
+}
+
+node {
+    name: "GBVS 32 Channel L";
+    type: SaliencyGBVS;
+    argument {
+        name: "iwidth";
+        type: pb_uint32;
+        value: "32";
+    }
+    argument {
+        name: "iheight";
+        type: pb_uint32;
+        value: "32";
+    }
+    input {
+        node: "Seperate Channels";
+        port: 0;
+    }
+}
+
+node {
+    name: "GBVS 24 Channel L";
+    type: SaliencyGBVS;
+    argument {
+        name: "iwidth";
+        type: pb_uint32;
+        value: "24";
+    }
+    argument {
+        name: "iheight";
+        type: pb_uint32;
+        value: "24";
+    }
+    input {
+        node: "Seperate Channels";
+        port: 0;
+    }
+}
+
+node {
+    name: "GBVS 16 Channel L";
+    type: SaliencyGBVS;
+    argument {
+        name: "iwidth";
+        type: pb_uint32;
+        value: "16";
+    }
+    argument {
+        name: "iheight";
+        type: pb_uint32;
+        value: "16";
+    }
+    input {
+        node: "Seperate Channels";
+        port: 0;
+    }
+}
+
+node {
+    name: "GBVS 32 Channel A";
+    type: SaliencyGBVS;
+    argument {
+        name: "iwidth";
+        type: pb_uint32;
+        value: "32";
+    }
+    argument {
+        name: "iheight";
+        type: pb_uint32;
+        value: "32";
+    }
+    input {
+        node: "Seperate Channels";
+        port: 1;
+    }
+}
+
+node {
+    name: "GBVS 24 Channel A";
+    type: SaliencyGBVS;
+    argument {
+        name: "iwidth";
+        type: pb_uint32;
+        value: "24";
+    }
+    argument {
+        name: "iheight";
+        type: pb_uint32;
+        value: "24";
+    }
+    input {
+        node: "Seperate Channels";
+        port: 1;
+    }
+}
+
+node {
+    name: "GBVS 16 Channel A";
+    type: SaliencyGBVS;
+    argument {
+        name: "iwidth";
+        type: pb_uint32;
+        value: "16";
+    }
+    argument {
+        name: "iheight";
+        type: pb_uint32;
+        value: "16";
+    }
+    input {
+        node: "Seperate Channels";
+        port: 1;
+    }
+}
+
+node {
+    name: "GBVS 32 Channel B";
+    type: SaliencyGBVS;
+    argument {
+        name: "iwidth";
+        type: pb_uint32;
+        value: "32";
+    }
+    argument {
+        name: "iheight";
+        type: pb_uint32;
+        value: "32";
+    }
+    input {
+        node: "Seperate Channels";
+        port: 2;
+    }
+}
+
+node {
+    name: "GBVS 24 Channel B";
+    type: SaliencyGBVS;
+    argument {
+        name: "iwidth";
+        type: pb_uint32;
+        value: "24";
+    }
+    argument {
+        name: "iheight";
+        type: pb_uint32;
+        value: "24";
+    }
+    input {
+        node: "Seperate Channels";
+        port: 2;
+    }
+}
+
+node {
+    name: "GBVS 16 Channel B";
+    type: SaliencyGBVS;
+    argument {
+        name: "iwidth";
+        type: pb_uint32;
+        value: "16";
+    }
+    argument {
+        name: "iheight";
+        type: pb_uint32;
+        value: "16";
+    }
+    input {
+        node: "Seperate Channels";
+        port: 2;
+    }
+}
+
+ node {
+     name: "Merge GBVS 32 Orientation Activations";
+     type: UtilsMatrixMerge;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec4f";
+     }
+     input {
+         node: "GBVS 32 Orientation 0°";
+         port: 0;
+     }
+     input {
+         node: "GBVS 32 Orientation 45°";
+         port: 0;
+     }
+     input {
+         node: "GBVS 32 Orientation 90°";
+         port: 0;
+     }
+     input {
+         node: "GBVS 32 Orientation 135°";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "Merge GBVS 24 Orientation Activations";
+     type: UtilsMatrixMerge;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec4f";
+     }
+     input {
+         node: "GBVS 24 Orientation 0°";
+         port: 0;
+     }
+     input {
+         node: "GBVS 24 Orientation 45°";
+         port: 0;
+     }
+     input {
+         node: "GBVS 24 Orientation 90°";
+         port: 0;
+     }
+     input {
+         node: "GBVS 24 Orientation 135°";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "Merge GBVS 16 Orientation Activations";
+     type: UtilsMatrixMerge;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec4f";
+     }
+     input {
+         node: "GBVS 16 Orientation 0°";
+         port: 0;
+     }
+     input {
+         node: "GBVS 16 Orientation 45°";
+         port: 0;
+     }
+     input {
+         node: "GBVS 16 Orientation 90°";
+         port: 0;
+     }
+     input {
+         node: "GBVS 16 Orientation 135°";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "GBVS 32 Orientation Activation";
+     type: UtilsMatrixSum;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec4f";
+     }
+     input {
+         node: "Merge GBVS 32 Orientation Activations";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "GBVS 24 Orientation Activation";
+     type: UtilsMatrixSum;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec4f";
+     }
+     input {
+         node: "Merge GBVS 24 Orientation Activations";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "GBVS 16 Orientation Activation";
+     type: UtilsMatrixSum;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec4f";
+     }
+     input {
+         node: "Merge GBVS 16 Orientation Activations";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "Merge GBVS Orientation Activations";
+     type: UtilsMatrixMerge;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec3f";
+     }
+     input {
+         node: "GBVS 32 Orientation Activation";
+         port: 0;
+     }
+     input {
+         node: "GBVS 24 Orientation Activation";
+         port: 0;
+     }
+     input {
+         node: "GBVS 16 Orientation Activation";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "GBVS Orientation Activation";
+     type: UtilsMatrixSum;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec3f";
+     }
+     input {
+         node: "Merge GBVS Orientation Activations";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "Merge GBVS 32 Color Activations";
+     type: UtilsMatrixMerge;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec2f";
+     }
+     input {
+         node: "GBVS 32 Channel A";
+         port: 0;
+     }
+     input {
+         node: "GBVS 32 Channel B";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "Merge GBVS 24 Color Activations";
+     type: UtilsMatrixMerge;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec2f";
+     }
+     input {
+         node: "GBVS 24 Channel A";
+         port: 0;
+     }
+     input {
+         node: "GBVS 24 Channel B";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "Merge GBVS 16 Color Activations";
+     type: UtilsMatrixMerge;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec2f";
+     }
+     input {
+         node: "GBVS 16 Channel A";
+         port: 0;
+     }
+     input {
+         node: "GBVS 16 Channel B";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "GBVS 32 Color Activation";
+     type: UtilsMatrixSum;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec2f";
+     }
+     input {
+         node: "Merge GBVS 32 Color Activations";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "GBVS 24 Color Activation";
+     type: UtilsMatrixSum;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec2f";
+     }
+     input {
+         node: "Merge GBVS 24 Color Activations";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "GBVS 16 Color Activation";
+     type: UtilsMatrixSum;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec2f";
+     }
+     input {
+         node: "Merge GBVS 16 Color Activations";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "Merge GBVS Color Activations";
+     type: UtilsMatrixMerge;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec3f";
+     }
+     input {
+         node: "GBVS 32 Color Activation";
+         port: 0;
+     }
+     input {
+         node: "GBVS 24 Color Activation";
+         port: 0;
+     }
+     input {
+         node: "GBVS 16 Color Activation";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "GBVS Color Activation";
+     type: UtilsMatrixSum;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec3f";
+     }
+     input {
+         node: "Merge GBVS Color Activations";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "Merge GBVS Intensity Activations";
+     type: UtilsMatrixMerge;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec3f";
+     }
+     input {
+         node: "GBVS 32 Channel L";
+         port: 0;
+     }
+     input {
+         node: "GBVS 24 Channel L";
+         port: 0;
+     }
+     input {
+         node: "GBVS 16 Channel L";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "GBVS Intensity Activation";
+     type: UtilsMatrixSum;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec3f";
+     }
+     input {
+         node: "Merge GBVS Intensity Activations";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "GBVS Normed Intensity Activation";
+     type: UtilsNormalize;
+     input {
+         node: "GBVS Intensity Activation";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "GBVS Normed Orientation Activation";
+     type: UtilsNormalize;
+     input {
+         node: "GBVS Orientation Activation";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "GBVS Normed Color Activation";
+     type: UtilsNormalize;
+     input {
+         node: "GBVS Color Activation";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "Merge GBVS Activations";
+     type: UtilsMatrixMerge;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec3f";
+     }
+     input {
+         node: "GBVS Normed Color Activation";
+         port: 0;
+     }
+     input {
+         node: "GBVS Normed Orientation Activation";
+         port: 0;
+     }
+     input {
+         node: "GBVS Normed Intensity Activation";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "GBVS";
+     type: UtilsMatrixSum;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec3f";
+     }
+     input {
+         node: "Merge GBVS Activations";
+         port: 0;
+     }
+ }
+
+#
+# Highpass Saliency
+#
+
+node {
+     name: "Highpass Channel L";
+     type: SaliencyHighpass;
+     input {
+         node: "Seperate Channels";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "Highpass Channel A";
+     type: SaliencyHighpass;
+     input {
+         node: "Seperate Channels";
+         port: 1;
+     }
+ }
+
+ node {
+     name: "Highpass Channel B";
+     type: SaliencyHighpass;
+     input {
+         node: "Seperate Channels";
+         port: 2;
+     }
+ }
+
+ node {
+     name: "Merge Highpass Activations";
+     type: UtilsMatrixMerge;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec3f";
+     }
+     input {
+         node: "Highpass Channel L";
+         port: 0;
+     }
+     input {
+         node: "Highpass Channel A";
+         port: 0;
+     }
+     input {
+         node: "Highpass Channel B";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "Highpass Saliency";
+     type: UtilsMatrixSum;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec3f";
+     }
+     input {
+         node: "Merge Highpass Activations";
+         port: 0;
+     }
+ }
+
+#
+# Mixed Saliency
+#
+
+ node {
+     name: "Merge Mixed Activations";
+     type: UtilsMatrixMerge;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec<float,5>";
+     }
+     input {
+         node: "Highpass Saliency";
+         port: 0;
+     }
+     input {
+         node: "GBVS";
+         port: 0;
+     }
+     input {
+         node: "Itti & Koch";
+         port: 0;
+     }
+     input {
+         node: "Spectral Whitening";
+         port: 0;
+     }
+     input {
+         node: "Boolean Maps";
+         port: 0;
+     }
+ }
+
+ node {
+     name: "Mixed Saliency";
+     type: UtilsMatrixSum;
+     argument {
+         name: "type";
+         type: pb_complex;
+         value: "cv::Vec<float,5>";
+     }
+     input {
+         node: "Merge Mixed Activations";
+         port: 0;
+     }
+ }
+
+#
+# Pearson Evaluation
+#
+
+node {
+    name: "Pearson Evaluation of Boolean Maps";
+    type: SaliencyPearson;
+    input {
+        node: "Boolean Maps";
+        port: 0;
+    }
+    input {
+        node: "Fixation Heatmap";
+        port: 0;
+    }
+}
+
+node {
+    name: "Pearson Evaluation of Spectral Whitening";
+    type: SaliencyPearson;
+    input {
+        node: "Spectral Whitening";
+        port: 0;
+    }
+    input {
+        node: "Fixation Heatmap";
+        port: 0;
+    }
+}
+
+node {
+    name: "Pearson Evaluation of Itti & Koch";
+    type: SaliencyPearson;
+    input {
+        node: "Itti & Koch";
+        port: 0;
+    }
+    input {
+        node: "Fixation Heatmap";
+        port: 0;
+    }
+}
+
+node {
+    name: "Pearson Evaluation of GBVS";
+    type: SaliencyPearson;
+    input {
+        node: "GBVS";
+        port: 0;
+    }
+    input {
+        node: "Fixation Heatmap";
+        port: 0;
+    }
+}
+
+node {
+    name: "Pearson Evaluation of Highpass";
+    type: SaliencyPearson;
+    input {
+        node: "Highpass Saliency";
+        port: 0;
+    }
+    input {
+        node: "Fixation Heatmap";
+        port: 0;
+    }
+}
+
+node {
+    name: "Pearson Evaluation of Mixed";
+    type: SaliencyPearson;
+    input {
+        node: "Mixed Saliency";
+        port: 0;
+    }
+    input {
+        node: "Fixation Heatmap";
+        port: 0;
+    }
+}
+
+#
+# SotA Pearson Evaluation
+#
+
+node {
+    name: "SotA Pearson Evaluation of Boolean Maps";
+    type: SaliencyPearson;
+    input {
+        node: "Boolean Maps";
+        port: 0;
+    }
+    input {
+        node: "SotA Saliency Heatmap";
+        port: 0;
+    }
+}
+
+node {
+    name: "SotA Pearson Evaluation of Spectral Whitening";
+    type: SaliencyPearson;
+    input {
+        node: "Spectral Whitening";
+        port: 0;
+    }
+    input {
+        node: "SotA Saliency Heatmap";
+        port: 0;
+    }
+}
+
+node {
+    name: "SotA Pearson Evaluation of Itti & Koch";
+    type: SaliencyPearson;
+    input {
+        node: "Itti & Koch";
+        port: 0;
+    }
+    input {
+        node: "SotA Saliency Heatmap";
+        port: 0;
+    }
+}
+
+node {
+    name: "SotA Pearson Evaluation of GBVS";
+    type: SaliencyPearson;
+    input {
+        node: "GBVS";
+        port: 0;
+    }
+    input {
+        node: "SotA Saliency Heatmap";
+        port: 0;
+    }
+}
+
+node {
+    name: "SotA Pearson Evaluation of Highpass";
+    type: SaliencyPearson;
+    input {
+        node: "Highpass Saliency";
+        port: 0;
+    }
+    input {
+        node: "SotA Saliency Heatmap";
+        port: 0;
+    }
+}
+
+node {
+    name: "SotA Pearson Evaluation of Mixed";
+    type: SaliencyPearson;
+    input {
+        node: "Mixed Saliency";
+        port: 0;
+    }
+    input {
+        node: "SotA Saliency Heatmap";
+        port: 0;
+    }
+}
+
+#
+# Show Boolean Maps Activation
+#
+
+node {
+    name: "Boolean Maps Heatmap";
+    type: UtilsImageConverter;
+    argument {
+        name: "input";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_HeatmapImage";
+    }
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_RGBImage";
+    }
+    input {
+        node: "Boolean Maps";
+        port: 0;
+    }
+}
+
+node {
+    name: "Show Boolean Maps";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "Boolean Maps";
+    }
+    input {
+        node: "Boolean Maps Heatmap";
+        port: 0;
+    }
+}
+
+#
+# Show Spectral Whitening Activation
+#
+
+node {
+    name: "Spectral Whitening Heatmap";
+    type: UtilsImageConverter;
+    argument {
+        name: "input";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_HeatmapImage";
+    }
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_RGBImage";
+    }
+    input {
+        node: "Spectral Whitening";
+        port: 0;
+    }
+}
+
+node {
+    name: "Spectral Whitening Maps";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "Spectral Whitening";
+    }
+    input {
+        node: "Spectral Whitening Heatmap";
+        port: 0;
+    }
+}
+
+#
+# Show Itti & Koch Activation
+#
+
+node {
+    name: "Itti & Koch Heatmap";
+    type: UtilsImageConverter;
+    argument {
+        name: "input";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_HeatmapImage";
+    }
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_RGBImage";
+    }
+    input {
+        node: "Itti & Koch";
+        port: 0;
+    }
+}
+
+node {
+    name: "Itti & Koch Maps";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "Itti & Koch";
+    }
+    input {
+        node: "Itti & Koch Heatmap";
+        port: 0;
+    }
+}
+
+#
+# Show GBVS Activation
+#
+
+node {
+    name: "GBVS Heatmap";
+    type: UtilsImageConverter;
+    argument {
+        name: "input";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_HeatmapImage";
+    }
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_RGBImage";
+    }
+    input {
+        node: "GBVS";
+        port: 0;
+    }
+}
+
+node {
+    name: "GBVS Maps";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "GBVS";
+    }
+    input {
+        node: "GBVS Heatmap";
+        port: 0;
+    }
+}
+
+#
+# Show Highpass Activation
+#
+
+node {
+    name: "Highpass Heatmap";
+    type: UtilsImageConverter;
+    argument {
+        name: "input";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_HeatmapImage";
+    }
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_RGBImage";
+    }
+    input {
+        node: "Highpass Saliency";
+        port: 0;
+    }
+}
+
+node {
+    name: "Highpass Maps";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "Highpass Saliency";
+    }
+    input {
+        node: "Highpass Heatmap";
+        port: 0;
+    }
+}
+
+#
+# Show Mixed Activation
+#
+
+node {
+    name: "Mixed Heatmap";
+    type: UtilsImageConverter;
+    argument {
+        name: "input";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_HeatmapImage";
+    }
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_RGBImage";
+    }
+    input {
+        node: "Mixed Saliency";
+        port: 0;
+    }
+}
+
+node {
+    name: "Mixed Maps";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "Mixed Saliency";
+    }
+    input {
+        node: "Mixed Heatmap";
+        port: 0;
+    }
+}
+
+#
+# Show Raw Input
+#
+
+node {
+    name: "Show Image";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "Raw Image";
+    }
+    input {
+        node: "Image Reader";
+        port: 0;
+    }
+}
+
+#
+# Show Fixation Heatmap
+#
+
+node {
+    name: "Convert Fixation Heatmap to RGB";
+    type: UtilsImageConverter;
+    argument {
+        name: "input";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_HeatmapImage";
+    }
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_RGBImage";
+    }
+    input {
+        node: "Fixation Heatmap";
+        port: 0;
+    }
+}
+
+node {
+    name: "Show Fixation";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "Fixation Heatmap";
+    }
+    input {
+        node: "Convert Fixation Heatmap to RGB";
+        port: 0;
+    }
+}
+
+#
+# Show SotA Saliency Heatmap
+#
+
+node {
+    name: "Convert SotA Saliency Heatmap to RGB";
+    type: UtilsImageConverter;
+    argument {
+        name: "input";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_HeatmapImage";
+    }
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_RGBImage";
+    }
+    input {
+        node: "SotA Saliency Heatmap";
+        port: 0;
+    }
+}
+
+node {
+    name: "Show SotA Saliency Heatmap";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "SotA Saliency Heatmap";
+    }
+    input {
+        node: "Convert SotA Saliency Heatmap to RGB";
+        port: 0;
+    }
+}
+
+#
+# FPS Plot
+#
+
+node {
+    name: "FPS Counter";
+    type: UtilsFPSCounter;
+    input {
+        node: "Boolean Maps";
+        port: 0;
+    }
+}
+
+node {
+    name: "FPS Plot";
+    type: Plot;
+    property {
+        name: "width";
+        type: pb_int;
+        value: "RES_WIDTH(RES_HD)";
+    }
+    property {
+        name: "height";
+        type: pb_int;
+        value: "RES_HEIGHT(RES_HD)";
+    }
+    argument {
+        name: "line0";
+        type: pb_string;
+        value: "fps";
+    }
+    input {
+        node: "FPS Counter";
+        port: 0;
+    }
+}
+
+node {
+    name: "Show FPS Plot";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "FPS";
+    }
+    input {
+        node: "FPS Plot";
+        port: 0;
+    }
+}
+
+#
+# Evaluation Plot
+#
+
+node {
+    name: "Evaluation Plot";
+    type: Plot;
+    property {
+        name: "width";
+        type: pb_int;
+        value: "RES_WIDTH(RES_HD)";
+    }
+    property {
+        name: "height";
+        type: pb_int;
+        value: "RES_HEIGHT(RES_HD)";
+    }
+    argument {
+        name: "line0";
+        type: pb_string;
+        value: "Boolean Maps";
+    }
+    argument {
+        name: "line1";
+        type: pb_string;
+        value: "Spectral Whitening";
+    }
+    argument {
+        name: "line2";
+        type: pb_string;
+        value: "Itti & Koch";
+    }
+    argument {
+        name: "line3";
+        type: pb_string;
+        value: "GBVS";
+    }
+    argument {
+        name: "line4";
+        type: pb_string;
+        value: "Highpass";
+    }
+    argument {
+        name: "line5";
+        type: pb_string;
+        value: "Mixed";
+    }
+    input {
+        node: "Pearson Evaluation of Boolean Maps";
+        port: 0;
+    }
+    input {
+        node: "Pearson Evaluation of Spectral Whitening";
+        port: 0;
+    }
+    input {
+        node: "Pearson Evaluation of Itti & Koch";
+        port: 0;
+    }
+    input {
+        node: "Pearson Evaluation of GBVS";
+        port: 0;
+    }
+    input {
+        node: "Pearson Evaluation of Highpass";
+        port: 0;
+    }
+    input {
+        node: "Pearson Evaluation of Mixed";
+        port: 0;
+    }
+}
+
+node {
+    name: "Show Evaluation Plot";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "Pearson Coefficent";
+    }
+    input {
+        node: "Evaluation Plot";
+        port: 0;
+    }
+}
+
+#
+# SotA Evaluation Plot
+#
+
+node {
+    name: "SotA Evaluation Plot";
+    type: Plot;
+    property {
+        name: "width";
+        type: pb_int;
+        value: "RES_WIDTH(RES_HD)";
+    }
+    property {
+        name: "height";
+        type: pb_int;
+        value: "RES_HEIGHT(RES_HD)";
+    }
+    argument {
+        name: "line0";
+        type: pb_string;
+        value: "Boolean Maps";
+    }
+    argument {
+        name: "line1";
+        type: pb_string;
+        value: "Spectral Whitening";
+    }
+    argument {
+        name: "line2";
+        type: pb_string;
+        value: "Itti & Koch";
+    }
+    argument {
+        name: "line3";
+        type: pb_string;
+        value: "GBVS";
+    }
+    argument {
+        name: "line4";
+        type: pb_string;
+        value: "Highpass";
+    }
+    argument {
+        name: "line5";
+        type: pb_string;
+        value: "Mixed";
+    }
+    input {
+        node: "SotA Pearson Evaluation of Boolean Maps";
+        port: 0;
+    }
+    input {
+        node: "SotA Pearson Evaluation of Spectral Whitening";
+        port: 0;
+    }
+    input {
+        node: "SotA Pearson Evaluation of Itti & Koch";
+        port: 0;
+    }
+    input {
+        node: "SotA Pearson Evaluation of GBVS";
+        port: 0;
+    }
+    input {
+        node: "SotA Pearson Evaluation of Highpass";
+        port: 0;
+    }
+    input {
+        node: "SotA Pearson Evaluation of Mixed";
+        port: 0;
+    }
+}
+
+node {
+    name: "Show SotA  Evaluation Plot";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "SotA Pearson Coefficent";
+    }
+    input {
+        node: "SotA Evaluation Plot";
+        port: 0;
+    }
+}

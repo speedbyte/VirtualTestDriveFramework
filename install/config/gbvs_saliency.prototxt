@@ -1,0 +1,273 @@
+name: "GBVS";
+
+##
+## Read video
+##
+
+node {
+    name: "Video Reader";
+    type: IOImageReader;
+    argument {
+        name: "path";
+        type: pb_string;
+        value: "${DIR_DATA}/kitti/2011_09_26/2011_09_26_drive_0001_sync/image_02/data";
+    }
+}
+
+##
+## Extract LAB color features
+##
+
+node {
+    name: "Convert to LAB";
+    type: UtilsImageConverter;
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_LABImage";
+    }
+    input {
+        node: "Video Reader";
+        port: 0;
+    }
+}
+
+node {
+    name: "LAB feature Map";
+    type: UtilsMatrixSplit;
+    argument {
+        name: "type";
+        type: pb_complex;
+        value: "cv::Vec3f";
+    }
+    input {
+        node: "Convert to LAB";
+        port: 0;
+    }
+}
+
+##
+## Calculate GBVS Activation
+## on each LAB channel
+##
+
+node {
+    name: "Intensity GBVS";
+    type: SaliencyGBVS;
+    input {
+        node: "LAB feature Map";
+        port: 0;
+    }
+}
+
+node {
+    name: "Green-Red Feature GBVS";
+    type: SaliencyGBVS;
+    input {
+        node: "LAB feature Map";
+        port: 1;
+    }
+}
+
+node {
+    name: "Blue-Yellow Feature GBVS";
+    type: SaliencyGBVS;
+    input {
+        node: "LAB feature Map";
+        port: 2;
+    }
+}
+
+##
+## Sum up Boolean Maps Activations
+##
+
+node {
+    name: "Merge GBVS";
+    type: UtilsMatrixMerge;
+    argument {
+        name: "type";
+        type: pb_complex;
+        value: "cv::Vec3f";
+    }
+    input {
+        node: "Intensity GBVS";
+        port: 0;
+    }
+    input {
+        node: "Green-Red Feature GBVS";
+        port: 0;
+    }
+    input {
+        node: "Blue-Yellow Feature GBVS";
+        port: 0;
+    }
+}
+
+node {
+    name: "GBVS";
+    type: UtilsMatrixSum;
+    argument {
+        name: "type";
+        type: pb_complex;
+        value: "cv::Vec3f";
+    }
+    input {
+        node: "Merge GBVS";
+        port: 0;
+    }
+}
+
+##
+## Time measurements
+##
+
+node {
+    name: "Video Reader FPS Counter";
+    type: UtilsFPSCounter;
+    input {
+        node: "Video Reader";
+        port: 0;
+    }
+}
+
+node {
+    name: "Intensity GBVS FPS Counter";
+    type: UtilsFPSCounter;
+    input {
+        node: "Intensity GBVS";
+        port: 0;
+    }
+}
+
+node {
+    name: "Green-Red Feature GBVS FPS Counter";
+    type: UtilsFPSCounter;
+    input {
+        node: "Green-Red Feature GBVS";
+        port: 0;
+    }
+}
+
+node {
+    name: "Blue-Yellow Feature GBVS FPS Counter";
+    type: UtilsFPSCounter;
+    input {
+        node: "Blue-Yellow Feature GBVS";
+        port: 0;
+    }
+}
+
+##
+## Plot time measurements
+##
+
+node {
+    name: "FPS Plot";
+    type: Plot;
+    argument {
+        name: "line0";
+        type: pb_string;
+        value: "Video Reader";
+    }
+    argument {
+        name: "line1";
+        type: pb_string;
+        value: "Intensity GBVS";
+    }
+    argument {
+        name: "line2";
+        type: pb_string;
+        value: "Green-Red Feature GBVS";
+    }
+    argument {
+        name: "line3";
+        type: pb_string;
+        value: "Blue-Yellow Feature GBVS";
+    }
+    input {
+        node: "Video Reader FPS Counter";
+        port: 0;
+    }
+    input {
+        node: "Intensity GBVS FPS Counter";
+        port: 0;
+    }
+    input {
+        node: "Green-Red Feature GBVS FPS Counter";
+        port: 0;
+    }
+    input {
+        node: "Blue-Yellow Feature GBVS FPS Counter";
+        port: 0;
+    }
+}
+
+node {
+    name: "Show FPS Plot";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "FPS";
+    }
+    input {
+        node: "FPS Plot";
+        port: 0;
+    }
+}
+
+##
+## Plot GBVS
+##
+
+node {
+    name: "GBVS Heatmap";
+    type: UtilsImageConverter;
+    argument {
+        name: "input";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_HeatmapImage";
+    }
+    argument {
+        name: "output";
+        type: pb_complex;
+        value: "saliency_sandbox::utils::_RGBImage";
+    }
+    input {
+        node: "GBVS";
+        port: 0;
+    }
+}
+
+node {
+    name: "Show GBVS";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "GBVS";
+    }
+    input {
+        node: "GBVS Heatmap";
+        port: 0;
+    }
+}
+
+##
+## Show input image
+##
+
+node {
+    name: "Show Image";
+    type: IOImageShow;
+    argument {
+        name: "window";
+        type: pb_string;
+        value: "Raw Image";
+    }
+    input {
+        node: "Video Reader";
+        port: 0;
+    }
+}
