@@ -15,19 +15,30 @@ foreach(Graphviz_LIB ${GRAPHVIZ_LIBRARY})
     list(APPEND PROTOBUILD_JITC_THIRD_DEP /third/graphviz/${Graphviz_LIB_N})
 endforeach()
 
-foreach(Boost_LIB ${Boost_LIBRARIES})
-    get_filename_component(Boost_LIB_P ${Boost_LIB} REALPATH)
-    install(FILES ${Boost_LIB_P} DESTINATION lib/third/boost)
-    get_filename_component(Boost_LIB_N ${Boost_LIB_P} NAME)
-    list(APPEND PROTOBUILD_JITC_THIRD_DEP /third/boost/${Boost_LIB_N})
-endforeach()
+message("installing graphviz ${GRAPHVIZ_LIBRARY} --output-- ${Graphviz_LIB_N} ${Graphviz_LIB_P}     ")
 
-foreach(OpenCV_LIB ${OpenCV_LIBS})
-    get_property(OpenCV_LIB_P TARGET ${OpenCV_LIB} PROPERTY IMPORTED_LOCATION_RELEASE)
-    get_filename_component(OpenCV_LIB_P ${OpenCV_LIB_P} REALPATH)
-    install(FILES ${OpenCV_LIB_P} DESTINATION lib/third/opencv)
+#pkg_boost_LIBRARIES should be the complete path of the .so including the library name.
+# for example,  /usr/lib/libgvc.so;/usr/lib/libcdt.so;/usr/lib/libpathplan.so
+# pkg_boost_LIBRARIES only gives the names that are written in pc file, normally without lib and without extension
+# for example boost_python
+
+foreach(Boost_LIB ${pkg_boost_LIBRARIES})
+    get_filename_component(Boost_LIB_P ${Boost_LIB} REALPATH)
+# we take the files directly from our own build
+    #install(FILES ${Boost_LIB_P} DESTINATION lib/third/boost)
+    get_filename_component(Boost_LIB_N ${Boost_LIB_P} NAME)
+    list(APPEND PROTOBUILD_JITC_THIRD_DEP ../../../../libs/boost-install/lib/lib${Boost_LIB_N}.so.1.64.0)
+endforeach()
+message("installing Boost ${pkg_boost_LIBRARIES} --output--  ${Boost_LIB_N} ${Boost_LIB_P}  ")
+
+
+foreach(OpenCV_LIB ${pkg_opencv_LIBRARIES})
+#    get_property(OpenCV_LIB_P TARGET ${OpenCV_LIB} PROPERTY IMPORTED_LOCATION_RELEASE)
+    get_filename_component(OpenCV_LIB_P ${OpenCV_LIB} REALPATH)
+# we take the files directly from our own build
+#install(FILES ${OpenCV_LIB_P} DESTINATION lib/third/opencv)
     get_filename_component(OpenCV_LIB_N ${OpenCV_LIB_P} NAME)
-    list(APPEND PROTOBUILD_JITC_THIRD_DEP /third/opencv/${OpenCV_LIB_N})
+    list(APPEND PROTOBUILD_JITC_THIRD_DEP ../../../../libs/opencv-install/lib/lib${OpenCV_LIB_N}.so.3.2.0)
 endforeach()
 
 foreach(PROTOBUF_LIB ${PROTOBUF_LIBRARIES})
@@ -40,6 +51,8 @@ foreach(PROTOBUF_LIB ${PROTOBUF_LIBRARIES})
         message("skip lib: ${PROTOBUF_LIB}")
     endif()
 endforeach()
+
+message("FINAL PROTOBUILD_JITC_THIRD_DEP ${PROTOBUILD_JITC_THIRD_DEP} ")
 
 configure_file(build.h.in build.h)
 
