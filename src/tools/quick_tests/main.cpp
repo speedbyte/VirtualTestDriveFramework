@@ -1,40 +1,34 @@
 
+
+#include <iostream>
+#include <dlfcn.h>
+#include <opencv2/opencv.hpp>
+
+#include <core/Core.h>
 #include <core/Pipeline.h>
-#include <kitti/VelodyneReader.h>
-#include <io/ImageShow.h>
+
 #include <io/ImageWriter.h>
+#include <io/ImageShow.h>
+
+#include <plot/Plot.h>
+#include <plot/GridLayout.h>
+
+#include <kitti/ImageReader.h>
+#include <kitti/OXTSReader.h>
+#include <kitti/DrawTracklet.h>
+#include <kitti/VelodyneReader.h>
 #include <kitti/Velodyne2PolarImage.h>
 
-#include <core/Pipeline.h>
-#include <io/ImageShow.h>
-#include <kitti/ImageReader.h>
 #include <saliency/activation/Spectral.h>
-#include <utils/FPSCounter.h>
-#include <plot/Plot.h>
-#include <core/Pipeline.h>
-#include <io/ImageShow.h>
-#include <kitti/ImageReader.h>
 #include <saliency/activation/BooleanMaps.h>
+
 #include <utils/FPSCounter.h>
-#include <plot/Plot.h>
-#include <core/Pipeline.h>
-#include <kitti/VelodyneReader.h>
-#include <io/ImageWriter.h>
-#include <kitti/OXTSReader.h>
-#include <plot/Plot.h>
-#include <io/ImageShow.h>
-#include <plot/GridLayout.h>
 
 #include <adtf/salbox/Image.h>
 #include <adtf/salbox/Gaze.h>
 #include <adtf/salbox/TrackedObject.h>
 #include <adtf/salbox/VisualPerception.h>
-#include <iostream>
 
-#include <core/Core.h>
-#include <dlfcn.h>
-#include <opencv2/opencv.hpp>
-#include <kitti/ImageReader.h>
 
 using namespace std;
 using namespace salbox;
@@ -42,48 +36,60 @@ using namespace salbox;
 using namespace saliency_sandbox::core;
 using namespace saliency_sandbox::kitti;
 
+typedef enum {
+    PLOTVELODYNE=0,
+    SPECTRALWHITENING=1,
+    BOOLEANMAPS=2,
+    PLOTOXTS=3,
+    PLOTTRACKLETS=4,
+    EXIT=10
+} TESTCASES;
 
-
-#include <core/Pipeline.h>
-#include <kitti/ImageReader.h>
-#include <io/ImageWriter.h>
-#include <kitti/OXTSReader.h>
-#include <plot/Plot.h>
-#include <io/ImageShow.h>
-#include <plot/GridLayout.h>
-#include <kitti/DrawTracklet.h>
-
-
+void process_plotvelodyne(bool saveOutput, boost::filesystem::path dataset, boost::filesystem::path output);
+void process_spectralwhitening(bool saveOutput, boost::filesystem::path dataset, boost::filesystem::path output);
+void process_booleanmaps(bool saveOutput, boost::filesystem::path dataset, boost::filesystem::path output);
+void process_plotoxts(bool saveOutput, boost::filesystem::path dataset, boost::filesystem::path output);
+void process_plottracklets(bool saveOutput, boost::filesystem::path dataset, boost::filesystem::path output);
 void process(bool saveOutput, boost::filesystem::path dataset, boost::filesystem::path output);
-
 int main( int argc, char *argv[])
 {
-    std::cin >> inputstring;
-    switch ( inputstring )
+    int runCommand = 0;
+    if ( argc == 1 ) {
+        std::cout << "Nothing input..Aborting" << std::endl;
+        runCommand=EXIT;
+    }
+    else {
+        if ( strcmp(argv[1], "plotvelodyne") == 0 ) runCommand = PLOTVELODYNE;
+        else if ( strcmp(argv[1], "spectralwhitening") == 0 ) runCommand = SPECTRALWHITENING;
+        else if ( strcmp(argv[1], "booleanmaps") == 0 ) runCommand = BOOLEANMAPS;
+    }
+    boost::filesystem::path dataset;
+    boost::filesystem::path output;
+    std::string in;
+
+    if(argc < 3 || argc > 4) {
+        std::cout << "plotvelodyne [kitti database root] [dataset] [save]" << std::endl;
+        exit(-1);
+    }
+
+
+    dataset /= argv[1];
+    dataset /= dataset.parent_path().leaf();
+    dataset += "_drive_";
+    dataset += argv[2];
+    dataset += "_sync/";
+
+    std::cout << "dataset: " << dataset << std::endl;
+
+    if(argc == 4)
+        output += argv[3];
+    else
+        output += argv[0];
+
+    switch ( runCommand )
     {
-        case "plotvelodyne":
+        case PLOTVELODYNE:
         {
-                boost::filesystem::path dataset;
-                boost::filesystem::path output;
-                std::string in;
-
-                if(argc < 3 || argc > 4) {
-                    std::cout << "plotvelodyne [kitti database root] [dataset] [save]" << std::endl;
-                    exit(-1);
-                }
-
-                dataset /= argv[1];
-                dataset /= dataset.parent_path().leaf();
-                dataset += "_drive_";
-                dataset += argv[2];
-                dataset += "_sync/";
-
-                std::cout << "dataset: " << dataset << std::endl;
-
-                if(argc == 4)
-                    output += argv[3];
-                else
-                    output += argv[0];
 
                 while(true) {
                     cv::destroyAllWindows();
@@ -100,30 +106,11 @@ int main( int argc, char *argv[])
                     }
                 }
         }
-        case "spectralwhitening":
-        {    boost::filesystem::path dataset;
-            boost::filesystem::path output;
-            std::string in;
-
-            if(argc < 3 || argc > 4) {
-                std::cout << "spectralwhitening [kitti database root] [dataset] [save]" << std::endl;
-                exit(-1);
-            }
+        case SPECTRALWHITENING:
+        {
 
             saliency_sandbox::core::Utils::setMainStackSize();
 
-            dataset /= argv[1];
-            dataset /= dataset.parent_path().leaf();
-            dataset += "_drive_";
-            dataset += argv[2];
-            dataset += "_sync/";
-
-            std::cout << "dataset: " << dataset << std::endl;
-
-            if(argc == 4)
-                output += argv[3];
-            else
-                output += argv[0];
 
             while(true) {
                 cv::destroyAllWindows();
@@ -140,19 +127,8 @@ int main( int argc, char *argv[])
                 }
             }
         }
-        case "booleanmaps":
+        case BOOLEANMAPS:
         {
-            boost::filesystem::path dataset;
-            boost::filesystem::path output;
-            std::string in;
-
-            if(argc < 3 || argc > 4) {
-                std::cout << "booleanmaps [kitti database root] [dataset] [save]" << std::endl;
-                exit(-1);
-            }
-
-            saliency_sandbox::core::Utils::setMainStackSize();
-
             dataset /= argv[1];
             dataset /= dataset.parent_path().leaf();
             dataset += "_drive_";
@@ -168,7 +144,7 @@ int main( int argc, char *argv[])
 
             while(true) {
                 cv::destroyAllWindows();
-                process(argc == 4, dataset, output);
+                process_booleanmaps(argc == 4, dataset, output);
                 while(true) {
                     std::cout << "pipeline finished or eof" << std::endl;
                     std::cout << "\trerun (Y/n):";
@@ -181,34 +157,15 @@ int main( int argc, char *argv[])
                 }
             }
         }
-        case "plotoxts":
-        {    boost::filesystem::path dataset;
-            boost::filesystem::path output;
-            std::string in;
-
-            if(argc < 3 || argc > 4) {
-                std::cout << "plotoxts [kitti database root] [dataset] [save]" << std::endl;
-                exit(-1);
-            }
+        case PLOTOXTS:
+        {
 
             saliency_sandbox::core::Utils::setMainStackSize();
 
-            dataset /= argv[1];
-            dataset /= dataset.parent_path().leaf();
-            dataset += "_drive_";
-            dataset += argv[2];
-            dataset += "_sync/";
-
-            std::cout << "dataset: " << dataset << std::endl;
-
-            if(argc == 4)
-                output += argv[3];
-            else
-                output += argv[0];
 
             while(true) {
                 cv::destroyAllWindows();
-                process(argc == 4, dataset, output);
+                process_plotoxts(argc == 4, dataset, output);
                 while(true) {
                     std::cout << "pipeline finished or eof" << std::endl;
                     std::cout << "\trerun (Y/n):";
@@ -221,8 +178,9 @@ int main( int argc, char *argv[])
                 }
             }
         }
-        case "adtfsalboxexample":
-        {	INode* pipeline;
+        case EXIT:
+        {
+            INode* pipeline;
             new_pipeline_fun_ptr new_pipeline;
             void* dl;
             LeftRGBImageReader* kitti;
@@ -263,34 +221,14 @@ int main( int argc, char *argv[])
                 cv::imshow("output",cv::Mat3b(out->height,out->width,(cv::Vec3b*)out->buffer));
             }
         }
-        case "plottracklets":
-        {    boost::filesystem::path dataset;
-            boost::filesystem::path output;
-            std::string in;
-
-            if(argc < 3 || argc > 4) {
-                std::cout << "plottracklets [kitti database root] [dataset] [save]" << std::endl;
-                exit(-1);
-            }
-
+        case PLOTTRACKLETS:
+        {
             saliency_sandbox::core::Utils::setMainStackSize();
 
-            dataset /= argv[1];
-            dataset /= dataset.parent_path().leaf();
-            dataset += "_drive_";
-            dataset += argv[2];
-            dataset += "_sync/";
-
-            std::cout << "dataset: " << dataset << std::endl;
-
-            if(argc == 4)
-                output += argv[3];
-            else
-                output += argv[0];
 
             while(true) {
                 //cv::destroyAllWindows();
-                process(argc == 4, dataset, output);
+                process_plottracklets(argc == 4, dataset, output);
                 continue;
                 while(true) {
                     std::cout << "pipeline finished or eof" << std::endl;
@@ -304,6 +242,10 @@ int main( int argc, char *argv[])
                 }
             }
         }
+        default:{
+            std::cerr<<"No valid input"<<std::endl;
+        }
+
     }
 }
 
@@ -319,28 +261,28 @@ void process_plotvelodyne(bool saveOutput, boost::filesystem::path dataset, boos
     saliency_sandbox::io::ImageWriter iw(output.string());
 
     std::cout << "create pipeline" << std::endl;
-    connect_port(velodyne_reader,0,v2pi,0);
-    connect_port(v2pi,1,h2rgb,0);
-    connect_port(h2rgb,0,is,0);
+    connect_port(velodyne_reader, 0, v2pi, 0);
+    connect_port(v2pi, 1, h2rgb, 0);
+    connect_port(h2rgb, 0, is, 0);
 
-    pipeline.pushNode("kitti dataset reader",&velodyne_reader);
-    pipeline.pushNode("velodyne to polar",&v2pi);
-    pipeline.pushNode("polar heatmap",&h2rgb);
-    pipeline.pushNode("show heatmap",&is);
+    pipeline.pushNode("kitti dataset reader", &velodyne_reader);
+    pipeline.pushNode("velodyne to polar", &v2pi);
+    pipeline.pushNode("polar heatmap", &h2rgb);
+    pipeline.pushNode("show heatmap", &is);
 
-    if(saveOutput) {
-        connect_port(h2rgb,0,iw,0);
-        pipeline.pushNode("write heatmap",&iw);
+    if (saveOutput) {
+        connect_port(h2rgb, 0, iw, 0);
+        pipeline.pushNode("write heatmap", &iw);
     }
 
     std::cout << "initialize pipeline" << std::endl;
-    is.properties()->set<bool>("close_window",false);
+    is.properties()->set<bool>("close_window", false);
     pipeline.initialize();
 
     std::cout << "process pipeline" << std::endl;
-    for(time_t time = 0; !pipeline.eof(); time++)
+    for (time_t time = 0; !pipeline.eof(); time++)
         pipeline.process(time);
-
+}
     void process_spectralwhitening(bool saveOutput, boost::filesystem::path dataset, boost::filesystem::path output) {
         const uint32_t WIDTH = uint32_t(saliency_sandbox::kitti::LeftRGBImageReader::Image::WIDTH);
         const uint32_t HEIGHT = uint32_t(saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT);
