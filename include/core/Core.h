@@ -12,10 +12,10 @@ namespace saliency_sandbox {
     namespace core {
 
         class IProcessable;
-        class IPort;
-        class INode;
         class IBusChannel;
         class IBus;
+        class IPort;
+        class INode;
 
         class IProcessable {
         public:
