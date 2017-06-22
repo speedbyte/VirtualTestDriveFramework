@@ -43,9 +43,9 @@ include_directories("${CMAKE_SOURCE_DIR}/../../utils/gnuplot-iostream")
 include_directories(include)
 
 install(DIRECTORY include/ DESTINATION include/ FILES_MATCHING PATTERN "*.h")
-install(DIRECTORY data/ DESTINATION data/)
-install(DIRECTORY config/ DESTINATION config/)
-install(DIRECTORY scripts/ DESTINATION scripts/)
+#install(DIRECTORY data/ DESTINATION data/)
+#install(DIRECTORY config/ DESTINATION config/)
+#install(DIRECTORY scripts/ DESTINATION scripts/)
 
 set(EXTERNAL_LIBS "${pkg_opencv_LDFLAGS} ${pkg_boost_LDFLAGS} ${pkg_ffmpeg_libswresample_LDFLAGS} ${pkg_ffmpeg_libavcodec_LDFLAGS}")
 
