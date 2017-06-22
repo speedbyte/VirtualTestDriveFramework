@@ -1,0 +1,52 @@
+
+
+add_executable(plotvelodyne ${CORE_SOURCE})
+target_link_libraries(plotvelodyne kitti utils ${OpenCV_LIBS} ${Boost_LIBRARIES} ${EXTERNAL_LIBS} )
+
+add_executable(spectralwhitening EXCLUDE_FROM_ALL ${CORE_SOURCE})
+target_link_libraries(spectralwhitening kitti saliency plot ${OpenCV_LIBS} ${Boost_LIBRARIES} ${EXTERNAL_LIBS} )MESSAGE("-- create eyetribtriggertest tool target")
+
+add_executable(eyetribtriggertest EXCLUDE_FROM_ALL ${CORE_SOURCE})
+target_link_libraries(eyetribtriggertest core utils dl io eyetribe ${OpenCV_LIBS} ${Boost_LIBRARIES} ${EXTERNAL_LIBS} ${GRAPHVIZ_LIBRARY} )
+
+add_executable(booleanmaps ${CORE_SOURCE})
+target_link_libraries(booleanmaps kitti saliency plot ${OpenCV_LIBS} ${Boost_LIBRARIES} ${EXTERNAL_LIBS} )
+
+add_executable(plotoxts EXCLUDE_FROM_ALL ${CORE_SOURCE})
+target_link_libraries(plotoxts kitti plot ${OpenCV_LIBS} ${Boost_LIBRARIES} ${EXTERNAL_LIBS} )
+
+add_executable(loadpipeline ${CORE_SOURCE})
+target_link_libraries(loadpipeline core utils dl ${OpenCV_LIBS} ${Boost_LIBRARIES} ${EXTERNAL_LIBS})
+
+add_executable(plottracklets EXCLUDE_FROM_ALL ${CORE_SOURCE})
+target_link_libraries(plottracklets kitti plot ${OpenCV_LIBS} ${Boost_LIBRARIES} ${EXTERNAL_LIBS} )
+
+add_executable(eyetriberun EXCLUDE_FROM_ALL ${CORE_SOURCE})
+target_link_libraries(eyetriberun core utils dl io eyetribe ${OpenCV_LIBS} ${Boost_LIBRARIES} ${EXTERNAL_LIBS} )
+
+add_executable(adtfsalboxtest ${CORE_SOURCE})
+#target_link_libraries(adtfsalboxtest kitti saliency plot ${OpenCV_LIBS} ${Boost_LIBRARIES} ${EXTERNAL_LIBS} )
+
+add_executable(spectralwhitening EXCLUDE_FROM_ALL ${CORE_SOURCE})
+target_link_libraries(spectralwhitening kitti saliency plot ${OpenCV_LIBS} ${Boost_LIBRARIES} ${EXTERNAL_LIBS} )
+
+add_executable(eyetribtriggertest EXCLUDE_FROM_ALL ${CORE_SOURCE})
+target_link_libraries(eyetribtriggertest core utils dl io eyetribe ${OpenCV_LIBS} ${Boost_LIBRARIES} ${EXTERNAL_LIBS} ${GRAPHVIZ_LIBRARY} )
+
+add_executable(booleanmaps ${CORE_SOURCE})
+target_link_libraries(booleanmaps kitti saliency plot ${OpenCV_LIBS} ${Boost_LIBRARIES} ${EXTERNAL_LIBS} )
+
+add_executable(plotoxts EXCLUDE_FROM_ALL ${CORE_SOURCE})
+target_link_libraries(plotoxts kitti plot ${OpenCV_LIBS} ${Boost_LIBRARIES} ${EXTERNAL_LIBS} )
+
+add_executable(loadpipeline ${CORE_SOURCE})
+target_link_libraries(loadpipeline core utils dl ${OpenCV_LIBS} ${Boost_LIBRARIES} ${EXTERNAL_LIBS})
+
+add_executable(plottracklets EXCLUDE_FROM_ALL ${CORE_SOURCE})
+target_link_libraries(plottracklets kitti plot ${OpenCV_LIBS} ${Boost_LIBRARIES} ${EXTERNAL_LIBS} )
+
+add_executable(eyetriberun EXCLUDE_FROM_ALL ${CORE_SOURCE})
+target_link_libraries(eyetriberun core utils dl io eyetribe ${OpenCV_LIBS} ${Boost_LIBRARIES} ${EXTERNAL_LIBS} )
+
+add_executable(adtfsalboxtest ${CORE_SOURCE})
+#target_link_libraries(adtfsalboxtest kitti saliency plot ${OpenCV_LIBS} ${Boost_LIBRARIES} ${EXTERNAL_LIBS} )
