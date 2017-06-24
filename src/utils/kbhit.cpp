@@ -2,7 +2,7 @@
 // Created by geislerd on 14.03.17.
 //
 
-#include "kbhit.h"
+#include "utils/kbhit.h"
 
 #include <stdio.h>
 #include <termios.h>
