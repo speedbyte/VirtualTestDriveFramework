@@ -70,13 +70,13 @@ typedef enum {
     EXIT=10
 } TESTCASES;
 
-void process_prioritygraph(bool saveOutput, boost::filesystem::path dataset, boost::filesystem::path output);
-void process_plotvelodyne(bool saveOutput, boost::filesystem::path dataset, boost::filesystem::path output);
-void process_spectralwhitening(bool saveOutput, boost::filesystem::path dataset, boost::filesystem::path output);
-void process_booleanmaps(bool saveOutput, boost::filesystem::path dataset, boost::filesystem::path output);
-void process_plotoxts(bool saveOutput, boost::filesystem::path dataset, boost::filesystem::path output);
-void process_plottracklets(bool saveOutput, boost::filesystem::path dataset, boost::filesystem::path output);
-void process_protobuild(bool saveOutput, boost::filesystem::path dataset, boost::filesystem::path output);
+void process_prioritygraph(bool saveOutput, const saliency_sandbox::run_configurations::RunConfigurations &rc);
+void process_plotvelodyne(bool saveOutput, const saliency_sandbox::run_configurations::RunConfigurations &rc);
+void process_spectralwhitening(bool saveOutput, const saliency_sandbox::run_configurations::RunConfigurations &rc);
+void process_booleanmaps(bool saveOutput, const saliency_sandbox::run_configurations::RunConfigurations &rc);
+void process_plotoxts(bool saveOutput, const saliency_sandbox::run_configurations::RunConfigurations &rc);
+void process_plottracklets(bool saveOutput, const saliency_sandbox::run_configurations::RunConfigurations &rc);
+void process_protobuild(bool saveOutput, const saliency_sandbox::run_configurations::RunConfigurations &rc);
 
 
 int main( int argc, char *argv[])
@@ -94,6 +94,7 @@ int main( int argc, char *argv[])
         else if ( strcmp(argv[4], "prioritygraph") == 0 ) runCommand = PRIORITYGRAPH;
         else if ( strcmp(argv[4], "protobuild") == 0 ) runCommand = PROTOBUILD;
     }
+
 
     boost::filesystem::path dataset;
     boost::filesystem::path output;
@@ -145,158 +146,68 @@ int main( int argc, char *argv[])
             ("framework,f",po::value<boost::filesystem::path>(),"path to install directory")
             ("wait,w","wait for key press after pipeline iteration");
 
+    saliency_sandbox::run_configurations::RunConfigurations rc(app_name);
+    saliency_sandbox::run_configurations::RunConfigurations rc2;
+    rc.version("Saliency Sandbox 2.0 - ProtoBuild",
+               "\tDavid Geisler - david.geisler@uni-tuebingen.de",
+               "\tUniversity of Tuebingen (c) 2017");
+    rc.displayVersionInfo();
+    rc.prepareRunConfiguration(dataset, output);
+
     switch ( runCommand )
     {
         case PLOTVELODYNE:
         {
-                while(true) {
-                    cv::destroyAllWindows();
-                    process_plotvelodyne(argc == 4, dataset, output);
-                    while(true) {
-                        std::cout << "pipeline finished or eof" << std::endl;
-                        std::cout << "\trerun (y/n):";
-                        std::cin >> in;
-                        if(in == "y" || in == "Y" || in == "yes" || in == "YES" || in == "Yes" || in.empty())
-                            break;
-                        else if(in == "n" || in == "N" || in == "no" || in == "NO" || in == "No" || in.empty())
-                            exit(0);
-                    }
-                }
+            saliency_sandbox::core::Utils::setMainStackSize();
+            cv::destroyAllWindows();
+            process_plotvelodyne(argc == 4, rc);
         }
         case SPECTRALWHITENING:
         {
             saliency_sandbox::core::Utils::setMainStackSize();
-            while(true) {
-                cv::destroyAllWindows();
-                process_spectralwhitening(argc == 4, dataset, output);
-                while(true) {
-                    std::cout << "pipeline finished or eof" << std::endl;
-                    std::cout << "\trerun (Y/n):";
-
-                    std::cin >> in;
-                    if(in == "y" || in == "Y" || in == "yes" || in == "YES" || in == "Yes" || in.empty())
-                        break;
-                    else if(in == "n" || in == "N" || in == "no" || in == "NO" || in == "No" || in.empty())
-                        exit(0);
-                }
-            }
-        }
-        case BOOLEANMAPS:
-        {
-            while(true) {
-                cv::destroyAllWindows();
-                process_booleanmaps(argc == 4, dataset, output);
-                while(true) {
-                    std::cout << "pipeline finished or eof" << std::endl;
-                    std::cout << "\trerun (Y/n):";
-
-                    std::cin >> in;
-                    if(in == "y" || in == "Y" || in == "yes" || in == "YES" || in == "Yes" || in.empty())
-                        break;
-                    else if(in == "n" || in == "N" || in == "no" || in == "NO" || in == "No" || in.empty())
-                        exit(0);
-                }
-            }
+            cv::destroyAllWindows();
+            process_spectralwhitening(argc == 4, rc);
         }
         case PLOTOXTS:
         {
             saliency_sandbox::core::Utils::setMainStackSize();
-            while(true) {
-                cv::destroyAllWindows();
-                process_plotoxts(argc == 4, dataset, output);
-                while(true) {
-                    std::cout << "pipeline finished or eof" << std::endl;
-                    std::cout << "\trerun (Y/n):";
-
-                    std::cin >> in;
-                    if(in == "y" || in == "Y" || in == "yes" || in == "YES" || in == "Yes" || in.empty())
-                        break;
-                    else if(in == "n" || in == "N" || in == "no" || in == "NO" || in == "No" || in.empty())
-                        exit(0);
-                }
-            }
+            cv::destroyAllWindows();
+            process_plotoxts(argc == 4, rc);
         }
-        case EXIT:
+        case BOOLEANMAPS:
         {
-//            INode* pipeline;
-//            new_pipeline_fun_ptr new_pipeline;
-//            void* dl;
-//            LeftRGBImageReader* kitti;
-//            RGBImage in(LeftRGBImageReader::Image::WIDTH,LeftRGBImageReader::Image::HEIGHT);
-//            RGBImage* out;
-//
-//            sserr << sscond(argc < 2) << "expect path to library as first command line argument:\t\tloadpipeline <path to kitti dataset> <path to image>" << ssthrow;
-//            sserr << sscond(argc < 3) << "expect path to kitti dataset as second command line argument:\t\tloadpipeline <path to protobuild library> <path to kitti dataset>" << ssthrow;
-//
-//            dl = dlopen(argv[1], RTLD_NOW);
-//            sserr << sscond(!dl) << "cannot load shared library " << argv[1] << ": " << dlerror() << ssthrow;
-//
-//            new_pipeline = (new_pipeline_fun_ptr) dlsym(dl, "new_pipeline");
-//            sserr << sscond(!new_pipeline) << "cannot find entry point of shared library " << argv[1] << ":" << dlerror() << ssthrow;
-//
-//            pipeline = new_pipeline();
-//            sserr << sscond(!dl) << "error while creating pipeline" << ssthrow;
-//
-//
-//            kitti = new LeftRGBImageReader(argv[2]);
-//
-//            cv::namedWindow("input");
-//            cv::namedWindow("output");
-//            cv::startWindowThread();
-//
-//            for(int time = 0; !kitti->eof(); time++) {
-//                kitti->template output<0>()->process(time); // read next image
-//                memcpy( in.buffer,
-//                        kitti->template output<0>()->value()->data(),
-//                        kitti->template output<0>()->value()->bytes()); // copy image
-//
-//                cv::imshow("input",cv::Mat3b(in.height,in.width,(cv::Vec3b*)in.buffer));
-//
-//                pipeline->input(0)->data(&in); // pass image to pipeline
-//                pipeline->output(0)->process(time); // process saliency map
-//                out = (RGBImage*)pipeline->output(0)->data();
-//
-//                cv::imshow("output",cv::Mat3b(out->height,out->width,(cv::Vec3b*)out->buffer));
-//            }
+            saliency_sandbox::core::Utils::setMainStackSize();
+            cv::destroyAllWindows();
+            process_booleanmaps(argc == 4, rc);
         }
         case PLOTTRACKLETS:
         {
             saliency_sandbox::core::Utils::setMainStackSize();
-            while(true) {
-                //cv::destroyAllWindows();
-                process_plottracklets(argc == 4, dataset, output);
-                continue;
-                while(true) {
-                    std::cout << "pipeline finished or eof" << std::endl;
-                    std::cout << "\trerun (Y/n):";
-
-                    std::cin >> in;
-                    if(in == "y" || in == "Y" || in == "yes" || in == "YES" || in == "Yes" || in.empty())
-                        break;
-                    else if(in == "n" || in == "N" || in == "no" || in == "NO" || in == "No" || in.empty())
-                        exit(0);
-                }
-            }
+            cv::destroyAllWindows();
+            process_plottracklets(argc == 4, rc);
         }
         case PRIORITYGRAPH:
         {
-            process_prioritygraph(argc == 4, dataset, output);
+            saliency_sandbox::core::Utils::setMainStackSize();
+            cv::destroyAllWindows();
+            process_prioritygraph(argc == 4, rc);
         }
         case PROTOBUILD:
         {
             try {
                 // parse commandline options
-                po::store(po::command_line_parser(argc, argv).options(opt_desc).positional(positionalOptions).run(),vm);
+                po::store(po::command_line_parser(argc, (const char* const*)argv[0]).options(opt_desc).positional(positionalOptions).run(),vm);
 
                 // check for help flag
                 if(vm.count("help")) {
-                    saliency_sandbox::run_configurations::RunConfigurations::help(app_name);
+                    rc.help(app_name);
                     exit(EXIT_SUCCESS);
                 }
 
+
                 // check for version flag
                 if(vm.count("version")) {
-                    saliency_sandbox::run_configurations::RunConfigurations::version();
+                    rc.displayVersionInfo();
                     exit(EXIT_SUCCESS);
                 }
 
@@ -407,22 +318,70 @@ int main( int argc, char *argv[])
                 sserr << e.what() << "\n\t\ttry " << app_name << " -h to get usage information" << ssthrow;
             }
         }
+        case EXIT:
+        {
+//            INode* pipeline;
+//            new_pipeline_fun_ptr new_pipeline;
+//            void* dl;
+//            LeftRGBImageReader* kitti;
+//            RGBImage in(LeftRGBImageReader::Image::WIDTH,LeftRGBImageReader::Image::HEIGHT);
+//            RGBImage* out;
+//
+//            sserr << sscond(argc < 2) << "expect path to library as first command line argument:\t\tloadpipeline <path to kitti dataset> <path to image>" << ssthrow;
+//            sserr << sscond(argc < 3) << "expect path to kitti dataset as second command line argument:\t\tloadpipeline <path to protobuild library> <path to kitti dataset>" << ssthrow;
+//
+//            dl = dlopen(argv[1], RTLD_NOW);
+//            sserr << sscond(!dl) << "cannot load shared library " << argv[1] << ": " << dlerror() << ssthrow;
+//
+//            new_pipeline = (new_pipeline_fun_ptr) dlsym(dl, "new_pipeline");
+//            sserr << sscond(!new_pipeline) << "cannot find entry point of shared library " << argv[1] << ":" << dlerror() << ssthrow;
+//
+//            pipeline = new_pipeline();
+//            sserr << sscond(!dl) << "error while creating pipeline" << ssthrow;
+//
+//
+//            kitti = new LeftRGBImageReader(argv[2]);
+//
+//            cv::namedWindow("input");
+//            cv::namedWindow("output");
+//            cv::startWindowThread();
+//
+//            for(int time = 0; !kitti->eof(); time++) {
+//                kitti->template output<0>()->process(time); // read next image
+//                memcpy( in.buffer,
+//                        kitti->template output<0>()->value()->data(),
+//                        kitti->template output<0>()->value()->bytes()); // copy image
+//
+//                cv::imshow("input",cv::Mat3b(in.height,in.width,(cv::Vec3b*)in.buffer));
+//
+//                pipeline->input(0)->data(&in); // pass image to pipeline
+//                pipeline->output(0)->process(time); // process saliency map
+//                out = (RGBImage*)pipeline->output(0)->data();
+//
+//                cv::imshow("output",cv::Mat3b(out->height,out->width,(cv::Vec3b*)out->buffer));
+//            }
+        }
         default:{
             std::cerr<<"No valid input"<<std::endl;
         }
+        std::cout << "pipeline finished or eof" << std::endl;
+        std::cout << "\tEnter a key to exit";
+        std::cin >> in;
+        cv::destroyAllWindows();
+        exit(0);
     }
 }
 
 
-void process_plotvelodyne(bool saveOutput, boost::filesystem::path dataset, boost::filesystem::path output) {
+void process_plotvelodyne(bool saveOutput, const saliency_sandbox::run_configurations::RunConfigurations &rc) {
     saliency_sandbox::core::Pipeline pipeline;
-    saliency_sandbox::kitti::VelodyneReader velodyne_reader(dataset);
+    saliency_sandbox::kitti::VelodyneReader velodyne_reader(rc.m_dataset);
     saliency_sandbox::kitti::Velodyne2PolarImage v2pi;
     saliency_sandbox::utils::PolarHeatmapImage::ConvertRGB h2rgb;
-    saliency_sandbox::io::ImageShow is(dataset.string());
-    saliency_sandbox::io::ImageWriter iw(output.string());
+    saliency_sandbox::io::ImageShow is(rc.m_dataset.string());
+    saliency_sandbox::io::ImageWriter iw(rc.m_output_directory.string());
 
-    std::cout << "create pipeline" << std::endl;
+    std::cout << "create pipeline velodyne" << std::endl;
     connect_port(velodyne_reader, 0, v2pi, 0);
     connect_port(v2pi, 1, h2rgb, 0);
     connect_port(h2rgb, 0, is, 0);
@@ -446,12 +405,12 @@ void process_plotvelodyne(bool saveOutput, boost::filesystem::path dataset, boos
         pipeline.process(time);
 }
 
-void process_spectralwhitening(bool saveOutput, boost::filesystem::path dataset, boost::filesystem::path output) {
+void process_spectralwhitening(bool saveOutput, const saliency_sandbox::run_configurations::RunConfigurations &rc) {
     const uint32_t WIDTH = uint32_t(saliency_sandbox::kitti::LeftRGBImageReader::Image::WIDTH);
     const uint32_t HEIGHT = uint32_t(saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT);
 
     saliency_sandbox::core::Pipeline pipeline;
-    saliency_sandbox::kitti::LeftRGBImageReader image_reader(dataset);
+    saliency_sandbox::kitti::LeftRGBImageReader image_reader(rc.m_dataset);
     saliency_sandbox::kitti::LeftRGBImageReader::Image::ConvertLAB lab;
     saliency_sandbox::kitti::LeftRGBImageReader::Image::ConvertLAB::OutputImage::Splitt lab_splitt;
     saliency_sandbox::saliency::activation::_Spectral<WIDTH,HEIGHT> spectral_l;
@@ -507,12 +466,13 @@ void process_spectralwhitening(bool saveOutput, boost::filesystem::path dataset,
         pipeline.process(time);
 }
 
-void process_booleanmaps(bool saveOutput, boost::filesystem::path dataset, boost::filesystem::path output) {
+void process_booleanmaps(bool saveOutput, const saliency_sandbox::run_configurations::RunConfigurations &rc) {
+
     const uint32_t WIDTH = uint32_t(saliency_sandbox::kitti::LeftRGBImageReader::Image::WIDTH);
     const uint32_t HEIGHT = uint32_t(saliency_sandbox::kitti::LeftRGBImageReader::Image::HEIGHT);
 
     saliency_sandbox::core::Pipeline pipeline;
-    saliency_sandbox::kitti::LeftRGBImageReader image_reader(dataset);
+    saliency_sandbox::kitti::LeftRGBImageReader image_reader(rc.m_dataset);
     saliency_sandbox::kitti::LeftRGBImageReader::Image::ConvertLAB lab;
     saliency_sandbox::kitti::LeftRGBImageReader::Image::ConvertLAB::OutputImage::Splitt lab_splitt;
     saliency_sandbox::utils::_HeatmapImage<WIDTH,HEIGHT>::ConvertIntensity int_l;
@@ -574,9 +534,9 @@ void process_booleanmaps(bool saveOutput, boost::filesystem::path dataset, boost
 }//
 
 
-void process_plotoxts(bool saveOutput, boost::filesystem::path dataset, boost::filesystem::path output) {
+void process_plotoxts(bool saveOutput, const saliency_sandbox::run_configurations::RunConfigurations &rc) {
     saliency_sandbox::core::Pipeline pipeline;
-    saliency_sandbox::kitti::OXTSReader oxts_reader(dataset);
+    saliency_sandbox::kitti::OXTSReader oxts_reader(rc.m_dataset);
     saliency_sandbox::kitti::OXTSRow::Selector<0> oxts_latitude;
     saliency_sandbox::kitti::OXTSRow::Selector<1> oxts_longitude;
     saliency_sandbox::kitti::OXTSRow::Selector<2> oxts_altitude;
@@ -684,18 +644,18 @@ void process_plotoxts(bool saveOutput, boost::filesystem::path dataset, boost::f
 }
 
 
-void process_protobuild(bool saveOutput, boost::filesystem::path dataset, boost::filesystem::path output) {
+void process_protobuild(bool saveOutput, const saliency_sandbox::run_configurations::RunConfigurations &rc) {
 
 }
 
-void process_plottracklets(bool saveOutput, boost::filesystem::path dataset, boost::filesystem::path output) {
+void process_plottracklets(bool saveOutput, const saliency_sandbox::run_configurations::RunConfigurations &rc) {
     saliency_sandbox::core::Pipeline pipeline;
-    saliency_sandbox::kitti::TrackletReader tracklet_reader(dataset);
-    saliency_sandbox::kitti::CalibrationReader calibration_reader(dataset);
-    saliency_sandbox::kitti::LeftGrayImageReader left_gray_image_reader(dataset);
-    saliency_sandbox::kitti::LeftRGBImageReader left_rgb_image_reader(dataset);
-    saliency_sandbox::kitti::RightGrayImageReader right_gray_image_reader(dataset);
-    saliency_sandbox::kitti::RightRGBImageReader right_rgb_image_reader(dataset);
+    saliency_sandbox::kitti::TrackletReader tracklet_reader(rc.m_dataset);
+    saliency_sandbox::kitti::CalibrationReader calibration_reader(rc.m_dataset);
+    saliency_sandbox::kitti::LeftGrayImageReader left_gray_image_reader(rc.m_dataset);
+    saliency_sandbox::kitti::LeftRGBImageReader left_rgb_image_reader(rc.m_dataset);
+    saliency_sandbox::kitti::RightGrayImageReader right_gray_image_reader(rc.m_dataset);
+    saliency_sandbox::kitti::RightRGBImageReader right_rgb_image_reader(rc.m_dataset);
     saliency_sandbox::kitti::LeftGrayDrawTracklet left_gray_image_draw_tracklet;
     saliency_sandbox::kitti::LeftRGBDrawTracklet left_rgb_image_draw_tracklet;
     saliency_sandbox::kitti::RightGrayDrawTracklet right_gray_image_draw_tracklet;
@@ -750,9 +710,9 @@ void process_plottracklets(bool saveOutput, boost::filesystem::path dataset, boo
     }
 }//
 
-void process_prioritygraph(bool saveOutput, boost::filesystem::path dataset, boost::filesystem::path output) {
+void process_prioritygraph(bool saveOutput, const saliency_sandbox::run_configurations::RunConfigurations &rc) {
     saliency_sandbox::core::Pipeline pipeline;
-    saliency_sandbox::kitti::KittiReader kitti_reader(dataset);
+    saliency_sandbox::kitti::KittiReader kitti_reader(rc.m_dataset);
     saliency_sandbox::sensor_fusion::Noise noise[5];
     saliency_sandbox::sensor_fusion::PriorityGraph pg;
 
